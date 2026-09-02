@@ -128,3 +128,16 @@
     @apply font-sans;
     }
 }
+
+/* Ocultar el icono nativo en Microsoft Edge e Internet Explorer para las contraseñas */
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
+/* Ocultar los botones de credenciales y autocompletado en Chrome/Safari si llegan a mostrarse */
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
