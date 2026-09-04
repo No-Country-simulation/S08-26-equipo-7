@@ -6,7 +6,7 @@ INSERT INTO roles (nombre, descripcion) VALUES
 
 INSERT INTO usuarios (nombre, email, password_hash, rol_id)
 SELECT 'Administrador', 'admin@serviceflow.com',
-       '$2b$10$2Xha.zPt8U1j2DgxnUOW/Omqp1Z5gA9yjqWUk/etB9wa9kSyYiRS2',
+       '${admin_password_hash}',
        r.id
 FROM roles r
 WHERE r.nombre = 'ADMIN';

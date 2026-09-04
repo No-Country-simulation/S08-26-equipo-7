@@ -15,3 +15,6 @@ CREATE TABLE usuarios (
     rol_id UUID NOT NULL REFERENCES roles(id),
     creado_en TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE INDEX idx_usuarios_rol_id ON usuarios(rol_id);
+
