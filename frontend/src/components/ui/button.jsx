@@ -1,4 +1,3 @@
-import * as React from "react"
 import { cva } from "class-variance-authority";
 import { Slot } from "radix-ui"
 
@@ -55,10 +54,10 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, className }), "rounded-sm py-4")}
       {...props}
     />
   )
 }
 
-export { Button, buttonVariants }
+export { Button }
