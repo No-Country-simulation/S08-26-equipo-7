@@ -4,6 +4,7 @@ import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
 import com.serviceflow.api.domain.Usuario;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,20 +12,26 @@ import java.util.UUID;
 public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
 
     private final UsuarioJpaRepository jpaRepository;
+    private final RolJpaRepository rolJpaRepository;
 
-    public UsuarioRepositoryAdapter(UsuarioJpaRepository jpaRepository) {
+    public UsuarioRepositoryAdapter(UsuarioJpaRepository jpaRepository, RolJpaRepository rolJpaRepository) {
         this.jpaRepository = jpaRepository;
+        this.rolJpaRepository = rolJpaRepository;
     }
 
     @Override
     public Usuario guardar(Usuario usuario) {
+        UUID id = usuario.getId() != null ? usuario.getId() : UUID.randomUUID();
+        LocalDateTime creadoEn = usuario.getCreadoEn() != null ? usuario.getCreadoEn() : LocalDateTime.now();
+        RolEntity rol = rolJpaRepository.findByNombre(usuario.getRol().name())
+                .orElseThrow(() -> new IllegalStateException("Rol no encontrado: " + usuario.getRol()));
         UsuarioEntity entity = new UsuarioEntity(
-                usuario.getId(),
+                id,
                 usuario.getNombre(),
                 usuario.getEmail(),
                 usuario.getPasswordHash(),
-                usuario.getRol(),
-                usuario.getCreadoEn()
+                rol,
+                creadoEn
         );
         UsuarioEntity guardado = jpaRepository.save(entity);
         return aDominio(guardado);
@@ -51,7 +58,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
                 entity.getNombre(),
                 entity.getEmail(),
                 entity.getPasswordHash(),
-                entity.getRol(),
+                com.serviceflow.api.domain.RolUsuario.valueOf(entity.getRol().getNombre()),
                 entity.getCreadoEn()
         );
     }

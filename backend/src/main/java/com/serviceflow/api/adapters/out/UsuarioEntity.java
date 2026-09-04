@@ -20,9 +20,9 @@ public class UsuarioEntity {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private com.serviceflow.api.domain.RolUsuario rol;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "rol_id", nullable = false)
+    private RolEntity rol;
 
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime creadoEn;
@@ -30,7 +30,7 @@ public class UsuarioEntity {
     public UsuarioEntity() {
     }
 
-    public UsuarioEntity(UUID id, String nombre, String email, String passwordHash, com.serviceflow.api.domain.RolUsuario rol, LocalDateTime creadoEn) {
+    public UsuarioEntity(UUID id, String nombre, String email, String passwordHash, RolEntity rol, LocalDateTime creadoEn) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
@@ -51,8 +51,8 @@ public class UsuarioEntity {
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-    public com.serviceflow.api.domain.RolUsuario getRol() { return rol; }
-    public void setRol(com.serviceflow.api.domain.RolUsuario rol) { this.rol = rol; }
+    public RolEntity getRol() { return rol; }
+    public void setRol(RolEntity rol) { this.rol = rol; }
 
     public LocalDateTime getCreadoEn() { return creadoEn; }
     public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
