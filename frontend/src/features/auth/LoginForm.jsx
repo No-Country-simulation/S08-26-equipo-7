@@ -1,42 +1,55 @@
-import { useState } from 'react';
+import { useState, useActionState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2, LayoutDashboard } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+
+async function loginAction(prevState, formData) {
+
+  const email = formData.get('email');
+  const password = formData.get('password');
+
+  /*const response = await fetch('/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: { email },
+      password: { password },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Credenciales inválidas');
+  }
+
+  return response.json();
+}*/
+
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  if (email !== "admin@tuempresa.com" || password !== "123456") {
+    return { error: "Credenciales inválidas" };
+  }
+
+  return { success: true, message: `Bienvenido, ${email}` };
+}
 
 export default function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [state, formAction, isPending] = useActionState(loginAction,null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulamos una petición de red al backend (2 segundos)
-    setTimeout(() => {
-      setIsLoading(false);
-      // Aquí iría el redireccionamiento al dashboard principal tras validar
-      alert("Simulación: Inicio de sesión validado correctamente para " + email);
-    }, 2000);
-  };
-  
+
   return (
     <div className="w-full max-w-100">
-      <div className="flex flex-col items-center mb-8 space-y-2">
-        <div className="h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-zinc-900/20">
-          <LayoutDashboard className="w-6 h-6 text-white" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-700 mt-4">
-            ServiceFlow
-        </h1>
+      <div className="flex flex-col items-center mb-2">
         <p className="text-sm text-slate-500">
             Ingresa tus credenciales para continuar
         </p>
       </div>
-      <form className="space-y-2 md:space-y-4 flex flex-col gap-4 bg-white p-8 rounded-lg shadow-md w-full max-w-md" onSubmit={handleSubmit}>
+      <form className="space-y-2 md:space-y-4 flex flex-col gap-4 bg-white p-8 rounded-lg shadow-md w-full max-w-md" action={formAction} method="POST">
         <div className="space-y-2.5">
           <Label htmlFor="email" className="text-sm font-medium text-slate-700">
           Correo electrónico corporativo
@@ -47,9 +60,7 @@ export default function LoginForm() {
             id="email" 
             placeholder="nombre@tuempresa.com"
             required
-            disabled={isLoading}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            disabled={isPending}
             autoComplete="email"
           />
         </div>
@@ -58,18 +69,17 @@ export default function LoginForm() {
             <Label htmlFor="password" className="text-sm font-medium text-slate-700">
           Contraseña
             </Label>
-            <a href="#" className="text-xs font-semibold text-slate-700 hover:underline underline-offset-4">
+            <Link to="/forgot-password" className="text-xs font-semibold text-slate-700 hover:underline underline-offset-4 cursor-pointer">
           ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </div>
           <div className="relative">
             <Input 
-              id="password" 
+              id="password"
+              name="password"
               type={showPassword ? "text" : "password"} 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={isLoading}
+              disabled={isPending}
               autoComplete="current-password"
               className="pr-10" // Espacio para el icono
             />
@@ -87,8 +97,13 @@ export default function LoginForm() {
             </button>
           </div>
         </div>
-        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-800 cursor-pointer" disabled={isLoading}>
-          {isLoading ? (
+        {state?.error && (
+          <div className="text-rose-600 text-sm w-full flex justify-center my-0">
+            {state.error}
+          </div>
+        )}
+        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-800 cursor-pointer" disabled={isPending}>
+          {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Autenticando...
