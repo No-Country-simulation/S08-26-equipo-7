@@ -70,15 +70,18 @@ $$\text{Solicitud} \rightarrow \text{Categorización} \rightarrow \text{Prioriza
 
 ### ⚙️ BackEnd Developers
 
+
 | <img src="https://via.placeholder.com/100" width=100> | <img src="./photos/santiago.jpg/" width=100> |
 |:-:|:-:|
 | **Gonzalo Daniele** | **Santiago Río** |
 | <a href="#"><img src="https://img.shields.io/badge/linkedin%20-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white"/></a> | <a href="https://www.linkedin.com/in/santiago-ríos-018a2a406?utm_source=share_via&utm_content=profile&utm_medium=member_ios"><img src="https://img.shields.io/badge/linkedin%20-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white"/></a> |
 | <a href="#"><img src="https://img.shields.io/badge/github-%23121011.svg?&style=for-the-badge&logo=github&logoColor=white"/></a> | <a href="https://github.com/santirios66"><img src="https://img.shields.io/badge/github-%23121011.svg?&style=for-the-badge&logo=github&logoColor=white"/></a> |
 
+
 <br>
 
 ### 🎨 FrontEnd Developer
+
 
 | <img src="./photos/camilo.png" width=100> |
 |:-:|
