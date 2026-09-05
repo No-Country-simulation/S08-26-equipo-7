@@ -83,7 +83,7 @@ $$\text{Solicitud} \rightarrow \text{Categorización} \rightarrow \text{Prioriza
 ### 🎨 FrontEnd Developer
 
 
-| <img src="./photos/camilo.png" width=100> |
+| <img src="./photos/Camilo.png" width=100> |
 |:-:|
 | **Juan Camilo Garcia** |
 | <a href="https://www.linkedin.com/in/juan-camilo-garcia-"><img src="https://img.shields.io/badge/linkedin%20-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white"/></a> |
