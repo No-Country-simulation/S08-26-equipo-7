@@ -10,23 +10,7 @@ async function loginAction(prevState, formData) {
   const email = formData.get('email');
   const password = formData.get('password');
 
-  /*const response = await fetch('/api/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: { email },
-      password: { password },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Credenciales inválidas');
-  }
-
-  return response.json();
-}*/
+  // TODO: reemplazar por llamada real a backend para autenticar usuario
 
   await new Promise(resolve => setTimeout(resolve, 2000));
   if (email !== "admin@tuempresa.com" || password !== "123456") {
@@ -43,16 +27,16 @@ export default function LoginForm() {
 
 
   return (
-    <div className="w-full max-w-100">
-      <div className="flex flex-col items-center mb-2">
-        <p className="text-sm text-slate-500">
-            Ingresa tus credenciales para continuar
+    <div className="w-full space-y-1 px-3 py-2">
+      <div className="flex flex-col justify-center items-center mb-6">
+        <p className="text-sm text-chart-2 text-center mt-2 font-semibold">
+            Bienvenido de nuevo, organiza tu trabajo.
         </p>
       </div>
-      <form className="space-y-2 md:space-y-4 flex flex-col gap-4 bg-white p-8 rounded-lg shadow-md w-full max-w-md" action={formAction} method="POST">
-        <div className="space-y-2.5">
-          <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-          Correo electrónico corporativo
+      <form className="md:space-y-4 flex flex-col gap-4 bg-card p-8 rounded-4xl shadow-md w-full border border-border" action={formAction} method="POST">
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-xs sm:text-sm font-bold">
+          Correo electrónico
           </Label>
           <Input 
             type="email" 
@@ -62,14 +46,15 @@ export default function LoginForm() {
             required
             disabled={isPending}
             autoComplete="email"
+            className="border-border font-semibold"
           />
         </div>
-        <div className="space-y-2.5">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+            <Label htmlFor="password" className="text-xs sm:text-sm font-bold">
           Contraseña
             </Label>
-            <Link to="/forgot-password" className="text-xs font-semibold text-slate-700 hover:underline underline-offset-4 cursor-pointer">
+            <Link to="/forgot-password" className="text-center text-xs sm:text-sm font-bold hover:underline underline-offset-4 text-chart-1 cursor-pointer">
           ¿Olvidaste tu contraseña?
             </Link>
           </div>
@@ -81,12 +66,13 @@ export default function LoginForm() {
               required
               disabled={isPending}
               autoComplete="current-password"
-              className="pr-10" // Espacio para el icono
+              placeholder="••••••••"
+              className="pr-10 border-border font-semibold" // Espacio para el icono
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none focus:text-slate-900"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
               tabIndex={-1} // Para que no interfiera en la navegación por tabulador
             >
               {showPassword ? (
@@ -102,7 +88,7 @@ export default function LoginForm() {
             {state.error}
           </div>
         )}
-        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-800 cursor-pointer" disabled={isPending}>
+        <Button type="submit" className="w-full btn-gradient-primary cursor-pointer" disabled={isPending}>
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -114,8 +100,8 @@ export default function LoginForm() {
         </Button>
       </form>
       <p className="text-center text-xs text-slate-500 mt-8">
-          ServiceFlow es un sistema de uso interno exclusivo.<br/>
-          Si necesitas acceso, contacta con tu administrador de área.
+          Powered by NoCountry S08-26-equipo 7<br />
+Uso interno exclusivo
       </p>
     </div>
   );
