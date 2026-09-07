@@ -31,6 +31,8 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
+        "icon-xl": "size-10",
+        "icon-2xl": "size-12",
       },
     },
     defaultVariants: {
@@ -54,7 +56,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }), "rounded-sm py-4")}
+      className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
   )
