@@ -1,7 +1,7 @@
 INSERT INTO roles (nombre, descripcion) VALUES
-    ('COLABORADOR', 'Usuario que solicita y sigue el estado de sus solicitudes'),
-    ('AGENTE', 'Usuario que procesa y asigna solicitudes'),
-    ('APROBADOR', 'Usuario que aprueba solicitudes o restablecimientos'),
+    ('REQUESTER', 'Usuario que solicita y sigue el estado de sus solicitudes'),
+    ('AGENT', 'Usuario que procesa y asigna solicitudes'),
+    ('SUPERVISOR', 'Usuario que aprueba solicitudes o restablecimientos'),
     ('ADMIN', 'Administrador del sistema')
 ON CONFLICT (nombre) DO NOTHING;
 
