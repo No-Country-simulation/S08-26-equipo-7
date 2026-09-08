@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import ForgotPassPage from "@/pages/ForgotPassPage";
+import DasboardPage from "./pages/DashboardPage";
 
 export default function App() {
   return (
@@ -9,6 +10,7 @@ export default function App() {
         {/* Ruta directa para el inicio de sesión */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPassPage />} />
+        <Route path="/dashboard" element={<DasboardPage/>} />
 
         {/* Al ser un sistema cerrado, la raíz y cualquier ruta inválida redirigen al login */}
         <Route path="/" element={<Navigate to="/login" replace />} />

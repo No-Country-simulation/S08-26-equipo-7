@@ -145,7 +145,7 @@
     @apply border-border outline-ring/50;
   }
   
-  body {
+  .body-auth {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -160,7 +160,7 @@
   }
 
   /* Fondo radial exacto para el modo oscuro */
-  html.dark body, .dark body {
+  html.dark .body-auth, .dark .body-auth {
     background-color: #020617;
     background-image: radial-gradient(ellipse at top, #0f172a, #020617, #020617);
   }

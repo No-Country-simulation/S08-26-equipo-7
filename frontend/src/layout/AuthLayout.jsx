@@ -3,7 +3,7 @@ import Logo from "@/components/Logo";
 
 export default function AuthLayout({ subtitle, children }) {
   return (
-    <div className="relative flex flex-col items-center justify-center w-screen h-screen px-4 md:px-0">
+    <div className="relative flex flex-col items-center justify-center w-screen h-screen px-4 md:px-0 body-auth">
       <div className="absolute top-0 right-0 mr-8 mt-4">
         <ThemeToggle />
       </div>
