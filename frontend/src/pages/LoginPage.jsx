@@ -3,7 +3,7 @@ import LoginForm from "@/features/auth/LoginForm";
 
 export default function LoginPage() {
   return (
-    <AuthLayout>
+    <AuthLayout subtitle="Bienvenido de nuevo, organiza tu trabajo.">
       <LoginForm />
     </AuthLayout>
   );

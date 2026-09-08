@@ -21,6 +21,7 @@ export default defineConfig([
     },
     rules: {
       indent: ['error', 2, { SwitchCase: 1 }],
+      eqeqeq: ['error', 'always'],
     },
   },
 ])
