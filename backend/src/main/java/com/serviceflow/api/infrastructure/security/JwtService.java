@@ -18,8 +18,12 @@ public class JwtService {
     private final long expirationMs;
 
     public JwtService(@Value("${app.jwt.secret}") String secret,
-                      @Value("${app.jwt.expiration-ms}") long expirationMs) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+                  @Value("${app.jwt.expiration-ms}") long expirationMs) {
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length < 32) {
+            throw new IllegalArgumentException("app.jwt.secret debe tener al menos 32 bytes (256 bits) para HS256");
+        }
+        this.key = Keys.hmacShaKeyFor(secretBytes);
         this.expirationMs = expirationMs;
     }
 
@@ -48,11 +52,6 @@ public class JwtService {
 
     public String extraerRol(String token) {
         return extraerClaims(token).get("rol", String.class);
-    }
-
-    public boolean esValido(String token, String email) {
-        Claims claims = extraerClaims(token);
-        return claims.get("email", String.class).equals(email);
     }
 
     private Claims extraerClaims(String token) {

@@ -8,6 +8,7 @@ import com.serviceflow.api.infrastructure.security.JwtAuthFilter;
 import com.serviceflow.api.infrastructure.security.JwtService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,10 +26,13 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+    private final boolean cookieSecure;
 
-    public AuthController(AuthService authService, JwtService jwtService) {
+    public AuthController(AuthService authService, JwtService jwtService,
+                          @Value("${app.cookie.secure:false}") boolean cookieSecure) {
         this.authService = authService;
         this.jwtService = jwtService;
+        this.cookieSecure = cookieSecure;
     }
 
     @PostMapping("/login")
@@ -38,8 +42,10 @@ public class AuthController {
 
             Cookie cookie = new Cookie(JwtAuthFilter.COOKIE_NAME, resultado.token());
             cookie.setHttpOnly(true);
+            cookie.setSecure(cookieSecure);
+            cookie.setAttribute("SameSite", "Strict");
             cookie.setPath("/");
-            cookie.setMaxAge((int) jwtService.expiracionEnSegundos());
+            cookie.setMaxAge(Math.toIntExact(jwtService.expiracionEnSegundos()));
             response.addCookie(cookie);
 
             return ResponseEntity.ok(new LoginResponse(resultado.nombre(), resultado.rol()));
