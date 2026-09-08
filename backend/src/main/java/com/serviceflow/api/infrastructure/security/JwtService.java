@@ -38,8 +38,16 @@ public class JwtService {
                 .compact();
     }
 
+    public long expiracionEnSegundos() {
+        return expirationMs / 1000;
+    }
+
     public String extraerEmail(String token) {
         return extraerClaims(token).get("email", String.class);
+    }
+
+    public String extraerRol(String token) {
+        return extraerClaims(token).get("rol", String.class);
     }
 
     public boolean esValido(String token, String email) {

@@ -4,8 +4,14 @@ import com.serviceflow.api.adapters.in.dto.LoginRequest;
 import com.serviceflow.api.adapters.in.dto.LoginResponse;
 import com.serviceflow.api.application.services.AuthService;
 import com.serviceflow.api.application.services.CredencialesInvalidasException;
+import com.serviceflow.api.infrastructure.security.JwtAuthFilter;
+import com.serviceflow.api.infrastructure.security.JwtService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,19 +24,37 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtService jwtService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtService jwtService) {
         this.authService = authService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         try {
             AuthService.LoginResult resultado = authService.login(request.email(), request.password());
-            return ResponseEntity.ok(new LoginResponse(resultado.token(), resultado.nombre(), resultado.rol()));
+
+            Cookie cookie = new Cookie(JwtAuthFilter.COOKIE_NAME, resultado.token());
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setMaxAge((int) jwtService.expiracionEnSegundos());
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(new LoginResponse(resultado.nombre(), resultado.rol()));
         } catch (CredencialesInvalidasException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Credenciales inválidas"));
         }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication authentication) {
+        String email = (String) authentication.getPrincipal();
+        return ResponseEntity.ok(Map.of("email", email, "rol", authentication.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("")));
     }
 }
