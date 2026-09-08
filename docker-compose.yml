@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: serviceflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: serviceflow_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-serviceflow_dev}
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d serviceflow_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    container_name: serviceflow-api
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/serviceflow_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-serviceflow_dev}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-$$2a$$10$$Ges6Ky4QenZYaULDVYVyUer3CzOGjtjzlC5RV7rbYxSCD49QedRme}
+      JWT_SECRET: ${JWT_SECRET:-clave-super-secreta-serviceflow-2026-cambiar-en-produccion-muy-larga}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
