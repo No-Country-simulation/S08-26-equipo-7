@@ -1,16 +1,18 @@
 // services/authService.js
-export async function login(email, password) {
-  await new Promise(r => setTimeout(r, 1000));
-  if (email !== "admin@tuempresa.com" || password !== "123456") {
-    throw new Error("Credenciales inválidas");
-  }
-  return { email };
-}
+const API_URL = import.meta.env.VITE_API_URL;
 
-export async function forgotPassword(email) {
-  await new Promise(r => setTimeout(r, 1000));
-  if (email.trim() === "") {
-    throw new Error("El correo no puede estar vacío");
+export async function login(email, password) {
+  const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Error al iniciar sesión");
   }
-  return { message: "Si el correo existe, se creará un ticket." };
+
+  return data; // { token, nombre, rol }
 }
