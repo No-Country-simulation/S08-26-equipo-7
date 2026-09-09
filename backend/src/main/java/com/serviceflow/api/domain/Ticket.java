@@ -5,62 +5,62 @@ import java.util.UUID;
 
 public class Ticket {
 
-    private UUID id;
-    private UUID usuarioId;
-    private String email;
-    private CategoriaTicket categoria;
-    private String descripcion;
-    private PrioridadTicket prioridad;
-    private EstadoTicket estado;
-    private boolean requiereAprobacion;
-    private LocalDateTime creadoEn;
+    private final UUID id;
+    private final UUID userId;
+    private final String email;
+    private final CategoriaTicket category;
+    private final String description;
+    private final PrioridadTicket priority;
+    private final EstadoTicket status;
+    private final boolean requiresApproval;
+    private final LocalDateTime createdAt;
 
-    public Ticket(UUID id, UUID usuarioId, String email, CategoriaTicket categoria, String descripcion,
-                  PrioridadTicket prioridad, EstadoTicket estado, boolean requiereAprobacion, LocalDateTime creadoEn) {
+    public Ticket(UUID id, UUID userId, String email, CategoriaTicket category, String description,
+                  PrioridadTicket priority, EstadoTicket status, boolean requiresApproval, LocalDateTime createdAt) {
         this.id = id;
-        this.usuarioId = usuarioId;
+        this.userId = userId;
         this.email = email;
-        this.categoria = categoria;
-        this.descripcion = descripcion;
-        this.prioridad = prioridad;
-        this.estado = estado;
-        this.requiereAprobacion = requiereAprobacion;
-        this.creadoEn = creadoEn;
+        this.category = category;
+        this.description = description;
+        this.priority = priority;
+        this.status = status;
+        this.requiresApproval = requiresApproval;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public UUID getUsuarioId() {
-        return usuarioId;
+    public UUID getUserId() {
+        return userId;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public CategoriaTicket getCategoria() {
-        return categoria;
+    public CategoriaTicket getCategory() {
+        return category;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getDescription() {
+        return description;
     }
 
-    public PrioridadTicket getPrioridad() {
-        return prioridad;
+    public PrioridadTicket getPriority() {
+        return priority;
     }
 
-    public EstadoTicket getEstado() {
-        return estado;
+    public EstadoTicket getStatus() {
+        return status;
     }
 
-    public boolean isRequiereAprobacion() {
-        return requiereAprobacion;
+    public boolean isRequiresApproval() {
+        return requiresApproval;
     }
 
-    public LocalDateTime getCreadoEn() {
-        return creadoEn;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

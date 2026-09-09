@@ -30,34 +30,34 @@ public class AuthService {
     }
 
     public LoginResult login(String email, String password) {
-        Usuario usuario = usuarioRepository.buscarPorEmail(email)
-                .orElseThrow(() -> new CredencialesInvalidasException("Credenciales inválidas"));
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         if (!passwordEncoder.matches(password, usuario.getPasswordHash())) {
-            throw new CredencialesInvalidasException("Credenciales inválidas");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        String token = jwtService.generarToken(usuario);
-        return new LoginResult(token, usuario.getNombre(), usuario.getRol().name());
+        String token = jwtService.generateToken(usuario);
+        return new LoginResult(token, usuario.getName(), usuario.getRole().name());
     }
 
-    public void solicitarRecuperacion(String email) {
+    public void requestPasswordRecovery(String email) {
         if (email == null || email.isBlank()) {
             return;
         }
-        usuarioRepository.buscarPorEmail(email).ifPresent(usuario -> {
+        usuarioRepository.findByEmail(email).ifPresent(usuario -> {
             Ticket ticket = new Ticket(
                     null,
                     usuario.getId(),
                     usuario.getEmail(),
-                    CategoriaTicket.RESTABLECIMIENTO_PASSWORD,
-                    "Solicitud de restablecimiento de contraseña",
-                    PrioridadTicket.URGENTE,
-                    EstadoTicket.PENDIENTE,
+                    CategoriaTicket.PASSWORD_RECOVERY,
+                    "Password recovery request",
+                    PrioridadTicket.URGENT,
+                    EstadoTicket.PENDING,
                     true,
                     null
             );
-            ticketRepository.guardar(ticket);
+            ticketRepository.save(ticket);
         });
     }
 

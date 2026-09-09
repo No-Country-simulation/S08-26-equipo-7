@@ -1,6 +1,13 @@
 package com.serviceflow.api.adapters.out;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,8 +18,8 @@ public class UsuarioEntity {
     @Id
     private UUID id;
 
-    @Column(nullable = false, length = 150)
-    private String nombre;
+    @Column(name = "nombre", nullable = false, length = 150)
+    private String name;
 
     @Column(nullable = false, unique = true, length = 150)
     private String email;
@@ -25,25 +32,25 @@ public class UsuarioEntity {
     private RolEntity rol;
 
     @Column(name = "creado_en", nullable = false)
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
     public UsuarioEntity() {
     }
 
-    public UsuarioEntity(UUID id, String nombre, String email, String passwordHash, RolEntity rol, LocalDateTime creadoEn) {
+    public UsuarioEntity(UUID id, String name, String email, String passwordHash, RolEntity rol, LocalDateTime createdAt) {
         this.id = id;
-        this.nombre = nombre;
+        this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.rol = rol;
-        this.creadoEn = creadoEn;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -54,6 +61,6 @@ public class UsuarioEntity {
     public RolEntity getRol() { return rol; }
     public void setRol(RolEntity rol) { this.rol = rol; }
 
-    public LocalDateTime getCreadoEn() { return creadoEn; }
-    public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

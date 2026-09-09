@@ -5,28 +5,28 @@ import java.util.UUID;
 
 public class Usuario {
 
-    private UUID id;
-    private String nombre;
-    private String email;
-    private String passwordHash;
-    private RolUsuario rol;
-    private LocalDateTime creadoEn;
+    private final UUID id;
+    private final String name;
+    private final String email;
+    private final String passwordHash;
+    private final RolUsuario role;
+    private final LocalDateTime createdAt;
 
-    public Usuario(UUID id, String nombre, String email, String passwordHash, RolUsuario rol, LocalDateTime creadoEn) {
+    public Usuario(UUID id, String name, String email, String passwordHash, RolUsuario role, LocalDateTime createdAt) {
         this.id = id;
-        this.nombre = nombre;
+        this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.rol = rol;
-        this.creadoEn = creadoEn;
+        this.role = role;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
@@ -37,11 +37,11 @@ public class Usuario {
         return passwordHash;
     }
 
-    public RolUsuario getRol() {
-        return rol;
+    public RolUsuario getRole() {
+        return role;
     }
 
-    public LocalDateTime getCreadoEn() {
-        return creadoEn;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
