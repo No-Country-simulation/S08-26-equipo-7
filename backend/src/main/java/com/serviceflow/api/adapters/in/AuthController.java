@@ -7,6 +7,7 @@ import com.serviceflow.api.application.services.AuthService;
 import com.serviceflow.api.application.services.InvalidCredentialsException;
 import com.serviceflow.api.infrastructure.security.JwtAuthFilter;
 import com.serviceflow.api.infrastructure.security.JwtService;
+import com.serviceflow.api.infrastructure.security.UsuarioAutenticado;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,10 +65,19 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
-        String email = (String) authentication.getPrincipal();
-        return ResponseEntity.ok(Map.of("email", email, "rol", authentication.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .orElse("")));
+        UsuarioAutenticado usuario = (UsuarioAutenticado) authentication.getPrincipal();
+        return ResponseEntity.ok(Map.of("nombre", usuario.name(), "rol", usuario.role()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie(JwtAuthFilter.COOKIE_NAME, "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(cookieSecure);
+        cookie.setAttribute("SameSite", "Strict");
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return ResponseEntity.ok(Map.of("mensaje", "Sesión cerrada"));
     }
 }
