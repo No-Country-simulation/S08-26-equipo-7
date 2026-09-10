@@ -42,7 +42,7 @@ export default function LoginForm() {
         {state?.success ? (
           <StatustCard title="¡Sesión iniciada!" message="Redirigiendo a tu espacio de trabajo..."  />
         ) : (
-          <form className="space-y-4" action={formAction} method="POST">
+          <form className="space-y-4" action={formAction}>
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs sm:text-sm font-semibold text-accent-foreground">
             Correo electrónico

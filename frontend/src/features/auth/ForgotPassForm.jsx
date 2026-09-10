@@ -9,7 +9,9 @@ import { Card } from "@/components/ui/card";
 import StatustCard from '@/components/StatusCard';
 
 async function forgotPassAction(prevState, formData) {
+  console.log(formData);
   const email = formData.get('email');
+  console.log(email);
 
   try {
     const result = await forgotPassword(email);
@@ -39,7 +41,7 @@ export default function ForgotPassForm() {
               </Link> } 
           />
         ) : (
-          <form action={formAction} className="space-y-4" method="POST">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs sm:text-sm font-bold">
           Correo asociado a tu cuenta
