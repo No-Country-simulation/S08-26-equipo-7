@@ -16,69 +16,69 @@ public class TicketEntity {
     private UUID id;
 
     @Column(name = "usuario_id")
-    private UUID usuarioId;
+    private UUID userId;
 
     @Column(nullable = false, length = 150)
     private String email;
 
-    @Column(nullable = false, length = 50)
-    private String categoria;
+    @Column(name = "categoria", nullable = false, length = 50)
+    private String category;
 
-    @Column(length = 255)
-    private String descripcion;
+    @Column(name = "descripcion", length = 255)
+    private String description;
 
-    @Column(nullable = false, length = 20)
-    private String prioridad;
+    @Column(name = "prioridad", nullable = false, length = 20)
+    private String priority;
 
-    @Column(nullable = false, length = 20)
-    private String estado;
+    @Column(name = "estado", nullable = false, length = 20)
+    private String status;
 
     @Column(name = "requiere_aprobacion", nullable = false)
-    private boolean requiereAprobacion;
+    private boolean requiresApproval;
 
     @Column(name = "creado_en", nullable = false)
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
     public TicketEntity() {
     }
 
-    public TicketEntity(UUID id, UUID usuarioId, String email, String categoria, String descripcion,
-                        String prioridad, String estado, boolean requiereAprobacion, LocalDateTime creadoEn) {
+    public TicketEntity(UUID id, UUID userId, String email, String category, String description,
+                        String priority, String status, boolean requiresApproval, LocalDateTime createdAt) {
         this.id = id;
-        this.usuarioId = usuarioId;
+        this.userId = userId;
         this.email = email;
-        this.categoria = categoria;
-        this.descripcion = descripcion;
-        this.prioridad = prioridad;
-        this.estado = estado;
-        this.requiereAprobacion = requiereAprobacion;
-        this.creadoEn = creadoEn;
+        this.category = category;
+        this.description = description;
+        this.priority = priority;
+        this.status = status;
+        this.requiresApproval = requiresApproval;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public UUID getUsuarioId() { return usuarioId; }
-    public void setUsuarioId(UUID usuarioId) { this.usuarioId = usuarioId; }
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public String getCategoria() { return categoria; }
-    public void setCategoria(String categoria) { this.categoria = categoria; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getPrioridad() { return prioridad; }
-    public void setPrioridad(String prioridad) { this.prioridad = prioridad; }
+    public String getPriority() { return priority; }
+    public void setPriority(String priority) { this.priority = priority; }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public boolean isRequiereAprobacion() { return requiereAprobacion; }
-    public void setRequiereAprobacion(boolean requiereAprobacion) { this.requiereAprobacion = requiereAprobacion; }
+    public boolean isRequiresApproval() { return requiresApproval; }
+    public void setRequiresApproval(boolean requiresApproval) { this.requiresApproval = requiresApproval; }
 
-    public LocalDateTime getCreadoEn() { return creadoEn; }
-    public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

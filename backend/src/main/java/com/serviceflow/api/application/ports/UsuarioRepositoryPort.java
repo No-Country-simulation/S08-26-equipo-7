@@ -7,11 +7,11 @@ import java.util.UUID;
 
 public interface UsuarioRepositoryPort {
 
-    Usuario guardar(Usuario usuario);
+    Usuario save(Usuario usuario);
 
-    Optional<Usuario> buscarPorId(UUID id);
+    Optional<Usuario> findById(UUID id);
 
-    Optional<Usuario> buscarPorEmail(String email);
+    Optional<Usuario> findByEmail(String email);
 
-    boolean existePorEmail(String email);
+    boolean existsByEmail(String email);
 }

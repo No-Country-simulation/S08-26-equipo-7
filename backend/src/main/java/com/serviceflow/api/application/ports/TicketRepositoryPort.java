@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface TicketRepositoryPort {
 
-    Ticket guardar(Ticket ticket);
+    Ticket save(Ticket ticket);
 
-    List<Ticket> listarTodos();
+    List<Ticket> findAll();
 }

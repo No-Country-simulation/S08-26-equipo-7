@@ -21,39 +21,39 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
     }
 
     @Override
-    public Ticket guardar(Ticket ticket) {
+    public Ticket save(Ticket ticket) {
         UUID id = ticket.getId() != null ? ticket.getId() : UUID.randomUUID();
-        LocalDateTime creadoEn = ticket.getCreadoEn() != null ? ticket.getCreadoEn() : LocalDateTime.now();
+        LocalDateTime createdAt = ticket.getCreatedAt() != null ? ticket.getCreatedAt() : LocalDateTime.now();
         TicketEntity entity = new TicketEntity(
                 id,
-                ticket.getUsuarioId(),
+                ticket.getUserId(),
                 ticket.getEmail(),
-                ticket.getCategoria().name(),
-                ticket.getDescripcion(),
-                ticket.getPrioridad().name(),
-                ticket.getEstado().name(),
-                ticket.isRequiereAprobacion(),
-                creadoEn
+                ticket.getCategory().name(),
+                ticket.getDescription(),
+                ticket.getPriority().name(),
+                ticket.getStatus().name(),
+                ticket.isRequiresApproval(),
+                createdAt
         );
-        return aDominio(jpaRepository.save(entity));
+        return toDomain(jpaRepository.save(entity));
     }
 
     @Override
-    public List<Ticket> listarTodos() {
-        return jpaRepository.findAll().stream().map(this::aDominio).toList();
+    public List<Ticket> findAll() {
+        return jpaRepository.findAll().stream().map(this::toDomain).toList();
     }
 
-    private Ticket aDominio(TicketEntity entity) {
+    private Ticket toDomain(TicketEntity entity) {
         return new Ticket(
                 entity.getId(),
-                entity.getUsuarioId(),
+                entity.getUserId(),
                 entity.getEmail(),
-                CategoriaTicket.valueOf(entity.getCategoria()),
-                entity.getDescripcion(),
-                PrioridadTicket.valueOf(entity.getPrioridad()),
-                EstadoTicket.valueOf(entity.getEstado()),
-                entity.isRequiereAprobacion(),
-                entity.getCreadoEn()
+                CategoriaTicket.valueOf(entity.getCategory()),
+                entity.getDescription(),
+                PrioridadTicket.valueOf(entity.getPriority()),
+                EstadoTicket.valueOf(entity.getStatus()),
+                entity.isRequiresApproval(),
+                entity.getCreatedAt()
         );
     }
 }

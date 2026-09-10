@@ -18,47 +18,47 @@ public class JwtService {
     private final long expirationMs;
 
     public JwtService(@Value("${app.jwt.secret}") String secret,
-                  @Value("${app.jwt.expiration-ms}") long expirationMs) {
+                      @Value("${app.jwt.expiration-ms}") long expirationMs) {
         byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
         if (secretBytes.length < 32) {
-            throw new IllegalArgumentException("app.jwt.secret debe tener al menos 32 bytes (256 bits) para HS256");
+            throw new IllegalArgumentException("app.jwt.secret must be at least 32 bytes (256 bits) for HS256");
         }
         this.key = Keys.hmacShaKeyFor(secretBytes);
         this.expirationMs = expirationMs;
     }
 
-    public String generarToken(Usuario usuario) {
-        Date ahora = new Date();
-        Date expiracion = new Date(ahora.getTime() + expirationMs);
+    public String generateToken(Usuario usuario) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(usuario.getId().toString())
                 .claim("email", usuario.getEmail())
-                .claim("nombre", usuario.getNombre())
-                .claim("rol", usuario.getRol().name())
-                .issuedAt(ahora)
-                .expiration(expiracion)
+                .claim("name", usuario.getName())
+                .claim("role", usuario.getRole().name())
+                .issuedAt(now)
+                .expiration(expiration)
                 .signWith(key)
                 .compact();
     }
 
-    public long expiracionEnSegundos() {
+    public long expirationInSeconds() {
         return expirationMs / 1000;
     }
 
-    public String extraerEmail(String token) {
-        return extraerClaims(token).get("email", String.class);
+    public String extractEmail(String token) {
+        return extractClaims(token).get("email", String.class);
     }
 
-    public String extraerRol(String token) {
-        return extraerClaims(token).get("rol", String.class);
+    public String extractRole(String token) {
+        return extractClaims(token).get("role", String.class);
     }
 
-    public String extraerNombre(String token) {
-        return extraerClaims(token).get("nombre", String.class);
+    public String extractName(String token) {
+        return extractClaims(token).get("name", String.class);
     }
 
-    private Claims extraerClaims(String token) {
+    private Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
