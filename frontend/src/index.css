@@ -145,7 +145,7 @@
     @apply border-border outline-ring/50;
   }
   
-  .body-auth {
+  .body-app {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -160,7 +160,7 @@
   }
 
   /* Fondo radial exacto para el modo oscuro */
-  html.dark .body-auth, .dark .body-auth {
+  html.dark .body-auth, .dark .body-app {
     background-color: #020617;
     background-image: radial-gradient(ellipse at top, #0f172a, #020617, #020617);
   }
@@ -172,7 +172,7 @@
 
 /* Estilos de botones principales con degradado (Login y Recuperar contraseña) */
 .btn-gradient-primary {
-  @apply w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md hover:shadow-lg hover:from-blue-700 hover:to-cyan-600 dark:hover:from-blue-500 dark:hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 h-11 px-6 py-2 rounded-xl text-sm font-semibold inline-flex items-center justify-center transition-all disabled:opacity-70 disabled:pointer-events-none;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md hover:shadow-lg hover:from-blue-700 hover:to-cyan-600 dark:hover:from-blue-500 dark:hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 h-11 px-6 py-2 rounded-xl text-sm font-semibold inline-flex items-center justify-center transition-all disabled:opacity-70 disabled:pointer-events-none;
 }
 
 .color-brand-gradient {
