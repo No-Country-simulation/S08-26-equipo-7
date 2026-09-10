@@ -5,6 +5,7 @@ export async function login(email, password) {
   const response = await fetch(`${API_URL}/api/v1/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ email, password }),
   });
 
@@ -14,5 +15,9 @@ export async function login(email, password) {
     throw new Error(data.error || "Error al iniciar sesión");
   }
 
-  return data; // { token, nombre, rol }
+  return data;
 }
+
+export async function forgotPassword(){
+
+};
