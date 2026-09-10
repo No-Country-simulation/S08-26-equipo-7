@@ -2,6 +2,7 @@ package com.serviceflow.api.adapters.in;
 
 import com.serviceflow.api.adapters.in.dto.LoginRequest;
 import com.serviceflow.api.adapters.in.dto.LoginResponse;
+import com.serviceflow.api.adapters.in.dto.RecoverPasswordRequest;
 import com.serviceflow.api.application.services.AuthService;
 import com.serviceflow.api.application.services.CredencialesInvalidasException;
 import com.serviceflow.api.infrastructure.security.JwtAuthFilter;
@@ -54,6 +55,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Credenciales inválidas"));
         }
+    }
+
+    @PostMapping("/recover-password")
+    public ResponseEntity<?> recoverPassword(@RequestBody RecoverPasswordRequest request) {
+        authService.solicitarRecuperacion(request.email());
+        return ResponseEntity.ok(Map.of("mensaje", "Si el correo existe, procesaremos la solicitud"));
     }
 
     @GetMapping("/me")
