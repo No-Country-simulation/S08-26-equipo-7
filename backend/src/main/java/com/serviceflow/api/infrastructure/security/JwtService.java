@@ -54,6 +54,10 @@ public class JwtService {
         return extraerClaims(token).get("rol", String.class);
     }
 
+    public String extraerNombre(String token) {
+        return extraerClaims(token).get("nombre", String.class);
+    }
+
     private Claims extraerClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)
