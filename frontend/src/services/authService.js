@@ -9,7 +9,7 @@ export async function login(email, password) {
     body: JSON.stringify({ email, password }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(data.error || "Error al iniciar sesión");
@@ -19,16 +19,16 @@ export async function login(email, password) {
 }
 
 export async function forgotPassword(email){
-  const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+  const response = await fetch(`${API_URL}/api/v1/auth/recover-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.error || "Error al iniciar sesión");
+    throw new Error(data.error || data.message || "No se pudo procesar la solicitud");
   }
 
   return data;
-};
+}
