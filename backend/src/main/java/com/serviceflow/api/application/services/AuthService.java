@@ -11,6 +11,8 @@ import com.serviceflow.api.infrastructure.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AuthService {
 
@@ -53,9 +55,13 @@ public class AuthService {
                     CategoriaTicket.PASSWORD_RECOVERY,
                     "Password recovery request",
                     PrioridadTicket.URGENT,
-                    EstadoTicket.PENDING,
+                    EstadoTicket.SUBMITTED,
                     true,
-                    null
+                    null,
+                    LocalDateTime.now().plus(java.time.Duration.ofHours(4)),
+                    null,
+                    null,
+                    LocalDateTime.now()
             );
             ticketRepository.save(ticket);
         });
