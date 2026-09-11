@@ -18,6 +18,17 @@ export async function login(email, password) {
   return data;
 }
 
-export async function forgotPassword(){
+export async function forgotPassword(email){
+  const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await response.json();
 
+  if (!response.ok) {
+    throw new Error(data.error || "Error al iniciar sesión");
+  }
+
+  return data;
 };
