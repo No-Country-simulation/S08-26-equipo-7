@@ -1,5 +1,7 @@
 package com.serviceflow.api.infrastructure.security;
 
+import com.serviceflow.api.infrastructure.ratelimit.InMemoryRateLimiter;
+import com.serviceflow.api.infrastructure.ratelimit.RecoverPasswordRateLimitFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +24,21 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtService jwtService;
+    private final InMemoryRateLimiter rateLimiter;
     private final String allowedOrigin;
+    private final int maxRequests;
+    private final long windowMs;
 
     public SecurityConfig(JwtService jwtService,
-                          @Value("${app.cors.allowed-origin:http://localhost:5173}") String allowedOrigin) {
+                          InMemoryRateLimiter rateLimiter,
+                          @Value("${app.cors.allowed-origin:http://localhost:5173}") String allowedOrigin,
+                          @Value("${app.rate-limit.max-requests:3}") int maxRequests,
+                          @Value("${app.rate-limit.window-ms:900000}") long windowMs) {
         this.jwtService = jwtService;
+        this.rateLimiter = rateLimiter;
         this.allowedOrigin = allowedOrigin;
+        this.maxRequests = maxRequests;
+        this.windowMs = windowMs;
     }
 
     @Bean
@@ -40,7 +51,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password")
+                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/logout")
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -49,7 +60,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new RecoverPasswordRateLimitFilter(rateLimiter, maxRequests, windowMs),
+                        JwtAuthFilter.class);
         return http.build();
     }
 

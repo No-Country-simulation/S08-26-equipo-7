@@ -20,46 +20,46 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
     }
 
     @Override
-    public Usuario guardar(Usuario usuario) {
+    public Usuario save(Usuario usuario) {
         UUID id = usuario.getId() != null ? usuario.getId() : UUID.randomUUID();
-        LocalDateTime creadoEn = usuario.getCreadoEn() != null ? usuario.getCreadoEn() : LocalDateTime.now();
-        RolEntity rol = rolJpaRepository.findByNombre(usuario.getRol().name())
-                .orElseThrow(() -> new IllegalStateException("Rol no encontrado: " + usuario.getRol()));
+        LocalDateTime createdAt = usuario.getCreatedAt() != null ? usuario.getCreatedAt() : LocalDateTime.now();
+        RolEntity rol = rolJpaRepository.findByName(usuario.getRole().name())
+                .orElseThrow(() -> new IllegalStateException("Role not found: " + usuario.getRole()));
         UsuarioEntity entity = new UsuarioEntity(
                 id,
-                usuario.getNombre(),
+                usuario.getName(),
                 usuario.getEmail(),
                 usuario.getPasswordHash(),
                 rol,
-                creadoEn
+                createdAt
         );
-        UsuarioEntity guardado = jpaRepository.save(entity);
-        return aDominio(guardado);
+        UsuarioEntity saved = jpaRepository.save(entity);
+        return toDomain(saved);
     }
 
     @Override
-    public Optional<Usuario> buscarPorId(UUID id) {
-        return jpaRepository.findById(id).map(this::aDominio);
+    public Optional<Usuario> findById(UUID id) {
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     @Override
-    public Optional<Usuario> buscarPorEmail(String email) {
-        return jpaRepository.findByEmail(email).map(this::aDominio);
+    public Optional<Usuario> findByEmail(String email) {
+        return jpaRepository.findByEmail(email).map(this::toDomain);
     }
 
     @Override
-    public boolean existePorEmail(String email) {
+    public boolean existsByEmail(String email) {
         return jpaRepository.existsByEmail(email);
     }
 
-    private Usuario aDominio(UsuarioEntity entity) {
+    private Usuario toDomain(UsuarioEntity entity) {
         return new Usuario(
                 entity.getId(),
-                entity.getNombre(),
+                entity.getName(),
                 entity.getEmail(),
                 entity.getPasswordHash(),
-                com.serviceflow.api.domain.RolUsuario.valueOf(entity.getRol().getNombre()),
-                entity.getCreadoEn()
+                com.serviceflow.api.domain.RolUsuario.valueOf(entity.getRol().getName()),
+                entity.getCreatedAt()
         );
     }
 }
