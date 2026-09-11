@@ -33,8 +33,8 @@ Inicia sesión. Setea la cookie `access_token` (HttpOnly).
 ```
 - `400` si falta algún campo · `401` si las credenciales son inválidas
 
-### POST /auth/forgotPassword (recover-password)
-Genera un ticket de recuperación — **siempre devuelve 200** (no revela si el email existe). Inserta el ticket solo cuando el email existe en la BD. Unidad de rate limit: **máx. 3 peticiones / 15 min por IP** (la 4ta responde `429`).
+### POST /api/v1/auth/recover-password
+Genera un ticket de recuperación — **siempre devuelve 200** (no revela si el email existe). Inserta el ticket solo cuando el email existe en la BD. Unidad de rate limit: **máx. 3 peticiones / 15 min por IP** (la 4ta responde `429`). Es una ruta **pública** (no requiere token).
 
 ```json
 // body

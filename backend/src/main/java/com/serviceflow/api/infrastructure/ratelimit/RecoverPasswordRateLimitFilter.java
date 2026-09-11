@@ -26,7 +26,8 @@ public class RecoverPasswordRateLimitFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         if ("POST".equalsIgnoreCase(request.getMethod())
-                && request.getRequestURI().equals("/api/v1/auth/recover-password")) {
+                && (request.getRequestURI().equals("/api/v1/auth/recover-password")
+                || request.getRequestURI().equals("/api/v1/auth/forgotPassword"))) {
             if (!rateLimiter.allow(clientIp(request), maxRequests, windowMs)) {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.setContentType("application/json");
