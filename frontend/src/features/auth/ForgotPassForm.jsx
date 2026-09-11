@@ -9,9 +9,7 @@ import { Card } from "@/components/ui/card";
 import StatustCard from '@/components/StatusCard';
 
 async function forgotPassAction(prevState, formData) {
-  console.log(formData);
   const email = formData.get('email');
-  console.log(email);
 
   try {
     const result = await forgotPassword(email);
@@ -60,6 +58,11 @@ export default function ForgotPassForm() {
                 className="border-border font-semibold"
               />
             </div>
+            {state?.error && (
+              <p role="alert" className="text-sm font-medium text-destructive">
+                {state.error}
+              </p>
+            )}
             <Button type="submit" className="w-full btn-gradient-primary cursor-pointer" disabled={isPending}>
               {isPending ? (
                 <>
