@@ -57,7 +57,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping({"/recover-password", "/forgotPassword"})
+    @PostMapping("/recover-password")
     public ResponseEntity<?> recoverPassword(@RequestBody RecoverPasswordRequest request) {
         authService.requestPasswordRecovery(request.email());
         return ResponseEntity.ok(Map.of("message", "If the email exists, we will process the request"));

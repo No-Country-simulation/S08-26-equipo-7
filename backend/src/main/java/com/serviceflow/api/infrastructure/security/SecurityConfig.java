@@ -53,12 +53,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/forgotPassword", "/api/v1/auth/logout")
+                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/logout")
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/forgotPassword").permitAll()
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password").permitAll()
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .anyRequest().authenticated()
                 )
