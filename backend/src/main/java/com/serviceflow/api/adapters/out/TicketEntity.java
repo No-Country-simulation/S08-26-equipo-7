@@ -36,6 +36,18 @@ public class TicketEntity {
     @Column(name = "requiere_aprobacion", nullable = false)
     private boolean requiresApproval;
 
+    @Column(name = "asignado_a")
+    private UUID assignedTo;
+
+    @Column(name = "sla_due_at")
+    private LocalDateTime slaDueAt;
+
+    @Column(name = "resuelto_en")
+    private LocalDateTime resolvedAt;
+
+    @Column(name = "cerrado_en")
+    private LocalDateTime closedAt;
+
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime createdAt;
 
@@ -43,7 +55,9 @@ public class TicketEntity {
     }
 
     public TicketEntity(UUID id, UUID userId, String email, String category, String description,
-                        String priority, String status, boolean requiresApproval, LocalDateTime createdAt) {
+                        String priority, String status, boolean requiresApproval, UUID assignedTo,
+                        LocalDateTime slaDueAt, LocalDateTime resolvedAt, LocalDateTime closedAt,
+                        LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.email = email;
@@ -52,6 +66,10 @@ public class TicketEntity {
         this.priority = priority;
         this.status = status;
         this.requiresApproval = requiresApproval;
+        this.assignedTo = assignedTo;
+        this.slaDueAt = slaDueAt;
+        this.resolvedAt = resolvedAt;
+        this.closedAt = closedAt;
         this.createdAt = createdAt;
     }
 
@@ -78,6 +96,18 @@ public class TicketEntity {
 
     public boolean isRequiresApproval() { return requiresApproval; }
     public void setRequiresApproval(boolean requiresApproval) { this.requiresApproval = requiresApproval; }
+
+    public UUID getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(UUID assignedTo) { this.assignedTo = assignedTo; }
+
+    public LocalDateTime getSlaDueAt() { return slaDueAt; }
+    public void setSlaDueAt(LocalDateTime slaDueAt) { this.slaDueAt = slaDueAt; }
+
+    public LocalDateTime getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
+
+    public LocalDateTime getClosedAt() { return closedAt; }
+    public void setClosedAt(LocalDateTime closedAt) { this.closedAt = closedAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
