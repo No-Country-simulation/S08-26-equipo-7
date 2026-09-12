@@ -32,9 +32,23 @@ export async function apiRequest(endpoint, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
+    const error = new Error(
       translateApiMessage(data?.error || data?.message, response.status),
     );
+    error.status = response.status;
+
+    const isPublicAuthEndpoint = ["auth/login", "auth/recover-password"].some(
+      (publicEndpoint) => endpoint.replace(/^\/+/, "") === publicEndpoint,
+    );
+
+    if (
+      !isPublicAuthEndpoint &&
+      (response.status === 401 || response.status === 403)
+    ) {
+      window.dispatchEvent(new CustomEvent("auth:expired"));
+    }
+
+    throw error;
   }
 
   return data;
