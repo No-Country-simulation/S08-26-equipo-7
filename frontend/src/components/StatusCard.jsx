@@ -1,6 +1,6 @@
 import { CircleCheck } from 'lucide-react';
 
-export default function StatustCard ({ title, message, action }){
+export default function StatusCard ({ title, message, action }){
 
   return(
     <div className="flex flex-col items-center justify-center space-y-2 my-8">
