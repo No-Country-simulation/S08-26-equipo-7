@@ -1,5 +1,5 @@
 import AuthLayout from "@/layout/AuthLayout";
-import ForgotPassForm from "@/features/auth/ForgotPassForm";
+import ForgotPassForm from "@/features/auth/components/ForgotPassForm";
 
 export default function ForgotPassPage() {
   return (

@@ -1,6 +1,8 @@
-import AppLayout from "@/layout/AppLayout";
-export default function DasboardPage(){
-  return(
-    <AppLayout />
+export default function DashboardPage() {
+  return (
+    <section>
+      <h1>Dashboard</h1>
+      <p>Resumen de actividad</p>
+    </section>
   );
 }

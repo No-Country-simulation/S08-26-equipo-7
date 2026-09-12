@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowLeftIcon } from 'lucide-react';
 import { Label } from "@/components/ui/label";
-import { forgotPassword } from "@/services/authService.js";
+import { forgotPassword } from "@/features/auth/services/authService.js";
 import { Card } from "@/components/ui/card";
-import StatustCard from '@/components/StatusCard';
+import StatusCard from '@/components/StatusCard';
 
 async function forgotPassAction(prevState, formData) {
   const email = formData.get('email');
@@ -27,7 +27,7 @@ export default function ForgotPassForm() {
     <div className="w-full max-w-md space-y-1 px-3 py-2">
       <Card className="space-y-1.5 p-8 rounded-4xl shadow-md w-full" aria-live="polite">
         {state?.success ? (
-          <StatustCard 
+          <StatusCard 
             title="¡Solicitud enviada!" 
             message="Si el correo existe, se creará un ticket automático para que puedas recuperar tu contraseña. Para más información, comunícate con el administrador." 
             action={ 
