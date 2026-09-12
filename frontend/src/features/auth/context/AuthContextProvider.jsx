@@ -21,6 +21,27 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    async function handleAuthExpired() {
+      setUser(null);
+
+      if (["/login", "/forgot-password"].includes(window.location.pathname)) {
+        return;
+      }
+
+      try {
+        await logout();
+      } catch {
+        // The access token is already invalid; local cleanup still proceeds.
+      } finally {
+        window.location.assign("/login");
+      }
+    }
+
+    window.addEventListener("auth:expired", handleAuthExpired);
+    return () => window.removeEventListener("auth:expired", handleAuthExpired);
+  }, []);
+
   const loginContext = (userData) => {
     setUser(userData);
   };

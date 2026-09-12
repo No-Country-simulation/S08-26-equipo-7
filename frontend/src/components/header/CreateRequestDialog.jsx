@@ -17,10 +17,14 @@ export default function CreateRequestDialog(){
       <Dialog>
         <form>
           <DialogTrigger asChild>
-            <Button className="btn-gradient-primary cursor-pointer">
+            <Button
+              className="btn-gradient-primary !h-8 !w-8 !rounded-md cursor-pointer overflow-hidden !p-0 sm:!h-10 sm:!w-auto sm:!px-4 md:!h-11 md:!px-6"
+              size="icon-xs"
+              aria-label="Nueva solicitud"
+              title="Nueva solicitud"
+            >
               <Plus />
-              {}
-          Nueva Solicitud
+              <span className="hidden sm:inline">Nueva Solicitud</span>
             </Button>
           </DialogTrigger>
           <DialogContent>

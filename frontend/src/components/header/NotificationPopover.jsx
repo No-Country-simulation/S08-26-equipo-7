@@ -14,7 +14,7 @@ export default function NotificationPopover(){
         <Button type="button"
           variant="ghost"
           size="icon-2xl"
-          className="bg-card rounded-full flex-items justify-center border border-border cursor-pointer"
+          className="size-8 cursor-pointer rounded-full border border-border bg-card sm:size-12 sm:max-md:size-10"
         >
           <Bell />
         </Button>

@@ -14,7 +14,7 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
       title={isDark ? "Activar modo claro" : "Activar modo oscuro"}
-      className="bg-card rounded-full flex items-center justify-center border border-border cursor-pointer"
+      className="size-8 cursor-pointer rounded-full border border-border bg-card sm:size-12 sm:max-md:size-10"
     >
       {isDark ? <Sun /> : <Moon />}
     </Button>
