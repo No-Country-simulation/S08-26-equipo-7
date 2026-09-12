@@ -7,10 +7,10 @@ import AppSidebar from "@/components/app-sidebar/AppSidebar";
 export default function AppLayout(){
 
   return(
-    <div className="relative flex flex-col items-center justify-center w-screen h-screen px-4 md:px-0 body-app">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-0 body-app">
       <SidebarProvider>
         <AppSidebar />
-        <div className="w-full">
+        <div className="min-w-0 w-full">
           <Header />
           <main>
             <Outlet />

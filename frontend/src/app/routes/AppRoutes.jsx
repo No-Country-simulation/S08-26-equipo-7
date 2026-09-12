@@ -2,8 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import ForgotPassPage from "@/pages/ForgotPassPage";
 import DashboardPage from "@/pages/DashboardPage";
-import ProtectedRoute from "@/routes/ProtectedRoute";
-import PublicRoute from "@/routes/PublicRoute";
+import ProtectedRoute from "@/app/routes/ProtectedRoute";
+import PublicRoute from "@/app/routes/PublicRoute";
 import AppLayout from "@/layout/AppLayout";
 import NotFoundPage from "@/pages/NotFoundPage";
 
