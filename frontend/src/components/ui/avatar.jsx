@@ -1,4 +1,4 @@
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { Avatar as AvatarPrimitive } from "radix-ui"
 
 function Avatar({
