@@ -9,8 +9,35 @@ function buildUrl(endpoint) {
   return `${API_URL.replace(/\/+$/, "")}/${endpoint.replace(/^\/+/, "")}`;
 }
 
+function getCookie(name) {
+  const cookie = document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${name}=`));
+
+  return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : null;
+}
+
+function requiresCsrf(method, endpoint) {
+  const normalizedEndpoint = endpoint.replace(/^\/+/, "");
+  const publicEndpoints = [
+    "auth/login",
+    "auth/recover-password",
+    "auth/logout",
+  ];
+  const safeMethods = ["GET", "HEAD", "OPTIONS"];
+
+  return (
+    !safeMethods.includes(method) &&
+    !publicEndpoints.includes(normalizedEndpoint)
+  );
+}
+
 export async function apiRequest(endpoint, options = {}) {
   const { body, headers, ...requestOptions } = options;
+  const method = (requestOptions.method || "GET").toUpperCase();
+  const csrfToken = requiresCsrf(method, endpoint)
+    ? getCookie("XSRF-TOKEN")
+    : null;
   let response;
 
   try {
@@ -19,6 +46,7 @@ export async function apiRequest(endpoint, options = {}) {
       credentials: "include",
       headers: {
         ...(body !== undefined && { "Content-Type": "application/json" }),
+        ...(csrfToken && { "X-XSRF-TOKEN": csrfToken }),
         ...headers,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
