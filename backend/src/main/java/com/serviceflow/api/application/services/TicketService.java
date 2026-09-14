@@ -29,6 +29,8 @@ public class TicketService {
             PrioridadTicket.URGENT, Duration.ofHours(4)
     );
 
+    private static final Duration NEAR_SLA_WINDOW = Duration.ofHours(24);
+
     private final TicketRepositoryPort ticketRepository;
     private final UsuarioRepositoryPort usuarioRepository;
     private final CategoriaRepositoryPort categoriaRepository;
@@ -199,6 +201,77 @@ public class TicketService {
                 "byStatus", statusBreakdown(),
                 "byCategory", categoryBreakdown()
         );
+    }
+
+    public Map<String, Object> summaryStats(LocalDateTime month) {
+        LocalDateTime start = month.withDayOfMonth(1).toLocalDate().atStartOfDay();
+        LocalDateTime end = start.plusMonths(1);
+        LocalDateTime prevStart = start.minusMonths(1);
+        LocalDateTime prevEnd = start;
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Ticket> all = ticketRepository.findAll();
+
+        List<Ticket> active = all.stream()
+                .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
+                .toList();
+
+        long activeTickets = active.size();
+        long activePrev = activeCountAt(prevEnd);
+
+        long nearSlaExpiry = active.stream()
+                .filter(t -> t.getSlaDueAt() != null)
+                .filter(t -> !t.getSlaDueAt().isBefore(now) && !t.getSlaDueAt().isAfter(now.plus(NEAR_SLA_WINDOW)))
+                .count();
+
+        long overdueSla = active.stream()
+                .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(now))
+                .count();
+
+        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
+        List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd);
+
+        long resolvedOnTime = resolved.stream()
+                .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
+                .count();
+        long resolvedOnTimePrev = resolvedPrev.stream()
+                .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
+                .count();
+
+        double compliance = resolved.isEmpty() ? 0.0 : round2(resolvedOnTime * 100.0 / resolved.size());
+        double compliancePrev = resolvedPrev.isEmpty() ? 0.0 : round2(resolvedOnTimePrev * 100.0 / resolvedPrev.size());
+
+        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
+        List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd);
+
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("month", start.toLocalDate().getYear() + "-" + String.format("%02d", start.toLocalDate().getMonthValue()));
+        result.put("activeTickets", activeTickets);
+        result.put("activePrevMonth", activePrev);
+        result.put("activeDelta", activeTickets - activePrev);
+        result.put("nearSlaExpiry", nearSlaExpiry);
+        result.put("overdueSla", overdueSla);
+        result.put("resolved", resolved.size());
+        result.put("resolvedPrevMonth", resolvedPrev.size());
+        result.put("resolvedOnTime", resolvedOnTime);
+        result.put("resolvedOnTimePrev", resolvedOnTimePrev);
+        result.put("slaCompliance", compliance);
+        result.put("slaCompliancePrev", compliancePrev);
+        result.put("created", created.size());
+        result.put("createdPrevMonth", createdPrev.size());
+        return result;
+    }
+
+    private long activeCountAt(LocalDateTime until) {
+        return ticketRepository.findAll().stream()
+                .filter(t -> t.getCreatedAt() != null && !t.getCreatedAt().isAfter(until))
+                .filter(t -> t.getResolvedAt() == null || t.getResolvedAt().isAfter(until))
+                .filter(t -> t.getClosedAt() == null || t.getClosedAt().isAfter(until))
+                .count();
+    }
+
+    private double round2(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     private Map<String, Long> statusBreakdown() {

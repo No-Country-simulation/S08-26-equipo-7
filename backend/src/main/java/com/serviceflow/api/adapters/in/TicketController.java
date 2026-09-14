@@ -65,7 +65,9 @@ public class TicketController {
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(required = false) String status,
                                   @RequestParam(required = false) String category,
-                                  @RequestParam(required = false) String priority) {
+                                  @RequestParam(required = false) String priority,
+                                  @RequestParam(required = false) Integer limit,
+                                  @RequestParam(required = false) Integer offset) {
         List<Ticket> all = ticketService.findAll();
         if (status != null) {
             all = all.stream().filter(t -> t.getStatus().name().equalsIgnoreCase(status)).toList();
@@ -75,6 +77,20 @@ public class TicketController {
         }
         if (priority != null) {
             all = all.stream().filter(t -> t.getPriority().name().equalsIgnoreCase(priority)).toList();
+        }
+        all = new java.util.ArrayList<>(all);
+        long total = all.size();
+        List<Ticket> page = all;
+        if (limit != null || offset != null) {
+            int start = offset != null ? Math.max(0, offset) : 0;
+            int end = limit != null ? start + Math.max(1, limit) : all.size();
+            page = all.subList(Math.min(start, all.size()), Math.min(end, all.size()));
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("total", total);
+            body.put("offset", offset != null ? offset : 0);
+            body.put("limit", limit);
+            body.put("items", page.stream().map(TicketResponse::from).toList());
+            return ResponseEntity.ok(body);
         }
         return ResponseEntity.ok(all.stream().map(TicketResponse::from).toList());
     }
@@ -132,6 +148,14 @@ public class TicketController {
                 ? LocalDate.parse(month + "-01").atStartOfDay()
                 : LocalDateTime.now();
         return ResponseEntity.ok(ticketService.monthlyStats(input));
+    }
+
+    @GetMapping("/stats/summary")
+    public ResponseEntity<?> summary(@RequestParam(required = false) String month) {
+        LocalDateTime input = month != null
+                ? LocalDate.parse(month + "-01").atStartOfDay()
+                : LocalDateTime.now();
+        return ResponseEntity.ok(ticketService.summaryStats(input));
     }
 
     private RolUsuario role(Authentication auth) {
