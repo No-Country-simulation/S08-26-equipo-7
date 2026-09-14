@@ -71,7 +71,7 @@ export async function apiRequest(endpoint, options = {}) {
 
     if (
       !isPublicAuthEndpoint &&
-      (response.status === 401 || response.status === 403)
+      response.status === 401
     ) {
       window.dispatchEvent(new CustomEvent("auth:expired"));
     }
