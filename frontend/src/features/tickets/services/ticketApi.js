@@ -1,13 +1,12 @@
 import { apiRequest } from "@/services/apiService";
 
 export async function createTicket({
+  title,
   description,
   category,
-  priority,
-  requiresApproval
 }) {
   return apiRequest("tickets", {
     method: "POST",
-    body: { description, category, priority, requiresApproval },
+    body: { title, description, category },
   });
 }
