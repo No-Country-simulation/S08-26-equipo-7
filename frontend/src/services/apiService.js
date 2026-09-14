@@ -32,12 +32,11 @@ function requiresCsrf(method, endpoint) {
   );
 }
 
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint, options = {}, _retryingAfterCsrf = false) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
-  const csrfToken = requiresCsrf(method, endpoint)
-    ? getCookie("XSRF-TOKEN")
-    : null;
+  const needsCsrf = requiresCsrf(method, endpoint);
+  const csrfToken = needsCsrf ? getCookie("XSRF-TOKEN") : null;
   let response;
 
   try {
@@ -60,6 +59,19 @@ export async function apiRequest(endpoint, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // El backend recién emite la cookie XSRF-TOKEN en la respuesta del primer POST
+    // que la necesitaba. Si no teníamos token para enviar, reintentamos una vez
+    // ahora que el navegador ya guardó la cookie que vino en este 403.
+    if (
+      !_retryingAfterCsrf &&
+      needsCsrf &&
+      !csrfToken &&
+      response.status === 403 &&
+      getCookie("XSRF-TOKEN")
+    ) {
+      return apiRequest(endpoint, options, true);
+    }
+
     const error = new Error(
       translateApiMessage(data?.error || data?.message, response.status),
     );
