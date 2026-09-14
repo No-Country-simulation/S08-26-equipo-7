@@ -24,6 +24,9 @@ public class TicketEntity {
     @Column(name = "categoria", nullable = false, length = 50)
     private String category;
 
+    @Column(name = "titulo", nullable = false, length = 150)
+    private String title;
+
     @Column(name = "descripcion", length = 255)
     private String description;
 
@@ -54,13 +57,14 @@ public class TicketEntity {
     public TicketEntity() {
     }
 
-    public TicketEntity(UUID id, UUID userId, String email, String category, String description,
+    public TicketEntity(UUID id, UUID userId, String email, String title, String category, String description,
                         String priority, String status, boolean requiresApproval, UUID assignedTo,
                         LocalDateTime slaDueAt, LocalDateTime resolvedAt, LocalDateTime closedAt,
                         LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.email = email;
+        this.title = title;
         this.category = category;
         this.description = description;
         this.priority = priority;
@@ -84,6 +88,9 @@ public class TicketEntity {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

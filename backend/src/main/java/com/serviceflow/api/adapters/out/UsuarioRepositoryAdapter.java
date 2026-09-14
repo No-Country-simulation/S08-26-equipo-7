@@ -52,6 +52,11 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
         return jpaRepository.existsByEmail(email);
     }
 
+    @Override
+    public java.util.List<Usuario> findAll() {
+        return jpaRepository.findAll().stream().map(this::toDomain).toList();
+    }
+
     private Usuario toDomain(UsuarioEntity entity) {
         return new Usuario(
                 entity.getId(),

@@ -1,7 +1,6 @@
 package com.serviceflow.api.adapters.out;
 
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
-import com.serviceflow.api.domain.CategoriaTicket;
 import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.PrioridadTicket;
 import com.serviceflow.api.domain.Ticket;
@@ -29,7 +28,8 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
                 id,
                 ticket.getUserId(),
                 ticket.getEmail(),
-                ticket.getCategory().name(),
+                ticket.getTitle(),
+                ticket.getCategory(),
                 ticket.getDescription(),
                 ticket.getPriority().name(),
                 ticket.getStatus().name(),
@@ -78,7 +78,8 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
                 entity.getId(),
                 entity.getUserId(),
                 entity.getEmail(),
-                CategoriaTicket.valueOf(entity.getCategory()),
+                entity.getTitle(),
+                entity.getCategory(),
                 entity.getDescription(),
                 PrioridadTicket.valueOf(entity.getPriority()),
                 EstadoTicket.valueOf(entity.getStatus()),
