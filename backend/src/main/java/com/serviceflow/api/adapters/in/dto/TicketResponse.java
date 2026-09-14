@@ -8,6 +8,7 @@ import java.util.UUID;
 public record TicketResponse(
         UUID id,
         String email,
+        String title,
         String category,
         String description,
         String priority,
@@ -23,7 +24,8 @@ public record TicketResponse(
         return new TicketResponse(
                 ticket.getId(),
                 ticket.getEmail(),
-                ticket.getCategory().name(),
+                ticket.getTitle(),
+                ticket.getCategory(),
                 ticket.getDescription(),
                 ticket.getPriority().name(),
                 ticket.getStatus().name(),
