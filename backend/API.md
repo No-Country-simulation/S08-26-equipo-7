@@ -206,6 +206,20 @@ Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prio
 Lista tickets con filtros opcionales por query string:
 `GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH`
 
+**Paginación opcional** con `limit` y `offset`:
+`GET /tickets?limit=10&offset=0`
+
+Cuando se pasa `limit` o `offset`, devuelve `{ total, offset, limit, items }`:
+```json
+{
+  "total": 35,
+  "offset": 0,
+  "limit": 10,
+  "items": [ { "id": "...", "title": "...", ... } ]
+}
+```
+Sin `limit`/`offset` devuelve el array plano (como antes). `total` es el conteo total después de aplicar `status`/`category`/`priority`.
+
 ### GET /tickets/{id}
 Devuelve un ticket por UUID. `404` si no existe.
 
@@ -240,6 +254,41 @@ Estadísticas para gráficas del admin. `month` opcional en formato `YYYY-MM` (d
 }
 ```
 
+### GET /tickets/stats/summary
+Resumen del dashboard del admin — tickets activos, próximos a vencer, vencidos y cumplimiento de SLA. **Solo ADMIN y SUPERVISOR** (403 para otros roles). `month` opcional en formato `YYYY-MM` (default: mes actual). Los campos con sufijo `PrevMonth` y los `*Delta` permiten comparar contra el mes anterior.
+
+```json
+// respuesta 200
+{
+  "month": "2026-09",
+  "activeTickets": 12,
+  "activePrevMonth": 10,
+  "activeDelta": 2,
+  "nearSlaExpiry": 3,
+  "overdueSla": 1,
+  "resolved": 9,
+  "resolvedPrevMonth": 7,
+  "resolvedOnTime": 8,
+  "resolvedOnTimePrev": 6,
+  "slaCompliance": 88.9,
+  "slaCompliancePrev": 85.7,
+  "created": 15,
+  "createdPrevMonth": 13
+}
+```
+
+| Campo | Descripción |
+|---|---|
+| `activeTickets` | Tickets no cerrados ni resueltos (activos hoy) |
+| `activePrevMonth` | Activos al cierre del mes anterior |
+| `activeDelta` | `activeTickets` − `activePrevMonth` |
+| `nearSlaExpiry` | Activos cuyo SLA vence dentro de las próximas 24 h |
+| `overdueSla` | Activos ya vencidos (SLA pasado, sin resolver) |
+| `resolvedOnTime` | Resueltos a tiempo en el mes |
+| `slaCompliance` | `resolvedOnTime / resolved × 100`, máx. 2 decimales |
+| `slaCompliancePrev` | Idem para mes anterior |
+| `created` / `createdPrevMonth` | Creados en el mes actual / anterior |
+
 ---
 
 ## Ejemplo rápido (flujo completo con CSRF)
@@ -255,4 +304,6 @@ Estadísticas para gráficas del admin. `month` opcional en formato `YYYY-MM` (d
 9. `POST /tickets/{id}/start` → `IN_PROGRESS`.
 10. `POST /tickets/{id}/resolve` → `RESOLVED`.
 11. `POST /tickets/{id}/close` → `CLOSED`.
-12. `GET /tickets/stats/monthly?month=2026-09` → estadísticas.
+12. `GET /tickets/stats/monthly?month=2026-09` → estadísticas mensuales.
+13. `GET /tickets/stats/summary?month=2026-09` → resumen SLA + activos (solo ADMIN/SUPERVISOR).
+14. `GET /tickets?limit=10&offset=0` → página de tickets con `total`.
