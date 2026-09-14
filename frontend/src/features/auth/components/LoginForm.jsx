@@ -2,7 +2,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useActionState, useEffect,useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 
-import StatusCard from '@/components/StatusCard';
+import SuccessCard from '@/components/SuccessCard';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,7 @@ export default function LoginForm() {
     <div className="w-full max-w-md space-y-1 px-3 py-2">
       <Card className="w-full space-y-1.5 rounded-4xl p-5 shadow-md sm:p-8" aria-live="polite">
         {state?.success ? (
-          <StatusCard title="¡Sesión iniciada!" message="Redirigiendo a tu espacio de trabajo..." />
+          <SuccessCard title="¡Sesión iniciada!" message="Redirigiendo a tu espacio de trabajo..." />
         ) : (
           <form className="space-y-4" action={formAction}>
             <div className="space-y-1.5">

@@ -1,7 +1,7 @@
 import { ArrowLeftIcon, FilePlus, Plus } from "lucide-react";
 import { useState } from "react";
 
-import StatusCard from "@/components/StatusCard";
+import SuccessCard from "@/components/SuccessCard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
 
 import CreateTicketForm from "./CreateTicketForm";
 
-export default function CreateRequestDialog() {
+export default function CreateTicketDialog({ trigger }) {
   const [open, setOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -27,19 +27,21 @@ export default function CreateRequestDialog() {
     <div>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
-          <Button
-            className="btn-gradient-primary h-8! w-8! cursor-pointer overflow-hidden rounded-md! p-0! sm:h-9! sm:w-auto! sm:px-3! md:h-10! md:px-6!"
-            size="icon-xs"
-            aria-label="Nueva solicitud"
-            title="Nueva solicitud"
-          >
-            <Plus />
-            <span className="hidden sm:inline">Nueva Solicitud</span>
-          </Button>
+          {trigger ?? (
+            <Button
+              className="btn-gradient-primary h-8! w-8! cursor-pointer overflow-hidden rounded-md! p-0! sm:h-9! sm:w-auto! sm:px-3! md:h-10! md:px-6!"
+              size="icon-xs"
+              aria-label="Nueva solicitud"
+              title="Nueva solicitud"
+            >
+              <Plus />
+              <span className="hidden sm:inline ml-2">Nueva Solicitud</span>
+            </Button>
+          )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg md:max-w-xl">
           {showSuccess ? (
-            <StatusCard
+            <SuccessCard
               title="¡Solicitud enviada!"
               message="Tu solicitud ha sido enviada correctamente."
               action={

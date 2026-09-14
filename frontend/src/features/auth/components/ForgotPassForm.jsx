@@ -2,7 +2,7 @@ import { ArrowLeftIcon,Loader2 } from 'lucide-react';
 import { useActionState } from 'react';
 import { Link } from 'react-router-dom';
 
-import StatusCard from '@/components/StatusCard';
+import SuccessCard from '@/components/SuccessCard';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ export default function ForgotPassForm() {
     <div className="w-full max-w-md space-y-1 px-3 py-2">
       <Card className="space-y-1.5 p-8 rounded-4xl shadow-md w-full" aria-live="polite">
         {state?.success ? (
-          <StatusCard 
+          <SuccessCard 
             title="¡Solicitud enviada!" 
             message="Si el correo existe, se creará un ticket automático para que puedas recuperar tu contraseña. Para más información, comunícate con el administrador." 
             action={
