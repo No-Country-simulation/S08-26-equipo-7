@@ -1,7 +1,8 @@
 // PublicRoute.jsx
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import { Navigate } from "react-router-dom";
+
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function PublicRoute({ children }) {
   const { user, loading } = useAuth();

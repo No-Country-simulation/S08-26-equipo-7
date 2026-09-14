@@ -1,9 +1,9 @@
-import ThemeToggle from "@/components/ThemeToggle";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AuthLayout({ subtitle, children }) {
   return (
-    <div className="relative flex flex-col items-center justify-center w-screen h-screen px-4 md:px-0 body-app">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-y-auto px-4 py-6 body-app md:px-0">
       <div className="absolute top-0 right-0 mr-8 mt-4">
         <ThemeToggle />
       </div>

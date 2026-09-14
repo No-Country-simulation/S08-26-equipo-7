@@ -1,5 +1,5 @@
-import { SidebarFooter } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SidebarFooter } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getRoleLabel } from "@/i18n/es/roles";
 

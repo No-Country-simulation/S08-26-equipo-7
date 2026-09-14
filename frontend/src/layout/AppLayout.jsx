@@ -1,7 +1,8 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import Header from '@/components/header/Header';
 import { Outlet } from "react-router-dom";
+
 import AppSidebar from "@/components/app-sidebar/AppSidebar";
+import Header from '@/components/header/Header';
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 
 export default function AppLayout(){
