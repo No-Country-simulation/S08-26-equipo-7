@@ -1,10 +1,11 @@
 import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import react from 'eslint-plugin-react'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
 import { defineConfig, globalIgnores } from 'eslint/config'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import globals from 'globals'
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -18,6 +19,7 @@ export default defineConfig([
     ],
     plugins: {
       react,
+      'simple-import-sort': simpleImportSort,
     },
     settings: {
       react: {
@@ -32,6 +34,8 @@ export default defineConfig([
       indent: ['error', 2, { SwitchCase: 1 }],
       eqeqeq: ['error', 'always'],
       'react/jsx-uses-vars': 'error',
+      'simple-import-sort/imports': 'warn',
+      'simple-import-sort/exports': 'warn',
     },
   },
 ])
