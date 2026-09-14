@@ -1,4 +1,4 @@
-import { CheckCircle2, Info, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -6,28 +6,28 @@ import { DialogClose, DialogFooter } from "@/components/ui/dialog";
 import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { categories } from "../categoryApi";
-import { createTicket as sendTicket } from "../ticketApi";
+import { getCategories } from "../services/categoryApi";
+import { createTicket as sendTicket } from "../services/ticketApi";
+import TicketCategoryField from "./TicketCategoryField";
 
 const MAX_TITLE_LENGTH = 120;
 const MAX_DESCRIPTION_LENGTH = 1000;
-const activeCategories = categories.filter((category) => category.active);
 
+//trae las categorías activas desde la API
+async function fetchCategories() {
+  const categories = await getCategories();
+  return categories;
+}
+
+//envia el formulario para crear el ticket
 async function createTicketAction(_, formData) {
   const title = formData.get("title");
   const description = formData.get("description");
   const category = formData.get("category");
+
+  console.log({ title, description, category });
 
   if (!category) {
     return { errors: { category: "Selecciona un área responsable" } };
@@ -57,14 +57,11 @@ async function createTicketAction(_, formData) {
     };
   }
 
-  const categoryData = categories.find((item) => item.code === category);
-
   try {
     const result = await sendTicket({
+      title,
       description,
       category,
-      priority: categoryData?.priority,
-      requiresApproval: categoryData?.requiresApproval,
     });
 
     return { success: true, message: result.message };
@@ -73,7 +70,9 @@ async function createTicketAction(_, formData) {
   }
 }
 
-export default function CreateTicketForm() {
+// es todo el componente CreateTicketForm
+export default function CreateTicketForm({ onSuccess }) {
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -83,90 +82,32 @@ export default function CreateTicketForm() {
   );
 
   useEffect(() => {
+    fetchCategories().then(setCategories);
+  }, []);
+
+  useEffect(() => {
     if (!state?.success) return;
 
     const resetTimer = setTimeout(() => {
+      onSuccess?.();
       setSelectedCategory("");
       setTitle("");
       setDescription("");
     }, 0);
 
     return () => clearTimeout(resetTimer);
-  }, [state?.success]);
-
-  const selectedCategoryData = categories.find(
-    (category) => category.code === selectedCategory,
-  );
+  }, [state?.success, onSuccess]);
 
   return (
     <form action={formAction} onReset={(event) => event.preventDefault()}>
-      {state?.success && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="mb-4 flex items-center gap-2 rounded-md border border-success/30 bg-success/5 px-3 py-2 text-sm font-medium text-success"
-        >
-          <CheckCircle2 className="size-4 shrink-0" />
-          Solicitud creada correctamente.
-        </div>
-      )}
-
       <div className="space-y-2">
-        <Label htmlFor="category-trigger" className="font-semibold">
-          Área responsable <span aria-hidden="true">*</span>
-        </Label>
-        {activeCategories.length > 0 ? (
-          <>
-            <Select
-              value={selectedCategory}
-              onValueChange={(value) => {
-                if (value) setSelectedCategory(value);
-              }}
-              disabled={isPending}
-            >
-              <SelectTrigger
-                id="category-trigger"
-                className="w-full border border-border"
-                aria-invalid={Boolean(state?.errors?.category)}
-                aria-describedby={
-                  state?.errors?.category ? "category-error" : undefined
-                }
-              >
-                <SelectValue placeholder="Selecciona un área" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Áreas disponibles</SelectLabel>
-                  {activeCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.code}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="category" value={selectedCategory} />
-            <FieldError
-              id="category-error"
-              errors={state?.errors?.category}
-            />
-          </>
-        ) : (
-          <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-            No hay áreas disponibles en este momento.
-          </p>
-        )}
-        {selectedCategoryData && (
-          <p className="ml-1 text-sm text-muted-foreground">
-            Área encargada de: {selectedCategoryData.description}
-          </p>
-        )}
-        {selectedCategoryData?.requiresApproval && (
-          <p className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-            <Info className="size-4 shrink-0" />
-  Esta solicitud requiere aprobación antes de ser atendida.
-          </p>
-        )}
+        <TicketCategoryField
+          categories={categories}
+          value={selectedCategory}
+          onChange={setSelectedCategory}
+          error={state?.errors?.category}
+          disabled={isPending}
+        />
 
         <Label htmlFor="title" className="font-semibold">
           Título de la solicitud <span aria-hidden="true">*</span>
