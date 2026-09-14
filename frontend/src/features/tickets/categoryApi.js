@@ -1,0 +1,42 @@
+export const categories = [
+  {
+    id: 1,
+    code: "IT",
+    name: "Infraestructura IT",
+    description: "Equipos, redes, VPN y sistemas",
+    active: true,
+    requiresApproval: false,
+  },
+  {
+    id: 2,
+    code: "ACCESS",
+    name: "Accesos y Seguridad",
+    description: "Usuarios, permisos y credenciales",
+    active: true,
+    requiresApproval: true,
+  },
+  {
+    id: 3,
+    code: "HARDWARE",
+    name: "Hardware",
+    description: "Equipos y periféricos",
+    active: true,
+    requiresApproval: true,
+  },
+  {
+    id: 4,
+    code: "FACILITIES",
+    name: "Facilities y Logística",
+    description: "Espacios físicos, mantenimiento y logística",
+    active: true,
+    requiresApproval: false,
+  },
+  {
+    id: 5,
+    code: "FINANCE",
+    name: "Finanzas y Compras",
+    description: "Compras, gastos y viáticos",
+    active: true,
+    requiresApproval: true,
+  },
+];

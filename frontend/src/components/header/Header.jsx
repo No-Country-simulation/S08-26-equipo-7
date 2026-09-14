@@ -1,8 +1,9 @@
 import ThemeToggle from "@/components/ThemeToggle";
-import SearchApp from "./SearchApp";
-import CreateRequestDialog from "./CreateRequestDialog";
-import NotificationPopover from "./NotificationPopover";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+
+import CreateRequestDialog from "../../features/tickets/components/CreateTicketDialog";
+import NotificationPopover from "./NotificationPopover";
+import SearchApp from "./SearchApp";
 
 export default function Header(){
   return(
