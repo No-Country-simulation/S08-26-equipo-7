@@ -39,16 +39,26 @@ public class TicketController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateTicketRequest request, Authentication auth) {
         UsuarioAutenticado user = (UsuarioAutenticado) auth.getPrincipal();
+        if (request.title() == null || request.title().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "title is required"));
+        }
         if (request.description() == null || request.description().isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "description is required"));
         }
-        Ticket ticket = ticketService.createForRequester(
-                user.email(),
-                request.description(),
-                request.category() != null ? com.serviceflow.api.domain.CategoriaTicket.valueOf(request.category()) : null,
-                request.priority() != null ? com.serviceflow.api.domain.PrioridadTicket.valueOf(request.priority()) : null,
-                Boolean.TRUE.equals(request.requiresApproval())
-        );
+        if (request.category() == null || request.category().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "category is required"));
+        }
+        Ticket ticket;
+        try {
+            ticket = ticketService.createForRequester(
+                    user.email(),
+                    request.title().trim(),
+                    request.description().trim(),
+                    request.category().trim()
+            );
+        } catch (InvalidTransitionException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(TicketResponse.from(ticket));
     }
 
@@ -61,7 +71,7 @@ public class TicketController {
             all = all.stream().filter(t -> t.getStatus().name().equalsIgnoreCase(status)).toList();
         }
         if (category != null) {
-            all = all.stream().filter(t -> t.getCategory().name().equalsIgnoreCase(category)).toList();
+            all = all.stream().filter(t -> t.getCategory() != null && t.getCategory().equalsIgnoreCase(category)).toList();
         }
         if (priority != null) {
             all = all.stream().filter(t -> t.getPriority().name().equalsIgnoreCase(priority)).toList();
@@ -76,8 +86,7 @@ public class TicketController {
 
     @PostMapping("/{id}/categorize")
     public ResponseEntity<?> categorize(@PathVariable UUID id, @RequestParam String category, Authentication auth) {
-        return safeTransition(() -> ticketService.categorize(
-                id, com.serviceflow.api.domain.CategoriaTicket.valueOf(category), role(auth)));
+        return safeTransition(() -> ticketService.categorize(id, category, role(auth)));
     }
 
     @PostMapping("/{id}/prioritize")
@@ -148,6 +157,6 @@ public class TicketController {
         }
     }
 
-    public record CreateTicketRequest(String description, String category, String priority, Boolean requiresApproval) {
+    public record CreateTicketRequest(String title, String description, String category) {
     }
 }

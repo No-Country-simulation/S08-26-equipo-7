@@ -1,8 +1,9 @@
 package com.serviceflow.api.application.services;
 
+import com.serviceflow.api.application.ports.CategoriaRepositoryPort;
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
 import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
-import com.serviceflow.api.domain.CategoriaTicket;
+import com.serviceflow.api.domain.Categoria;
 import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.PrioridadTicket;
 import com.serviceflow.api.domain.RolUsuario;
@@ -30,38 +31,55 @@ public class TicketService {
 
     private final TicketRepositoryPort ticketRepository;
     private final UsuarioRepositoryPort usuarioRepository;
+    private final CategoriaRepositoryPort categoriaRepository;
 
-    public TicketService(TicketRepositoryPort ticketRepository, UsuarioRepositoryPort usuarioRepository) {
+    public TicketService(TicketRepositoryPort ticketRepository,
+                         UsuarioRepositoryPort usuarioRepository,
+                         CategoriaRepositoryPort categoriaRepository) {
         this.ticketRepository = ticketRepository;
         this.usuarioRepository = usuarioRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
-    public Ticket createForRequester(String email, String description, CategoriaTicket category,
-                                     PrioridadTicket priority, boolean requiresApproval) {
+    public Ticket createForRequester(String email, String title, String description, String categoryCode) {
         Usuario requester = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new TicketNotFoundException("User not found with email: " + email));
-        return create(category, description, priority, requiresApproval, requester.getId(), requester.getEmail());
+        Categoria category = resolveCategory(categoryCode);
+        return create(title, description, category, requester.getId(), requester.getEmail());
     }
 
-    public Ticket create(CategoriaTicket category, String description, PrioridadTicket priority,
-                         boolean requiresApproval, UUID userId, String email) {
-        PrioridadTicket effectivePriority = priority != null ? priority : PrioridadTicket.MEDIUM;
+    public Ticket create(String title, String description, Categoria category,
+                         UUID userId, String email) {
+        boolean requiresApproval = category != null && category.isRequiresApproval();
         Ticket ticket = new Ticket(
                 null,
                 userId,
                 email,
-                category != null ? category : CategoriaTicket.QUERY,
+                title,
+                category != null ? category.getCode() : null,
                 description,
-                effectivePriority,
+                PrioridadTicket.MEDIUM,
                 EstadoTicket.SUBMITTED,
                 requiresApproval,
                 null,
-                LocalDateTime.now().plus(SLA_BY_PRIORITY.get(effectivePriority)),
+                LocalDateTime.now().plus(SLA_BY_PRIORITY.get(PrioridadTicket.MEDIUM)),
                 null,
                 null,
                 LocalDateTime.now()
         );
         return ticketRepository.save(ticket);
+    }
+
+    private Categoria resolveCategory(String categoryCode) {
+        if (categoryCode == null || categoryCode.isBlank()) {
+            throw new InvalidTransitionException("A valid category is required");
+        }
+        Categoria category = categoriaRepository.findByCode(categoryCode)
+                .orElseThrow(() -> new InvalidTransitionException("Category not found: " + categoryCode));
+        if (!category.isActive()) {
+            throw new InvalidTransitionException("Category is not active: " + categoryCode);
+        }
+        return category;
     }
 
     public Ticket findById(UUID id) {
@@ -73,11 +91,13 @@ public class TicketService {
         return ticketRepository.findAll();
     }
 
-    public Ticket categorize(UUID id, CategoriaTicket category, RolUsuario actorRole) {
+    public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Categoria category = resolveCategory(categoryCode);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.SUBMITTED);
-        ticket.setCategory(category);
+        ticket.setCategory(category.getCode());
+        ticket.setRequiresApproval(category.isRequiresApproval());
         ticket.setStatus(EstadoTicket.CATEGORIZED);
         return ticketRepository.save(ticket);
     }
@@ -196,12 +216,12 @@ public class TicketService {
     }
 
     private Map<String, Long> categoryBreakdown() {
-        return Map.of(
-                "PASSWORD_RECOVERY", ticketRepository.countByCategory(CategoriaTicket.PASSWORD_RECOVERY.name()),
-                "QUERY", ticketRepository.countByCategory(CategoriaTicket.QUERY.name()),
-                "SYSTEM_ERROR", ticketRepository.countByCategory(CategoriaTicket.SYSTEM_ERROR.name()),
-                "OTHER", ticketRepository.countByCategory(CategoriaTicket.OTHER.name())
-        );
+        List<Categoria> categories = categoriaRepository.findAll();
+        Map<String, Long> result = new java.util.HashMap<>();
+        for (Categoria category : categories) {
+            result.put(category.getCode(), ticketRepository.countByCategory(category.getCode()));
+        }
+        return result;
     }
 
     private void requireStatus(Ticket ticket, EstadoTicket expected) {
