@@ -1,12 +1,14 @@
-import { useLocation } from "react-router-dom";
 import { ChartNoAxesCombined, LogOut } from "lucide-react";
-import SidebarMenuItemLink from "./SidebarMenuItemLink";
+import { useLocation } from "react-router-dom";
+
 import {
   SidebarContent,
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+
+import SidebarMenuItemLink from "./SidebarMenuItemLink";
 
 const navigationItems = [
   {
