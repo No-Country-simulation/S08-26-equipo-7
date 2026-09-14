@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getPreferredTheme, applyTheme, THEME_STORAGE_KEY } from '@/lib/theme';
+
+import { applyTheme, getPreferredTheme, THEME_STORAGE_KEY } from '@/lib/theme';
 
 const ThemeContext = createContext(null);
 

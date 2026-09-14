@@ -2,7 +2,6 @@ package com.serviceflow.api.application.services;
 
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
 import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
-import com.serviceflow.api.domain.CategoriaTicket;
 import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.PrioridadTicket;
 import com.serviceflow.api.domain.Ticket;
@@ -52,11 +51,12 @@ public class AuthService {
                     null,
                     usuario.getId(),
                     usuario.getEmail(),
-                    CategoriaTicket.PASSWORD_RECOVERY,
+                    "Password recovery request",
+                    "PASSWORD_RECOVERY",
                     "Password recovery request",
                     PrioridadTicket.URGENT,
                     EstadoTicket.SUBMITTED,
-                    true,
+                    false,
                     null,
                     LocalDateTime.now().plus(java.time.Duration.ofHours(4)),
                     null,

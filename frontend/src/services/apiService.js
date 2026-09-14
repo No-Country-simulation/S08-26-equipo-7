@@ -9,8 +9,34 @@ function buildUrl(endpoint) {
   return `${API_URL.replace(/\/+$/, "")}/${endpoint.replace(/^\/+/, "")}`;
 }
 
-export async function apiRequest(endpoint, options = {}) {
+function getCookie(name) {
+  const cookie = document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${name}=`));
+
+  return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : null;
+}
+
+function requiresCsrf(method, endpoint) {
+  const normalizedEndpoint = endpoint.replace(/^\/+/, "");
+  const publicEndpoints = [
+    "auth/login",
+    "auth/recover-password",
+    "auth/logout",
+  ];
+  const safeMethods = ["GET", "HEAD", "OPTIONS"];
+
+  return (
+    !safeMethods.includes(method) &&
+    !publicEndpoints.includes(normalizedEndpoint)
+  );
+}
+
+export async function apiRequest(endpoint, options = {}, _retryingAfterCsrf = false) {
   const { body, headers, ...requestOptions } = options;
+  const method = (requestOptions.method || "GET").toUpperCase();
+  const needsCsrf = requiresCsrf(method, endpoint);
+  const csrfToken = needsCsrf ? getCookie("XSRF-TOKEN") : null;
   let response;
 
   try {
@@ -19,6 +45,7 @@ export async function apiRequest(endpoint, options = {}) {
       credentials: "include",
       headers: {
         ...(body !== undefined && { "Content-Type": "application/json" }),
+        ...(csrfToken && { "X-XSRF-TOKEN": csrfToken }),
         ...headers,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -32,6 +59,19 @@ export async function apiRequest(endpoint, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // El backend recién emite la cookie XSRF-TOKEN en la respuesta del primer POST
+    // que la necesitaba. Si no teníamos token para enviar, reintentamos una vez
+    // ahora que el navegador ya guardó la cookie que vino en este 403.
+    if (
+      !_retryingAfterCsrf &&
+      needsCsrf &&
+      !csrfToken &&
+      response.status === 403 &&
+      getCookie("XSRF-TOKEN")
+    ) {
+      return apiRequest(endpoint, options, true);
+    }
+
     const error = new Error(
       translateApiMessage(data?.error || data?.message, response.status),
     );
@@ -43,7 +83,7 @@ export async function apiRequest(endpoint, options = {}) {
 
     if (
       !isPublicAuthEndpoint &&
-      (response.status === 401 || response.status === 403)
+      response.status === 401
     ) {
       window.dispatchEvent(new CustomEvent("auth:expired"));
     }

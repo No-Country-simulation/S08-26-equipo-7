@@ -1,9 +1,10 @@
+import { Search } from "lucide-react"
+
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Search } from "lucide-react"
 
 export default function SearchApp(){
   return(

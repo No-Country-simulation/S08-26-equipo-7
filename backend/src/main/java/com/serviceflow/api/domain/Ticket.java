@@ -8,7 +8,8 @@ public class Ticket {
     private UUID id;
     private UUID userId;
     private String email;
-    private CategoriaTicket category;
+    private String title;
+    private String category;
     private String description;
     private PrioridadTicket priority;
     private EstadoTicket status;
@@ -19,13 +20,14 @@ public class Ticket {
     private LocalDateTime closedAt;
     private LocalDateTime createdAt;
 
-    public Ticket(UUID id, UUID userId, String email, CategoriaTicket category, String description,
+    public Ticket(UUID id, UUID userId, String email, String title, String category, String description,
                   PrioridadTicket priority, EstadoTicket status, boolean requiresApproval,
                   UUID assignedTo, LocalDateTime slaDueAt, LocalDateTime resolvedAt,
                   LocalDateTime closedAt, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.email = email;
+        this.title = title;
         this.category = category;
         this.description = description;
         this.priority = priority;
@@ -47,8 +49,11 @@ public class Ticket {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public CategoriaTicket getCategory() { return category; }
-    public void setCategory(CategoriaTicket category) { this.category = category; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

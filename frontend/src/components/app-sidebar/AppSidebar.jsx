@@ -1,12 +1,14 @@
+import { LayoutDashboard } from "lucide-react";
+
 import {
   Sidebar,
   SidebarHeader,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard } from "lucide-react";
-import SidebarUser from "./SidebarUser";
+
 import SidebarNavigation from "./SidebarNavigation";
+import SidebarUser from "./SidebarUser";
 
 export default function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
@@ -29,9 +31,12 @@ export default function AppSidebar() {
           <h1 className="absolute top-1/2 left-14 -translate-y-1/2 whitespace-nowrap text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-200 min-[360px]:text-base sm:text-2xl group-data-[collapsible=icon]:hidden">
             ServiceFlow
           </h1>
-          <SidebarTrigger className="absolute top-1/2 right-2 !-translate-y-1/2 !transition-none group-data-[collapsible=icon]:hidden" />
+          <SidebarTrigger className="absolute top-1/2 right-2 -translate-y-1/2! transition-none! group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
+      <div className="h-13.25 shrink-0 border-t border-border py-4 font-bold text-center text-sm opacity-100 transition-opacity delay-100 duration-150 ease-linear group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:delay-0 group-data-[collapsible=icon]:duration-0">
+        MENÚ PRINCIPAL
+      </div>
       <SidebarNavigation />
       <SidebarUser />
     </Sidebar>

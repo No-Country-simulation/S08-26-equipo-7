@@ -1,12 +1,13 @@
+import { ArrowLeftIcon,Loader2 } from 'lucide-react';
 import { useActionState } from 'react';
 import { Link } from 'react-router-dom';
+
+import StatusCard from '@/components/StatusCard';
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, ArrowLeftIcon } from 'lucide-react';
 import { Label } from "@/components/ui/label";
 import { forgotPassword } from "@/features/auth/services/authService.js";
-import { Card } from "@/components/ui/card";
-import StatusCard from '@/components/StatusCard';
 
 async function forgotPassAction(prevState, formData) {
   const email = formData.get('email');
@@ -30,13 +31,15 @@ export default function ForgotPassForm() {
           <StatusCard 
             title="¡Solicitud enviada!" 
             message="Si el correo existe, se creará un ticket automático para que puedas recuperar tu contraseña. Para más información, comunícate con el administrador." 
-            action={ 
-              <Link to="/login">
-                <Button type="button" variant="ghost" className="w-full cursor-pointer text-muted-foreground text-md py-5">
-                  <ArrowLeftIcon className="mr-2 h-4 w-4 " />
-                    Volver al inicio de sesión
-                </Button>
-              </Link> } 
+            action={
+              <Link
+                to="/login"
+                className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+                Volver al inicio de sesión
+              </Link>
+            }
           />
         ) : (
           <form action={formAction} className="space-y-4">
@@ -70,14 +73,23 @@ export default function ForgotPassForm() {
                   Enviando...
                 </>
               ) : (
-                "Enviar solicitud de recuperación"
+                <>
+                  <span className="min-[360px]:hidden">Enviar solicitud</span>
+                  <span className="hidden min-[360px]:inline">
+                    Enviar solicitud de recuperación
+                  </span>
+                </>
               )}
             </Button>
-            <Link to="/login">
-              <Button type="button" variant="ghost" className="w-full cursor-pointer text-muted-foreground text-md py-5">
-                <ArrowLeftIcon className="mr-2 h-4 w-4 " />
-          Volver al inicio de sesión
-              </Button>
+            <Link
+              to="/login"
+              className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              <span className="min-[360px]:hidden">Volver al inicio</span>
+              <span className="hidden min-[360px]:inline">
+                Volver al inicio de sesión
+              </span>
             </Link>
           </form>
         )}

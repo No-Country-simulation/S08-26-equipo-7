@@ -54,6 +54,7 @@
     --color-brand-800: #1e40af;
     --color-brand-900: #1e3a8a;
     --color-success: var(--success);
+    --color-warning: var(--warning);
 
     /* Tus Sombras personalizadas */
     --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
@@ -103,6 +104,7 @@
     --sidebar-border: #F1F5F9;
     --sidebar-ring: #2563eb;
     --success: oklch(59.6% 0.145 163.225);
+    --warning: oklch(60% 0.16 70);
 }
 
 .dark {
@@ -138,6 +140,7 @@
     --sidebar-border: #334155;
     --sidebar-ring: #3b82f6;
     --success: oklch(76.5% 0.177 163.223);
+    --warning: oklch(83% 0.15 80);
 }
 
 @layer base {

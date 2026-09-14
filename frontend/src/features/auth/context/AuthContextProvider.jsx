@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+
 import { getCurrentUser, logout } from '@/features/auth/services/authService';
+
 import { AuthContext } from './authContext';
 
 export function AuthProvider({ children }) {
