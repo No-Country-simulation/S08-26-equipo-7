@@ -12,6 +12,7 @@ export default function StatCard({ icon, label, value, text, color, variant, ico
     warning: "text-warning",
     destructive: "text-destructive",
     primary: "text-primary",
+    neutro: "text-muted-foreground"
   };
 
   return (
