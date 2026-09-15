@@ -165,8 +165,10 @@ Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIG
 
 | Campo | Descripción |
 |---|---|
-| `id` | UUID del ticket |
+| `id` | UUID del ticket (interno) |
+| `codigo` | Código corto visible, ej. `HW-0002`, `IT-0012` — prefijo según categoría + secuencia |
 | `email` | Email del solicitante |
+| `createdByName` | Nombre del usuario que creó el ticket |
 | `title` | Título del ticket (requerido en creación) |
 | `category` | Code de la categoría (ej. `IT`, `HARDWARE`, `FINANCE`) |
 | `description` | Descripción del problema |
@@ -176,7 +178,21 @@ Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIG
 | `assignedTo` | UUID del agente asignado (o `null`) |
 | `slaDueAt` | Fecha tope según prioridad |
 | `resolvedAt` / `closedAt` | Fechas de resolución/cierre (o `null`) |
-| `createdAt` | Fecha de creación |
+| `createdAt` / `updatedAt` | Fecha de creación y de última actualización |
+
+### Código corto del ticket
+
+Se genera en el backend en la creación y sigue el patrón `PREFIJO-NNNN` (máx. 2 letras del prefijo + 4 dígitos):
+
+| Categoría | Prefijo | Ejemplo |
+|---|---|---|
+| `IT` | `IT` | `IT-0001` |
+| `ACCESS` | `ACC` | `ACC-0001` |
+| `HARDWARE` | `HW` | `HW-0001` |
+| `FACILITIES` | `FAC` | `FAC-0001` |
+| `FINANCE` | `FIN` | `FIN-0001` |
+| `PASSWORD_RECOVERY` | `PR` | `PR-0001` |
+| Otras | 2 primeras letras | `MO-0001` |
 
 ### SLA según prioridad (desde la priorización)
 
@@ -206,16 +222,20 @@ Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prio
 Lista tickets con filtros opcionales por query string:
 `GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH`
 
+**Ordenamiento** con `sort=asc` o `sort=desc` (por `updatedAt`, para traer siempre los últimos actualizados):
+`GET /tickets?sort=desc`
+
 **Paginación opcional** con `limit` y `offset`:
 `GET /tickets?limit=10&offset=0`
 
-Cuando se pasa `limit` o `offset`, devuelve `{ total, offset, limit, items }`:
+Cuando se pasa `limit` o `offset`, devuelve `{ total, offset, limit, sort, items }`:
 ```json
 {
   "total": 35,
   "offset": 0,
   "limit": 10,
-  "items": [ { "id": "...", "title": "...", ... } ]
+  "sort": "desc",
+  "items": [ { "id": "...", "codigo": "HW-0002", "createdByName": "...", ... } ]
 }
 ```
 Sin `limit`/`offset` devuelve el array plano (como antes). `total` es el conteo total después de aplicar `status`/`category`/`priority`.
@@ -306,4 +326,4 @@ Resumen del dashboard del admin — tickets activos, próximos a vencer, vencido
 11. `POST /tickets/{id}/close` → `CLOSED`.
 12. `GET /tickets/stats/monthly?month=2026-09` → estadísticas mensuales.
 13. `GET /tickets/stats/summary?month=2026-09` → resumen SLA + activos (solo ADMIN/SUPERVISOR).
-14. `GET /tickets?limit=10&offset=0` → página de tickets con `total`.
+14. `GET /tickets?limit=10&offset=0&sort=desc` → página de tickets con `total`, ordenados por última actualización.

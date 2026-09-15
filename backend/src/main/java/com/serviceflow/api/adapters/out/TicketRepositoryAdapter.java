@@ -24,8 +24,10 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
     public Ticket save(Ticket ticket) {
         UUID id = ticket.getId() != null ? ticket.getId() : UUID.randomUUID();
         LocalDateTime createdAt = ticket.getCreatedAt() != null ? ticket.getCreatedAt() : LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         TicketEntity entity = new TicketEntity(
                 id,
+                ticket.getCodigo(),
                 ticket.getUserId(),
                 ticket.getEmail(),
                 ticket.getTitle(),
@@ -38,7 +40,8 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
                 ticket.getSlaDueAt(),
                 ticket.getResolvedAt(),
                 ticket.getClosedAt(),
-                createdAt
+                createdAt,
+                now
         );
         return toDomain(jpaRepository.save(entity));
     }
@@ -74,7 +77,7 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
     }
 
     private Ticket toDomain(TicketEntity entity) {
-        return new Ticket(
+        Ticket ticket = new Ticket(
                 entity.getId(),
                 entity.getUserId(),
                 entity.getEmail(),
@@ -90,5 +93,8 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
                 entity.getClosedAt(),
                 entity.getCreatedAt()
         );
+        ticket.setCodigo(entity.getCodigo());
+        ticket.setUpdatedAt(entity.getUpdatedAt());
+        return ticket;
     }
 }
