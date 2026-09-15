@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, LogOut } from "lucide-react";
+import { ChartNoAxesCombined, LogOut, Ticket } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 import {
@@ -15,6 +15,10 @@ const navigationItems = [
     label: "Resumen",
     href: "/dashboard",
     icon: ChartNoAxesCombined,
+  },{
+    label: "Solicitudes",
+    href: "/tickets",
+    icon: Ticket,
   },
 ];
 
