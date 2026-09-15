@@ -1,6 +1,5 @@
 package com.serviceflow.api.adapters.in;
 
-import com.serviceflow.api.adapters.in.dto.TicketResponse;
 import com.serviceflow.api.application.services.InvalidTransitionException;
 import com.serviceflow.api.application.services.TicketNotFoundException;
 import com.serviceflow.api.application.services.TicketService;
@@ -59,13 +58,14 @@ public class TicketController {
         } catch (InvalidTransitionException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(TicketResponse.from(ticket));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.toResponse(ticket));
     }
 
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(required = false) String status,
                                   @RequestParam(required = false) String category,
                                   @RequestParam(required = false) String priority,
+                                  @RequestParam(required = false) String sort,
                                   @RequestParam(required = false) Integer limit,
                                   @RequestParam(required = false) Integer offset) {
         List<Ticket> all = ticketService.findAll();
@@ -79,6 +79,12 @@ public class TicketController {
             all = all.stream().filter(t -> t.getPriority().name().equalsIgnoreCase(priority)).toList();
         }
         all = new java.util.ArrayList<>(all);
+        boolean asc = "asc".equalsIgnoreCase(sort);
+        if (sort != null) {
+            java.util.Comparator<Ticket> byUpdated = java.util.Comparator.comparing(
+                    Ticket::getUpdatedAt, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()));
+            all.sort(asc ? byUpdated : byUpdated.reversed());
+        }
         long total = all.size();
         List<Ticket> page = all;
         if (limit != null || offset != null) {
@@ -89,15 +95,16 @@ public class TicketController {
             body.put("total", total);
             body.put("offset", offset != null ? offset : 0);
             body.put("limit", limit);
-            body.put("items", page.stream().map(TicketResponse::from).toList());
+            body.put("sort", sort != null ? sort : "desc");
+            body.put("items", page.stream().map(ticketService::toResponse).toList());
             return ResponseEntity.ok(body);
         }
-        return ResponseEntity.ok(all.stream().map(TicketResponse::from).toList());
+        return ResponseEntity.ok(all.stream().map(ticketService::toResponse).toList());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable UUID id) {
-        return safeGet(() -> TicketResponse.from(ticketService.findById(id)));
+        return safeGet(() -> ticketService.toResponse(ticketService.findById(id)));
     }
 
     @PostMapping("/{id}/categorize")
@@ -165,7 +172,7 @@ public class TicketController {
 
     private ResponseEntity<?> safeTransition(Supplier<Ticket> action) {
         try {
-            return ResponseEntity.ok(TicketResponse.from(action.get()));
+            return ResponseEntity.ok(ticketService.toResponse(action.get()));
         } catch (TicketNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (InvalidTransitionException | UnauthorizedActionException | IllegalArgumentException e) {

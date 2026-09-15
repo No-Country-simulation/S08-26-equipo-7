@@ -7,7 +7,9 @@ import java.util.UUID;
 
 public record TicketResponse(
         UUID id,
+        String codigo,
         String email,
+        String createdByName,
         String title,
         String category,
         String description,
@@ -18,12 +20,19 @@ public record TicketResponse(
         LocalDateTime slaDueAt,
         LocalDateTime resolvedAt,
         LocalDateTime closedAt,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static TicketResponse from(Ticket ticket) {
+        return from(ticket, null);
+    }
+
+    public static TicketResponse from(Ticket ticket, String createdByName) {
         return new TicketResponse(
                 ticket.getId(),
+                ticket.getCodigo(),
                 ticket.getEmail(),
+                createdByName,
                 ticket.getTitle(),
                 ticket.getCategory(),
                 ticket.getDescription(),
@@ -34,7 +43,8 @@ public record TicketResponse(
                 ticket.getSlaDueAt(),
                 ticket.getResolvedAt(),
                 ticket.getClosedAt(),
-                ticket.getCreatedAt()
+                ticket.getCreatedAt(),
+                ticket.getUpdatedAt()
         );
     }
 }

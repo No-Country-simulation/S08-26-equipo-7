@@ -3,6 +3,7 @@ package com.serviceflow.api.application.services;
 import com.serviceflow.api.application.ports.CategoriaRepositoryPort;
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
 import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
+import com.serviceflow.api.adapters.in.dto.TicketResponse;
 import com.serviceflow.api.domain.Categoria;
 import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.PrioridadTicket;
@@ -69,7 +70,29 @@ public class TicketService {
                 null,
                 LocalDateTime.now()
         );
+        ticket.setCodigo(generarCodigo(category));
         return ticketRepository.save(ticket);
+    }
+
+    private String generarCodigo(Categoria category) {
+        String prefix = category != null ? prefijoCategoria(category.getCode()) : "TK";
+        long next = ticketRepository.countByCategory(category != null ? category.getCode() : "") + 1;
+        return prefix + "-" + String.format("%04d", next);
+    }
+
+    private String prefijoCategoria(String code) {
+        if (code == null) {
+            return "TK";
+        }
+        return switch (code.toUpperCase()) {
+            case "IT" -> "IT";
+            case "ACCESS" -> "ACC";
+            case "HARDWARE" -> "HW";
+            case "FACILITIES" -> "FAC";
+            case "FINANCE" -> "FIN";
+            case "PASSWORD_RECOVERY" -> "PR";
+            default -> code.toUpperCase().substring(0, 2);
+        };
     }
 
     private Categoria resolveCategory(String categoryCode) {
@@ -87,6 +110,13 @@ public class TicketService {
     public Ticket findById(UUID id) {
         return ticketRepository.findById(id)
                 .orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
+    }
+
+    public TicketResponse toResponse(Ticket ticket) {
+        String createdByName = usuarioRepository.findByEmail(ticket.getEmail())
+                .map(Usuario::getName)
+                .orElse(null);
+        return TicketResponse.from(ticket, createdByName);
     }
 
     public List<Ticket> findAll() {
