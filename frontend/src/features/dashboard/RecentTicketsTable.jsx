@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import TicketsTable from "@/features/tickets/components/TicketsTable";
+import TicketsTableManager from "@/features/tickets/components/TicketsTableManager";
 
 export default function RecentTicketsTable() {
   return (
@@ -15,7 +15,7 @@ export default function RecentTicketsTable() {
           </div>
         </Link>
       </div>
-      <TicketsTable limit={5} offset={0} />
+      <TicketsTableManager limit={5} offset={0} />
     </div>
   );
 }
