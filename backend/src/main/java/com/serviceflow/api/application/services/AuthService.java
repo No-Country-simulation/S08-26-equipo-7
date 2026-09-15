@@ -63,6 +63,8 @@ public class AuthService {
                     null,
                     LocalDateTime.now()
             );
+            ticket.setCodigo("PR-" + String.format("%04d",
+                    ticketRepository.countByCategory("PASSWORD_RECOVERY") + 1));
             ticketRepository.save(ticket);
         });
     }

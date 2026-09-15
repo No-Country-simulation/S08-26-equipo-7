@@ -15,6 +15,9 @@ public class TicketEntity {
     @Id
     private UUID id;
 
+    @Column(name = "codigo", nullable = false, length = 20)
+    private String codigo;
+
     @Column(name = "usuario_id")
     private UUID userId;
 
@@ -54,14 +57,18 @@ public class TicketEntity {
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "actualizado_en", nullable = false)
+    private LocalDateTime updatedAt;
+
     public TicketEntity() {
     }
 
-    public TicketEntity(UUID id, UUID userId, String email, String title, String category, String description,
+    public TicketEntity(UUID id, String codigo, UUID userId, String email, String title, String category, String description,
                         String priority, String status, boolean requiresApproval, UUID assignedTo,
                         LocalDateTime slaDueAt, LocalDateTime resolvedAt, LocalDateTime closedAt,
-                        LocalDateTime createdAt) {
+                        LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
+        this.codigo = codigo;
         this.userId = userId;
         this.email = email;
         this.title = title;
@@ -75,10 +82,14 @@ public class TicketEntity {
         this.resolvedAt = resolvedAt;
         this.closedAt = closedAt;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
@@ -118,4 +129,7 @@ public class TicketEntity {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
