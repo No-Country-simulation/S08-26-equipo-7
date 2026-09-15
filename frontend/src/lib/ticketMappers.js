@@ -14,5 +14,5 @@ export const TICKET_STATUS_CONFIG = {
 
   // Grupo 4: Éxito
   RESOLVED: { label: "Resuelto", badgeClass: "text-success bg-success/10 border-success/20" },
-  CLOSED: { label: "Cerrado", badgeClass: "text-success bg-success/10 border-success/20" },
+  CLOSED: { label: "Resuelto", badgeClass: "text-success bg-success/10 border-success/20" },
 };
