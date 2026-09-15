@@ -161,6 +161,16 @@ Lista todos los usuarios. **Solo ADMIN**. La respuesta **nunca incluye** `passwo
 
 Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (APPROVED si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
 
+Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fija para la UI):
+
+| Grupo | Estados |
+|---|---|
+| `PENDIENTE` | `SUBMITTED`, `CATEGORIZED`, `PRIORITIZED` |
+| `EN_PROCESO` | `ASSIGNED`, `IN_PROGRESS` |
+| `EN_APROBACION` | `APPROVED` |
+| `EXPIRADO` | `ESCALATED` |
+| `RESUELTO` | `RESOLVED`, `CLOSED` |
+
 ### Campos del ticket (respuesta)
 
 | Campo | Descripción |
@@ -174,6 +184,7 @@ Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIG
 | `description` | Descripción del problema |
 | `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` — fijada en `MEDIUM` al crear; solo el supervisor la cambia vía `prioritize` |
 | `status` | Estado del ciclo de vida (lista arriba) |
+| `grupoEstado` | Grupo del estado para la UI: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO` o `RESUELTO` |
 | `requiresApproval` | Viene de la categoría (automático) |
 | `assignedTo` | UUID del agente asignado (o `null`) |
 | `slaDueAt` | Fecha tope según prioridad |
