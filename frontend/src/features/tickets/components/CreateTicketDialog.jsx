@@ -14,7 +14,7 @@ import {
 
 import CreateTicketForm from "./CreateTicketForm";
 
-export default function CreateTicketDialog({ trigger }) {
+export default function CreateTicketDialog() {
   const [open, setOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -27,17 +27,15 @@ export default function CreateTicketDialog({ trigger }) {
     <div>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
-          {trigger ?? (
-            <Button
-              className="btn-gradient-primary h-8! w-8! cursor-pointer overflow-hidden rounded-md! p-0! sm:h-9! sm:w-auto! sm:px-3! md:h-10! md:px-6!"
-              size="icon-xs"
-              aria-label="Nueva solicitud"
-              title="Nueva solicitud"
-            >
-              <Plus />
-              <span className="hidden sm:inline ml-2">Nueva Solicitud</span>
-            </Button>
-          )}
+          <Button
+            className="btn-gradient-primary h-8! w-8! cursor-pointer overflow-hidden rounded-md! p-0! sm:h-9! sm:w-auto! sm:px-3! md:h-10! md:px-6!"
+            size="icon-xs"
+            aria-label="Nueva solicitud"
+            title="Nueva solicitud"
+          >
+            <Plus />
+            <span className="hidden sm:inline ml-2">Nueva Solicitud</span>
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg md:max-w-xl">
           {showSuccess ? (

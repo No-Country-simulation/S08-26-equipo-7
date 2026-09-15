@@ -10,3 +10,9 @@ export async function createTicket({
     body: { title, description, category },
   });
 }
+
+export async function getTickets(limit, offset) {
+  return apiRequest(`tickets?limit=${limit}&offset=${offset}`, {
+    method: "GET",
+  });
+}
