@@ -41,7 +41,7 @@ export default function TicketsTableMobile({ limit, offset, resume }) {
                 </div>
               </TableCell>
             </TableRow>
-            {!resume && (
+            {resume === false && (
               <TableRow key={`${ticket.id}-creator`}>
                 <TableCell className="bg-muted-foreground/10 text-muted-foreground font-bold text-xs w-1/4 whitespace-normal">SOLICITANTE</TableCell>
                 <TableCell className="w-3/4 whitespace-normal wrap-break-words">{ticket.createdByName}</TableCell>
