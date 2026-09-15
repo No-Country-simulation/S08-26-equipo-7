@@ -30,7 +30,7 @@ public class TicketService {
             PrioridadTicket.URGENT, Duration.ofHours(4)
     );
 
-    private static final Duration NEAR_SLA_WINDOW = Duration.ofHours(24);
+    private static final Duration NEAR_SLA_WINDOW = Duration.ofHours(12);
 
     private final TicketRepositoryPort ticketRepository;
     private final UsuarioRepositoryPort usuarioRepository;

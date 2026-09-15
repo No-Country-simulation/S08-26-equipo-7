@@ -161,6 +161,16 @@ Lista todos los usuarios. **Solo ADMIN**. La respuesta **nunca incluye** `passwo
 
 Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (APPROVED si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
 
+Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fija para la UI):
+
+| Grupo | Estados |
+|---|---|
+| `PENDIENTE` | `SUBMITTED`, `CATEGORIZED`, `PRIORITIZED` |
+| `EN_PROCESO` | `ASSIGNED`, `IN_PROGRESS` |
+| `EN_APROBACION` | `APPROVED` |
+| `EXPIRADO` | `ESCALATED` |
+| `RESUELTO` | `RESOLVED`, `CLOSED` |
+
 ### Campos del ticket (respuesta)
 
 | Campo | Descripción |
@@ -174,6 +184,7 @@ Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIG
 | `description` | Descripción del problema |
 | `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` — fijada en `MEDIUM` al crear; solo el supervisor la cambia vía `prioritize` |
 | `status` | Estado del ciclo de vida (lista arriba) |
+| `grupoEstado` | Grupo del estado para la UI: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO` o `RESUELTO` |
 | `requiresApproval` | Viene de la categoría (automático) |
 | `assignedTo` | UUID del agente asignado (o `null`) |
 | `slaDueAt` | Fecha tope según prioridad |
@@ -302,12 +313,62 @@ Resumen del dashboard del admin — tickets activos, próximos a vencer, vencido
 | `activeTickets` | Tickets no cerrados ni resueltos (activos hoy) |
 | `activePrevMonth` | Activos al cierre del mes anterior |
 | `activeDelta` | `activeTickets` − `activePrevMonth` |
-| `nearSlaExpiry` | Activos cuyo SLA vence dentro de las próximas 24 h |
+| `nearSlaExpiry` | Activos cuyo SLA vence dentro de las próximas 12 h |
 | `overdueSla` | Activos ya vencidos (SLA pasado, sin resolver) |
 | `resolvedOnTime` | Resueltos a tiempo en el mes |
 | `slaCompliance` | `resolvedOnTime / resolved × 100`, máx. 2 decimales |
 | `slaCompliancePrev` | Idem para mes anterior |
 | `created` / `createdPrevMonth` | Creados en el mes actual / anterior |
+
+---
+
+## Base de Conocimiento (Auto-Servicio)
+
+Artículos para la sección "Base de Conocimiento & Auto-Servicio": tarjetas con categoría, contador de lecturas, título y descripción.
+
+### Campos del artículo (respuesta)
+
+| Campo | Descripción |
+|---|---|
+| `id` | UUID del artículo |
+| `titulo` | Título del artículo |
+| `descripcion` | Descripción corta (para la tarjeta) |
+| `contenido` | Texto completo del artículo |
+| `categoria` | Code de la categoría (ej. `IT`, `ACCESS`, `FINANCE`, `FACILITIES`) |
+| `visualizaciones` | Contador de lecturas/vistas |
+| `activo` | Si está publicado (`true`) o desactivado (`false`) |
+
+### GET /knowledge
+Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por más reciente. **Público** (sin login).
+
+```json
+[
+  {
+    "id": "11111111-...",
+    "titulo": "Cómo conectar y configurar la VPN corporativa GlobalProtect",
+    "descripcion": "Guía paso a paso para autenticación multifactor...",
+    "categoria": "IT",
+    "visualizaciones": 1402,
+    "activo": true
+  }
+]
+```
+
+### GET /knowledge/{id}
+Trae un artículo por ID (con su `contenido`). **Público**. `404` si no existe.
+
+### POST /knowledge/{id}/view
+Incrementa en 1 las `visualizaciones` del artículo. **Público** y sin CSRF (es un contador de clics). Devuelve:
+
+```json
+{ "id": "11111111-...", "visualizaciones": 1403 }
+```
+
+### POST /knowledge
+Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF. Body: `{ "titulo", "descripcion", "contenido", "categoria" }`. `201` con el artículo creado.
+
+### PUT /knowledge/{id}
+Edita un artículo (títulos, descripción, contenido, categoría o `activo`). **Solo ADMIN**. Body: `{ "titulo", "descripcion", "contenido", "categoria", "activo" }` (todos opcionales, parcialmente). `200` con el artículo actualizado. `404` si no existe.
 
 ---
 
@@ -327,3 +388,6 @@ Resumen del dashboard del admin — tickets activos, próximos a vencer, vencido
 12. `GET /tickets/stats/monthly?month=2026-09` → estadísticas mensuales.
 13. `GET /tickets/stats/summary?month=2026-09` → resumen SLA + activos (solo ADMIN/SUPERVISOR).
 14. `GET /tickets?limit=10&offset=0&sort=desc` → página de tickets con `total`, ordenados por última actualización.
+15. `GET /knowledge` → artículos publicados (público).
+16. `POST /knowledge/{id}/view` → incrementa lecturas al hacer click (público, sin CSRF).
+17. `POST /knowledge` y `PUT /knowledge/{id}` (ADMIN, con CSRF) → crear/editar artículos.
