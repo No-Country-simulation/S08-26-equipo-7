@@ -47,6 +47,18 @@ $$\text{Solicitud} \rightarrow \text{Categorización} \rightarrow \text{Prioriza
 
 ---
 
+## 📚 Documentación de la API
+
+Documentación interactiva de los endpoints del backend (autenticación JWT + CSRF, categorías, usuarios, tickets con ciclo de vida y SLA, estadísticas y base de conocimiento), publicada en Postman:
+
+🔗 **[ServiceFlow API - Documentación en Postman](https://documenter.getpostman.com/view/56523310/2sBYB1LnXZ)**
+
+Incluye el botón **Run in Postman** para probar los endpoints directamente, con ejemplos de request en distintos lenguajes.
+
+> La documentación detallada por módulo también está versionada en el repositorio: [**`backend/docs/`**](backend/docs/00-indice.md)
+
+---
+
 ## 🛠️ Stack Tecnológico
 
 #### 🎨 FrontEnd
