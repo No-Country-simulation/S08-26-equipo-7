@@ -261,6 +261,22 @@ Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prio
 Lista tickets con filtros opcionales por query string:
 `GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH`
 
+**Los filtros son opcionales e independientes** (si no se pasan, devuelve todo):
+
+| Query | Resultado |
+|---|---|
+| `GET /tickets?category=HARDWARE` | Todos los de hardware, sin importar el estado |
+| `GET /tickets?status=CLOSED` | Todos los cerrados, sin importar la categoría |
+| `GET /tickets?priority=URGENT&status=SUBMITTED` | Solo urgentes en estado SUBMITTED |
+
+**Filtro por grupo de estado** con `group` (para la UI, que solo maneja los 5 grupos):
+`GET /tickets?group=EN_PROCESO`
+Valores: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO`, `RESUELTO`.
+
+**Búsqueda por texto** con `search` (o `q`): busca en código/ID, título, creador y responsable, case-insensitive y con coincidencia parcial:
+`GET /tickets?search=1042`, `GET /tickets?search=Juan`, `GET /tickets?search=pantalla&status=IN_PROGRESS&sort=desc`
+Si `search=` viene vacío se ignora. Se combina con todos los filtros.
+
 **Ordenamiento** con `sort=asc` o `sort=desc` (por `updatedAt`, para traer siempre los últimos actualizados):
 `GET /tickets?sort=desc`
 
@@ -277,7 +293,32 @@ Cuando se pasa `limit` o `offset`, devuelve `{ total, offset, limit, sort, items
   "items": [ { "id": "...", "codigo": "HW-0002", "createdByName": "...", ... } ]
 }
 ```
-Sin `limit`/`offset` devuelve el array plano (como antes). `total` es el conteo total después de aplicar `status`/`category`/`priority`.
+Sin `limit`/`offset` devuelve el array plano (como antes). `total` es el conteo total después de aplicar `status`/`group`/`category`/`priority`/`search`.
+
+### GET /tickets/meta/groups
+Lista los **grupos de estado** con sus estados (para los selects de la UI). Autenticado.
+```json
+[
+  { "name": "PENDIENTE", "label": "Pendiente", "states": ["SUBMITTED", "CATEGORIZED", "PRIORITIZED"] },
+  { "name": "EN_PROCESO", "label": "En proceso", "states": ["ASSIGNED", "IN_PROGRESS"] },
+  { "name": "EN_APROBACION", "label": "En aprobación", "states": ["APPROVED"] },
+  { "name": "EXPIRADO", "label": "Expirado", "states": ["ESCALATED"] },
+  { "name": "RESUELTO", "label": "Resuelto", "states": ["RESOLVED", "CLOSED"] }
+]
+```
+El `name` se usa en el filtro `group` de `GET /tickets`.
+
+### GET /tickets/meta/priorities
+Lista las **prioridades** (para los selects de la UI). Autenticado.
+```json
+[
+  { "name": "LOW", "label": "Baja" },
+  { "name": "MEDIUM", "label": "Media" },
+  { "name": "HIGH", "label": "Alta" },
+  { "name": "URGENT", "label": "Urgente" }
+]
+```
+El `name` se usa en el filtro `priority` de `GET /tickets` y en `POST /tickets/{id}/prioritize`.
 
 ### GET /tickets/{id}
 Devuelve un ticket por UUID. `404` si no existe.
