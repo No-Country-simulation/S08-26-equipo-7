@@ -243,18 +243,36 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/tickets?status=&category=&priority=&sort=desc&limit=10&offset=0",
+              "raw": "{{baseUrl}}/tickets?status=&group=&category=&priority=&search=&sort=desc&limit=10&offset=0",
               "host": ["{{baseUrl}}"],
               "path": ["tickets"],
               "query": [
                 { "key": "status", "value": "", "description": "Opcional" },
+                { "key": "group", "value": "", "description": "Opcional: PENDIENTE|EN_PROCESO|EN_APROBACION|EXPIRADO|RESUELTO" },
                 { "key": "category", "value": "", "description": "Opcional" },
                 { "key": "priority", "value": "", "description": "Opcional" },
+                { "key": "search", "value": "", "description": "Busca en código, ID, título, creador y responsable" },
                 { "key": "sort", "value": "desc", "description": "asc|desc por updatedAt" },
                 { "key": "limit", "value": "10" },
                 { "key": "offset", "value": "0" }
               ]
             }
+          }
+        },
+        {
+          "name": "GET /tickets/meta/groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tickets/meta/groups"
+          }
+        },
+        {
+          "name": "GET /tickets/meta/priorities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tickets/meta/priorities"
           }
         },
         {
