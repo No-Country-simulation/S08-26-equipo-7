@@ -63,20 +63,38 @@ public class TicketController {
 
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(required = false) String status,
+                                  @RequestParam(required = false) String group,
                                   @RequestParam(required = false) String category,
                                   @RequestParam(required = false) String priority,
+                                  @RequestParam(required = false) String search,
+                                  @RequestParam(required = false) String q,
                                   @RequestParam(required = false) String sort,
                                   @RequestParam(required = false) Integer limit,
                                   @RequestParam(required = false) Integer offset) {
-        List<Ticket> all = ticketService.findAll();
+        List<Ticket> all = ticketService.findAllWithNames().stream()
+                .map(TicketService.TicketSearchData::ticket)
+                .toList();
         if (status != null) {
             all = all.stream().filter(t -> t.getStatus().name().equalsIgnoreCase(status)).toList();
+        }
+        if (group != null) {
+            all = all.stream().filter(t -> t.getStatus().getGrupo().name().equalsIgnoreCase(group)).toList();
         }
         if (category != null) {
             all = all.stream().filter(t -> t.getCategory() != null && t.getCategory().equalsIgnoreCase(category)).toList();
         }
         if (priority != null) {
             all = all.stream().filter(t -> t.getPriority().name().equalsIgnoreCase(priority)).toList();
+        }
+        String term = search != null ? search : q;
+        if (term != null && !term.isBlank()) {
+            String needle = term.trim().toLowerCase();
+            List<TicketService.TicketSearchData> allData = ticketService.findAllWithNames();
+            java.util.Set<UUID> matches = allData.stream()
+                    .filter(d -> matches(d, needle))
+                    .map(d -> d.ticket().getId())
+                    .collect(java.util.stream.Collectors.toSet());
+            all = all.stream().filter(t -> matches.contains(t.getId())).toList();
         }
         all = new java.util.ArrayList<>(all);
         boolean asc = "asc".equalsIgnoreCase(sort);
@@ -100,6 +118,59 @@ public class TicketController {
             return ResponseEntity.ok(body);
         }
         return ResponseEntity.ok(all.stream().map(ticketService::toResponse).toList());
+    }
+
+    @GetMapping("/meta/groups")
+    public ResponseEntity<?> groups() {
+        return ResponseEntity.ok(java.util.Arrays.stream(com.serviceflow.api.domain.GrupoEstado.values())
+                .map(g -> {
+                    java.util.List<String> estados = java.util.Arrays.stream(com.serviceflow.api.domain.EstadoTicket.values())
+                            .filter(e -> e.getGrupo() == g)
+                            .map(Enum::name)
+                            .toList();
+                    return java.util.Map.of(
+                            "name", g.name(),
+                            "label", label(g),
+                            "states", estados
+                    );
+                })
+                .toList());
+    }
+
+    @GetMapping("/meta/priorities")
+    public ResponseEntity<?> priorities() {
+        return ResponseEntity.ok(java.util.Arrays.stream(com.serviceflow.api.domain.PrioridadTicket.values())
+                .map(p -> java.util.Map.of("name", p.name(), "label", label(p)))
+                .toList());
+    }
+
+    private String label(com.serviceflow.api.domain.GrupoEstado g) {
+        return switch (g) {
+            case PENDIENTE -> "Pendiente";
+            case EN_PROCESO -> "En proceso";
+            case EN_APROBACION -> "En aprobación";
+            case EXPIRADO -> "Expirado";
+            case RESUELTO -> "Resuelto";
+        };
+    }
+
+    private String label(com.serviceflow.api.domain.PrioridadTicket p) {
+        return switch (p) {
+            case LOW -> "Baja";
+            case MEDIUM -> "Media";
+            case HIGH -> "Alta";
+            case URGENT -> "Urgente";
+        };
+    }
+
+    private boolean matches(TicketService.TicketSearchData d, String needle) {
+        Ticket t = d.ticket();
+        boolean codigo = t.getCodigo() != null && t.getCodigo().toLowerCase().contains(needle);
+        boolean title = t.getTitle() != null && t.getTitle().toLowerCase().contains(needle);
+        boolean id = t.getId() != null && t.getId().toString().toLowerCase().contains(needle);
+        boolean creator = d.createdByName() != null && d.createdByName().toLowerCase().contains(needle);
+        boolean assignee = d.assignedToName() != null && d.assignedToName().toLowerCase().contains(needle);
+        return codigo || title || id || creator || assignee;
     }
 
     @GetMapping("/{id}")

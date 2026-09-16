@@ -123,6 +123,20 @@ public class TicketService {
         return ticketRepository.findAll();
     }
 
+    public record TicketSearchData(Ticket ticket, String createdByName, String assignedToName) {
+    }
+
+    public List<TicketSearchData> findAllWithNames() {
+        return ticketRepository.findAll().stream()
+                .map(t -> new TicketSearchData(
+                        t,
+                        usuarioRepository.findByEmail(t.getEmail()).map(Usuario::getName).orElse(""),
+                        t.getAssignedTo() != null
+                                ? usuarioRepository.findById(t.getAssignedTo()).map(Usuario::getName).orElse("")
+                                : ""))
+                .toList();
+    }
+
     public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Categoria category = resolveCategory(categoryCode);

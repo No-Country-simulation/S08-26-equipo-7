@@ -90,6 +90,24 @@ GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH
 | `GET /tickets?status=CLOSED` | Todos los cerrados, sin importar la categoría |
 | `GET /tickets?priority=URGENT&status=SUBMITTED` | Solo urgentes en estado SUBMITTED |
 
+**Filtro por grupo de estado** con `group` (para la UI, que solo maneja los 5 grupos):
+
+```
+GET /tickets?group=EN_PROCESO
+```
+
+Valores: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO`, `RESUELTO`.
+
+**Búsqueda por texto** con `search` (o `q`): busca en código/ID, título, creador y responsable, sin distinguir mayúsculas y con coincidencia parcial:
+
+```
+GET /tickets?search=1042        // por código o ID
+GET /tickets?search=Juan        // por creador o responsable
+GET /tickets?search=pantalla&status=IN_PROGRESS&sort=desc   // combina con los filtros
+```
+
+Si `search=` viene vacío se ignora y devuelve la lista normal. Se combina con `status`, `group`, `category`, `priority`, `sort`, `limit` y `offset`.
+
 **Ordenamiento** con `sort=asc` o `sort=desc` (por `updatedAt`, para traer siempre los últimos actualizados):
 
 ```
@@ -119,6 +137,37 @@ Sin `limit`/`offset` devuelve el array plano (como antes). `total` es el conteo 
 ## GET /tickets/{id}
 
 Devuelve un ticket por UUID. `404` si no existe.
+
+## GET /tickets/meta/groups
+
+Lista los **grupos de estado** con sus estados (para los select de la UI). Autenticado.
+
+```json
+[
+  { "name": "PENDIENTE", "label": "Pendiente", "states": ["SUBMITTED", "CATEGORIZED", "PRIORITIZED"] },
+  { "name": "EN_PROCESO", "label": "En proceso", "states": ["ASSIGNED", "IN_PROGRESS"] },
+  { "name": "EN_APROBACION", "label": "En aprobación", "states": ["APPROVED"] },
+  { "name": "EXPIRADO", "label": "Expirado", "states": ["ESCALATED"] },
+  { "name": "RESUELTO", "label": "Resuelto", "states": ["RESOLVED", "CLOSED"] }
+]
+```
+
+El `name` se usa en el filtro `group` de `GET /tickets`.
+
+## GET /tickets/meta/priorities
+
+Lista las **prioridades** (para los select de la UI). Autenticado.
+
+```json
+[
+  { "name": "LOW", "label": "Baja" },
+  { "name": "MEDIUM", "label": "Media" },
+  { "name": "HIGH", "label": "Alta" },
+  { "name": "URGENT", "label": "Urgente" }
+]
+```
+
+El `name` se usa en el filtro `priority` de `GET /tickets` y en `POST /tickets/{id}/prioritize`.
 
 ## Transiciones (todas `POST`)
 
