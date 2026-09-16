@@ -191,6 +191,8 @@ Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fi
 | `resolvedAt` / `closedAt` | Fechas de resolución/cierre (o `null`) |
 | `createdAt` / `updatedAt` | Fecha de creación y de última actualización |
 
+> **Formato de fechas:** todos los timestamps se almacenan y devuelven en **UTC** con el sufijo `Z` (ej. `2026-09-15T20:19:44.262Z`). La serialización la maneja Jackson y la JVM corre en UTC (`TimeZone.setDefault("UTC")`), por lo que el cliente (React) debe interpretarlas como UTC y convertirlas a la zona del dispositivo. Esto evita el desfase que se producía al guardar en hora local de Colombia (UTC-5).
+
 ### Código corto del ticket
 
 Se genera en el backend en la creación y sigue el patrón `PREFIJO-NNNN` (máx. 2 letras del prefijo + 4 dígitos):
