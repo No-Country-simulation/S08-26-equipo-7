@@ -1,0 +1,445 @@
+{
+  "info": {
+    "name": "ServiceFlow API",
+    "description": "API de ServiceFlow - Gestión de tickets, SLA, base de conocimiento y auth con JWT + CSRF.\n\n## Setup\n1. Correr la request `Auth > GET /auth/csrf` primero: guarda la variable `csrfToken` para todos los POST.\n2. Correr `POST /auth/login`: postman guarda la cookie `access_token` automáticamente.\n3. Los POST que modifican datos ya incluyen el header `X-XSRF-TOKEN: {{csrfToken}}`.\n\nBase URL por defecto: http://localhost:8080/api/v1 (editable en la variable `baseUrl`).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "csrfToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "articleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "GET /auth/csrf (primero!)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/csrf"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('csrfToken', body.token);",
+                  "console.log('CSRF guardado:', body.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@serviceflow.com\",\n  \"password\": \"Admin123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "POST /auth/recover-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@empresa.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/recover-password"
+          }
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "item": [
+        {
+          "name": "GET /categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categories"
+          }
+        },
+        {
+          "name": "GET /categories/all (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categories/all"
+          }
+        },
+        {
+          "name": "POST /categories (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SECURITY\",\n  \"name\": \"Ciberseguridad\",\n  \"description\": \"Filtraciones, malware, ransomware\",\n  \"requiresApproval\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/categories"
+          }
+        },
+        {
+          "name": "PUT /categories/{id} (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ciberseguridad\",\n  \"description\": \"...\",\n  \"active\": false,\n  \"requiresApproval\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/categories/:id",
+            "pathVariable": [
+              { "key": "id", "value": "{{categoriaId}}" }
+            ]
+          }
+        },
+        {
+          "name": "POST /categories/{id}/toggle (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/categories/:id/toggle",
+            "pathVariable": [
+              { "key": "id", "value": "{{categoriaId}}" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios (ADMIN)",
+      "item": [
+        {
+          "name": "POST /users",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mariana López\",\n  \"email\": \"mariana.lopez@empresa.com\",\n  \"role\": \"AGENT\",\n  \"password\": \"ClaveSegura1\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/users",
+            "description": "Roles permitidos: REQUESTER, AGENT, SUPERVISOR, ADMIN"
+          }
+        },
+        {
+          "name": "GET /users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "POST /tickets",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"No enciende mi notebook\",\n  \"description\": \"No arranca el equipo al presionar el botón de encendido\",\n  \"category\": \"HARDWARE\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/tickets"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body && body.id) pm.collectionVariables.set('ticketId', body.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tickets?status=&category=&priority=&sort=desc&limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets"],
+              "query": [
+                { "key": "status", "value": "", "description": "Opcional" },
+                { "key": "category", "value": "", "description": "Opcional" },
+                { "key": "priority", "value": "", "description": "Opcional" },
+                { "key": "sort", "value": "desc", "description": "asc|desc por updatedAt" },
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /tickets/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/categorize",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/categorize?category=HARDWARE"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/prioritize",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/prioritize?priority=HIGH"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/assign",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/assign?assignedTo={{userId}}"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/approve"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/start",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/start"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/escalate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/escalate"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/resolve",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/resolve"
+          }
+        },
+        {
+          "name": "POST /tickets/{id}/close",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": "{{baseUrl}}/tickets/{{ticketId}}/close"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Estadísticas",
+      "item": [
+        {
+          "name": "GET /tickets/stats/monthly",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tickets/stats/monthly?month=2026-09"
+          }
+        },
+        {
+          "name": "GET /tickets/stats/summary (ADMIN/SUP)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tickets/stats/summary?month=2026-09"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Base de Conocimiento",
+      "item": [
+        {
+          "name": "GET /knowledge",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/knowledge"
+          }
+        },
+        {
+          "name": "GET /knowledge/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/knowledge/{{articleId}}"
+          }
+        },
+        {
+          "name": "POST /knowledge/{id}/view",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/knowledge/{{articleId}}/view"
+          }
+        },
+        {
+          "name": "POST /knowledge (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Cómo conectar la VPN corporativa\",\n  \"descripcion\": \"Guía paso a paso para GlobalProtect\",\n  \"contenido\": \"1. Descargue GlobalProtect...\",\n  \"categoria\": \"IT\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/knowledge"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body && body.id) pm.collectionVariables.set('articleId', body.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /knowledge/{id} (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Nuevo título\",\n  \"activo\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/knowledge/{{articleId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
