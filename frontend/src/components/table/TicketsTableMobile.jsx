@@ -1,4 +1,3 @@
-import { useEffect,useState } from 'react';
 import { Link } from "react-router-dom";
 
 import {
@@ -7,23 +6,12 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { getTickets } from "@/features/tickets/services/ticketApi";
+import SlaRemaining from "@/features/tickets/components/SlaRemaining";
+import TicketPriorityBadge from "@/features/tickets/components/TicketPriorityBadge";
+import TicketStatusBadge from "@/features/tickets/components/TicketStatusBadge";
 import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 
-import SlaRemaining from "./SlaRemaining";
-import TicketPriorityBadge from "./TicketPriorityBadge";
-import TicketStatusBadge from "./TicketStatusBadge";
-
-export default function TicketsTableMobile({ limit, offset, resume }) {
-  const [tickets, setTickets] = useState([]);
-
-  useEffect(() => {
-    async function fetchTickets() {
-      const data = await getTickets(limit, offset);
-      setTickets(data.items);
-    }
-    fetchTickets();
-  }, [limit, offset]);
+export default function TicketsTableMobile({ tickets, resume }) {
   return(
     <Table>
       <TableBody className="border border-border">

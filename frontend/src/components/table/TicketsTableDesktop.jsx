@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react";
-import { useEffect,useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -11,24 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTickets } from "@/features/tickets/services/ticketApi";
+import SlaRemaining from "@/features/tickets/components/SlaRemaining";
+import TicketPriorityBadge from "@/features/tickets/components/TicketPriorityBadge";
+import TicketStatusBadge from "@/features/tickets/components/TicketStatusBadge";
 import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 
-import SlaRemaining from "./SlaRemaining";
-import TicketPriorityBadge from "./TicketPriorityBadge";
-import TicketStatusBadge from "./TicketStatusBadge";
-
-export default function TicketsTableDesktop({ limit, offset, resume }) {
+export default function TicketsTableDesktop({ tickets , resume }) {
   const navigate = useNavigate();
-  const [tickets, setTickets] = useState([]);
-
-  useEffect(() => {
-    async function fetchTickets() {
-      const data = await getTickets(limit, offset);
-      setTickets(data.items);
-    }
-    fetchTickets();
-  }, [limit, offset]);
 
   return (
     <Table>
