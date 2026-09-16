@@ -37,7 +37,7 @@ Todas las respuestas son JSON. Los errores siguen el formato `{"error": "mensaje
 | [01-auth.md](01-auth.md) | `POST /auth/login`, `GET /auth/csrf`, `POST /auth/recover-password`, `GET /auth/me`, `POST /auth/logout` |
 | [02-categorias.md](02-categorias.md) | `GET /categories`, `GET /categories/all`, `PUT /categories/{id}`, `POST /categories/{id}/toggle` |
 | [03-usuarios.md](03-usuarios.md) | `POST /users`, `GET /users` |
-| [04-tickets.md](04-tickets.md) | Campos, código corto, SLA, `POST /tickets`, `GET /tickets` (filtros/sort/paginación), `GET /tickets/{id}`, transiciones |
+| [04-tickets.md](04-tickets.md) | Campos, código corto, SLA, `POST /tickets`, `GET /tickets` (filtros/sort/paginación/búsqueda/group), `GET /tickets/meta/groups`, `GET /tickets/meta/priorities`, `GET /tickets/{id}`, transiciones |
 | [05-tickets-estadisticas.md](05-tickets-estadisticas.md) | `GET /tickets/stats/monthly`, `GET /tickets/stats/summary` |
 | [06-base-conocimiento.md](06-base-conocimiento.md) | `GET /knowledge`, `GET /knowledge/{id}`, `POST /knowledge/{id}/view`, `POST /knowledge`, `PUT /knowledge/{id}` |
 | [07-flujo-csrf.md](07-flujo-csrf.md) | Ejemplo completo: login → csrf → crear/transicionar ticket con CSRF |
