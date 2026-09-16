@@ -12,7 +12,7 @@ export async function createTicket({
 }
 
 export async function getTickets(limit, offset) {
-  return apiRequest(`tickets?limit=${limit}&offset=${offset}`, {
+  return apiRequest(`tickets?limit=${limit}&offset=${offset}&sort=desc`, {
     method: "GET",
   });
 }
