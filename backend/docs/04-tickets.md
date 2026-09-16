@@ -57,6 +57,16 @@ Se genera en el backend en la creación y sigue el patrón `PREFIJO-NNNN` (máx.
 | `MEDIUM` | 24 h |
 | `LOW` | 72 h |
 
+## Vencimiento automático del SLA (EXPIRADO)
+
+Un **scheduler en el backend** revisa los tickets cada 60 segundos (configurable con la env var `SLA_EXPIRY_CHECK_MS`, default `60000`):
+
+- Si un ticket **activo** (cualquier estado excepto `RESOLVED`/`CLOSED`) tiene `slaDueAt` **ya vencido**, el sistema lo cambia **automáticamente** a `ESCALATED` (grupo `EXPIRADO`).
+- Se actualiza también su `updatedAt`.
+- No se tocan tickets ya `ESCALATED`, `RESOLVED` o `CLOSED`.
+
+El ticket vencido aparece de inmediato en `GET /tickets?group=EXPIRADO` y en el contador `overdueSla` del resumen.
+
 ## POST /tickets
 
 Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prioridad siempre es `MEDIUM`** (seteada en el backend, no enviada desde el front). `requiresApproval` viene automáticamente de la categoría seleccionada.

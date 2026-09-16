@@ -183,6 +183,15 @@ Lista todos los usuarios. **Solo ADMIN**. La respuesta **nunca incluye** `passwo
 
 ---
 
+## Vencimiento automático del SLA (EXPIRADO)
+
+Un **scheduler en el backend** revisa los tickets cada 60 segundos (configurable con `SLA_EXPIRY_CHECK_MS`, default `60000`):
+
+- Si un ticket **activo** (estado distinto de `RESOLVED`/`CLOSED`) tiene `slaDueAt` **vencido**, cambia solo a `ESCALATED` (grupo `EXPIRADO`) y actualiza `updatedAt`.
+- No toca tickets ya `ESCALATED`, `RESOLVED` o `CLOSED`.
+
+Se ve de inmediato en `GET /tickets?group=EXPIRADO` y en `overdueSla` del summary.
+
 ## Tickets
 
 Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (APPROVED si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
