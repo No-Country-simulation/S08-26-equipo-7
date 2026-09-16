@@ -8,8 +8,8 @@ import {
 
 export default function SearchFilter({ resultsCount }){
   return(
-    <InputGroup className="min-w-0 max-w-none flex-1 border border-border sm:max-w-xs">
-      <InputGroupInput placeholder="Search..." />
+    <InputGroup className="min-w-0 max-w-none flex-1 border border-border sm:max-w-lg">
+      <InputGroupInput placeholder="Buscar ticket por ID, título o responsable..." />
       <InputGroupAddon>
         <Search />
       </InputGroupAddon>
