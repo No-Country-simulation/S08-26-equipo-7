@@ -1,9 +1,11 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import TicketsTableManager from "@/features/tickets/components/TicketsTableManager";
+import TicketsTableManager from "@/components/table/TicketsTableManager";
+import { useTickets } from "@/hooks/useTickets";
 
 export default function RecentTicketsTable() {
+  const { tickets, loading, error } = useTickets({ limit: 5 });
   return (
     <div className="py-4 bg-card rounded-lg my-4 border border-border shadow-md">
       <div className="w-full flex justify-between items-center px-4 my-2">
@@ -15,7 +17,7 @@ export default function RecentTicketsTable() {
           </div>
         </Link>
       </div>
-      <TicketsTableManager limit={5} offset={0} />
+      <TicketsTableManager tickets={tickets} />
     </div>
   );
 }

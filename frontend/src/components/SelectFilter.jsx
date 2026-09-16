@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 
 import {
   Select,
@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/select";
 
 
-export default function SelectFilter({ label, options = [] }) {
-  const [selectedCategory, setSelectedCategory] = useState("all")
+export default function SelectFilter({ placeholder, label, options = [], value, onChange }) {
+
   return(
-    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-      <SelectTrigger className="w-full border border-border">
-        <SelectValue />
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-full border border-border p-4">
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

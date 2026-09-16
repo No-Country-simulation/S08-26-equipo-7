@@ -8,7 +8,7 @@ async function fetchCategories() {
   const categories = await getCategories();
   return categories;
 }
-export default function TicketCategoryFilter() {
+export default function TicketCategoryFilter({ value = "", onChange }) {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     fetchCategories().then(setCategories);
@@ -16,11 +16,13 @@ export default function TicketCategoryFilter() {
   return(
     <div>
       <SelectFilter 
-        placeholder="Todas las Categorias" 
-        label="Categorías" 
+        placeholder="Categorias" 
+        label="Categorías"
+        value={value}
+        onChange={onChange}
         options={[
-          { value: "all", label: "Todas las Categorías" },
-          ...categories.map(category => ({ value: category.id, label: category.name }))
+          { value: "", label: "Todas las Categorías" },
+          ...categories.map(category => ({ value: category.code, label: category.name }))
         ]} /> 
     </div>
   );

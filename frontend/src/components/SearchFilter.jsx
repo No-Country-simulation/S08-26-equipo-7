@@ -6,10 +6,10 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-export default function SearchFilter({ resultsCount }){
+export default function SearchFilter({ resultsCount, value, onChange }){
   return(
-    <InputGroup className="min-w-0 max-w-none flex-1 border border-border sm:max-w-lg">
-      <InputGroupInput placeholder="Buscar ticket por ID, título o responsable..." />
+    <InputGroup className="border border-border">
+      <InputGroupInput placeholder="Buscar ticket por ID, título o responsable..." value={value} onChange={onChange} />
       <InputGroupAddon>
         <Search />
       </InputGroupAddon>
