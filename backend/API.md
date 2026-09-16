@@ -8,6 +8,22 @@ Todas las respuestas son JSON. Los errores siguen el formato `{"error": "mensaje
 
 - Login con email + password con JWT almacenado en **cookie HttpOnly** (name=`access_token`).
 - Para las peticiones que modifican datos (POST) **excepto** `login`, `recover-password` y `logout`, hay que mandar el header **`X-XSRF-TOKEN`** con el valor de la cookie `XSRF-TOKEN` (el front la lee del navegador y la reenvía).
+- **Antes del primer POST**, llamá a `GET /auth/csrf` para obtener el token y la cookie (evita el 403 de una primera request).
+
+## Documentación modular
+
+Toda la API está modularizada por tema en la carpeta **[`docs/`](docs/00-indice.md)**:
+
+| Archivo | Contenido |
+|---|---|
+| [`00-indice.md`](docs/00-indice.md) | Índice global: seguridad, errores, roles y mapa de módulos |
+| [`01-auth.md`](docs/01-auth.md) | `login`, `csrf`, `recover-password`, `me`, `logout` |
+| [`02-categorias.md`](docs/02-categorias.md) | `categories` (GET, POST, PUT, toggle) |
+| [`03-usuarios.md`](docs/03-usuarios.md) | `users` (POST, GET) |
+| [`04-tickets.md`](docs/04-tickets.md) | `tickets` (POST, GET, GET by id, transiciones, código corto, SLA) |
+| [`05-tickets-estadisticas.md`](docs/05-tickets-estadisticas.md) | `tickets/stats/monthly` y `tickets/stats/summary` |
+| [`06-base-conocimiento.md`](docs/06-base-conocimiento.md) | `knowledge` (GET, view, POST, PUT) |
+| [`07-flujo-csrf.md`](docs/07-flujo-csrf.md) | Ejemplo completo: csrf → login → crear/transicionar ticket |
 
 ## Errores
 
@@ -42,6 +58,16 @@ Inicia sesión. Setea la cookie `access_token` (HttpOnly).
 { "nombre": "Alejandro", "rol": "ADMIN" }
 ```
 - `400` si falta algún campo · `401` si las credenciales son inválidas
+
+### GET /auth/csrf
+Devuelve el token CSRF y setea la cookie `XSRF-TOKEN` (público). **Llamar antes del primer POST** para no recibir 403 en la primera escritura (el token también sale en la cookie de una response rechazada, pero mejor pedirlo acá una vez).
+
+```json
+// respuesta 200
+{ "token": "a654aa5c-5e7e-40a8-af97-52ce98fd981c" }
+```
+
+Uso: el mismo valor del body va como header `X-XSRF-TOKEN` en los POST siguientes.
 
 ### POST /api/v1/auth/recover-password
 Genera un ticket de recuperación — **siempre devuelve 200** (no revela si el email existe). Inserta el ticket solo cuando el email existe en la BD. Unidad de rate limit: **máx. 3 peticiones / 15 min por IP** (la 4ta responde `429`). Es una ruta **pública** (no requiere token).
