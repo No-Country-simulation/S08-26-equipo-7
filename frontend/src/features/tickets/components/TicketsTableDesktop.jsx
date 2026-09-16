@@ -1,5 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { useEffect,useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   Table,
@@ -17,6 +19,7 @@ import TicketPriorityBadge from "./TicketPriorityBadge";
 import TicketStatusBadge from "./TicketStatusBadge";
 
 export default function TicketsTableDesktop({ limit, offset, resume }) {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export default function TicketsTableDesktop({ limit, offset, resume }) {
           <TableRow
             key={ticket.id}
             className="hover:bg-muted-foreground/10 cursor-pointer"
-            onClick={() => console.log(ticket)}
+            onClick={() => navigate(`/tickets/${ticket.id}`)}
           >
             <TableCell className="font-medium pl-4">
               <div className="flex flex-col">
@@ -60,7 +63,7 @@ export default function TicketsTableDesktop({ limit, offset, resume }) {
               <SlaRemaining slaDueAt={ticket.slaDueAt} />
             </TableCell>
             <TableCell className="text-center"><TicketStatusBadge status={ticket.status} /></TableCell>
-            <TableCell className="flex justify-center"> <ChevronRight /> </TableCell>
+            <TableCell className="flex justify-center"> <Link to={`/tickets/${ticket.id}`}><ChevronRight /></Link> </TableCell>
           </TableRow>
         ))}
       </TableBody>
