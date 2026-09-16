@@ -4,7 +4,7 @@ import TicketsTableDesktop from "./TicketsTableDesktop";
 import TicketsTableMobile from "./TicketsTableMobile";
 
 const MOBILE_BREAKPOINT = 684;
-const MOBILE_BREAKPOINT_LARGE = 790;
+const MOBILE_BREAKPOINT_LARGE = 926;
 
 export default function TicketsTableManager({ isResume = false, ...props }) {
   const containerRef = React.useRef(null);
