@@ -183,6 +183,28 @@ Lista todos los usuarios. **Solo ADMIN**. La respuesta **nunca incluye** `passwo
 
 ---
 
+## Vencimiento automático del SLA (EXPIRADO)
+
+Un **scheduler en el backend** revisa los tickets cada 60 segundos (configurable con `SLA_EXPIRY_CHECK_MS`, default `60000`):
+
+- Si un ticket **activo** (estado distinto de `RESOLVED`/`CLOSED`) tiene `slaDueAt` **vencido**, cambia solo a `ESCALATED` (grupo `EXPIRADO`) y actualiza `updatedAt`.
+- No toca tickets ya `ESCALATED`, `RESOLVED` o `CLOSED`.
+
+Se ve de inmediato en `GET /tickets?group=EXPIRADO` y en `overdueSla` del summary, y se registra un evento `ESCALATED` en la línea de tiempo del ticket.
+
+## GET /tickets/{id}/timeline
+
+Historial del ticket (línea de tiempo), ordenado de más antigua a más reciente. Autenticado. `404` si no existe.
+
+```json
+[
+  { "tipo": "CREATED", "descripcion": "Ticket creado", "actorEmail": "request@empresa.com", "actorNombre": "Usuario Uno", "fecha": "2026-09-15T20:19:44.262Z" },
+  { "tipo": "PRIORITIZED", "descripcion": "Prioridad asignada: HIGH (SLA 8h)", "actorEmail": "agente@serviceflow.com", "actorNombre": "Agente Uno", "fecha": "2026-09-15T20:20:01.100Z" }
+]
+```
+
+Tipos de evento: `CREATED`, `CATEGORIZED`, `PRIORITIZED`, `ASSIGNED`, `APPROVED`, `STARTED`, `ESCALATED` (manual o automático por SLA), `RESOLVED`, `CLOSED`. `actorEmail`/`actorNombre` = quién ejecutó la acción.
+
 ## Tickets
 
 Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (APPROVED si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`

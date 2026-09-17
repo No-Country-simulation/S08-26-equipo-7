@@ -1,6 +1,7 @@
 package com.serviceflow.api.application.services;
 
 import com.serviceflow.api.application.ports.CategoriaRepositoryPort;
+import com.serviceflow.api.application.ports.TicketEventoRepositoryPort;
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
 import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
 import com.serviceflow.api.adapters.in.dto.TicketResponse;
@@ -9,6 +10,7 @@ import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.PrioridadTicket;
 import com.serviceflow.api.domain.RolUsuario;
 import com.serviceflow.api.domain.Ticket;
+import com.serviceflow.api.domain.TicketEvento;
 import com.serviceflow.api.domain.Usuario;
 import org.springframework.stereotype.Service;
 
@@ -35,13 +37,16 @@ public class TicketService {
     private final TicketRepositoryPort ticketRepository;
     private final UsuarioRepositoryPort usuarioRepository;
     private final CategoriaRepositoryPort categoriaRepository;
+    private final TicketEventoRepositoryPort eventoRepository;
 
     public TicketService(TicketRepositoryPort ticketRepository,
                          UsuarioRepositoryPort usuarioRepository,
-                         CategoriaRepositoryPort categoriaRepository) {
+                         CategoriaRepositoryPort categoriaRepository,
+                         TicketEventoRepositoryPort eventoRepository) {
         this.ticketRepository = ticketRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
+        this.eventoRepository = eventoRepository;
     }
 
     public Ticket createForRequester(String email, String title, String description, String categoryCode) {
@@ -71,7 +76,11 @@ public class TicketService {
                 LocalDateTime.now()
         );
         ticket.setCodigo(generarCodigo(category));
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "CREATED",
+                "Ticket creado", saved.getEmail(), usuarioRepository.findByEmail(saved.getEmail())
+                        .map(Usuario::getName).orElse(null)));
+        return saved;
     }
 
     private String generarCodigo(Categoria category) {
@@ -137,7 +146,7 @@ public class TicketService {
                 .toList();
     }
 
-    public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole) {
+    public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Categoria category = resolveCategory(categoryCode);
         Ticket ticket = findById(id);
@@ -145,29 +154,36 @@ public class TicketService {
         ticket.setCategory(category.getCode());
         ticket.setRequiresApproval(category.isRequiresApproval());
         ticket.setStatus(EstadoTicket.CATEGORIZED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "CATEGORIZED", "Categoría asignada: " + category.getCode(), actorEmail);
+        return saved;
     }
 
-    public Ticket prioritize(UUID id, PrioridadTicket priority, RolUsuario actorRole) {
+    public Ticket prioritize(UUID id, PrioridadTicket priority, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.CATEGORIZED);
         ticket.setPriority(priority);
         ticket.setSlaDueAt(LocalDateTime.now().plus(SLA_BY_PRIORITY.get(priority)));
         ticket.setStatus(EstadoTicket.PRIORITIZED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "PRIORITIZED", "Prioridad asignada: " + priority + " (SLA " + SLA_BY_PRIORITY.get(priority).toHours() + "h)", actorEmail);
+        return saved;
     }
 
-    public Ticket assign(UUID id, UUID assignedTo, RolUsuario actorRole) {
+    public Ticket assign(UUID id, UUID assignedTo, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.PRIORITIZED);
         ticket.setAssignedTo(assignedTo);
         ticket.setStatus(EstadoTicket.ASSIGNED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        String asignadoNombre = usuarioRepository.findById(assignedTo).map(Usuario::getName).orElse(null);
+        registrarEvento(saved, "ASSIGNED", "Asignado al agente " + (asignadoNombre != null ? asignadoNombre : assignedTo), actorEmail);
+        return saved;
     }
 
-    public Ticket approve(UUID id, RolUsuario actorRole) {
+    public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.ASSIGNED);
@@ -175,28 +191,34 @@ public class TicketService {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
         ticket.setStatus(EstadoTicket.APPROVED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "APPROVED", "Ticket aprobado", actorEmail);
+        return saved;
     }
 
-    public Ticket start(UUID id, RolUsuario actorRole) {
+    public Ticket start(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.APPROVED).contains(ticket.getStatus())) {
             throw new InvalidTransitionException("Ticket must be assigned (and approved if required) before starting");
         }
         ticket.setStatus(EstadoTicket.IN_PROGRESS);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "STARTED", "Trabajo iniciado", actorEmail);
+        return saved;
     }
 
-    public Ticket escalate(UUID id, RolUsuario actorRole) {
+    public Ticket escalate(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.IN_PROGRESS);
         ticket.setStatus(EstadoTicket.ESCALATED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "ESCALATED", "Ticket escalado manualmente", actorEmail);
+        return saved;
     }
 
-    public Ticket resolve(UUID id, RolUsuario actorRole) {
+    public Ticket resolve(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         if (!EnumSet.of(EstadoTicket.IN_PROGRESS, EstadoTicket.ESCALATED).contains(ticket.getStatus())) {
@@ -204,7 +226,9 @@ public class TicketService {
         }
         ticket.setResolvedAt(LocalDateTime.now());
         ticket.setStatus(EstadoTicket.RESOLVED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "RESOLVED", "Ticket resuelto", actorEmail);
+        return saved;
     }
 
     public Ticket close(UUID id, RolUsuario actorRole, String actorEmail) {
@@ -216,7 +240,23 @@ public class TicketService {
         requireStatus(ticket, EstadoTicket.RESOLVED);
         ticket.setClosedAt(LocalDateTime.now());
         ticket.setStatus(EstadoTicket.CLOSED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "CLOSED", "Ticket cerrado", actorEmail);
+        return saved;
+    }
+
+    public List<TicketEvento> timeline(UUID id) {
+        findById(id);
+        return eventoRepository.findByTicketId(id);
+    }
+
+    private void registrarEvento(Ticket ticket, String tipo, String descripcion, String actorEmail) {
+        if (actorEmail == null || actorEmail.isBlank()) {
+            eventoRepository.save(TicketEvento.nuevo(ticket.getId(), tipo, descripcion, null, null));
+            return;
+        }
+        String nombre = usuarioRepository.findByEmail(actorEmail).map(Usuario::getName).orElse(null);
+        eventoRepository.save(TicketEvento.nuevo(ticket.getId(), tipo, descripcion, actorEmail, nombre));
     }
 
     public Map<String, Object> monthlyStats(LocalDateTime yearMonth) {
