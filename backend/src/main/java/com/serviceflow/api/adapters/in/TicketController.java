@@ -4,6 +4,7 @@ import com.serviceflow.api.application.services.InvalidTransitionException;
 import com.serviceflow.api.application.services.TicketNotFoundException;
 import com.serviceflow.api.application.services.TicketService;
 import com.serviceflow.api.application.services.UnauthorizedActionException;
+import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.RolUsuario;
 import com.serviceflow.api.domain.Ticket;
 import com.serviceflow.api.infrastructure.security.UsuarioAutenticado;
@@ -62,7 +63,8 @@ public class TicketController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam(required = false) String status,
+    public ResponseEntity<?> list(@RequestParam(required = false) Boolean active,
+                                  @RequestParam(required = false) String status,
                                   @RequestParam(required = false) String group,
                                   @RequestParam(required = false) String category,
                                   @RequestParam(required = false) String priority,
@@ -74,6 +76,14 @@ public class TicketController {
         List<Ticket> all = ticketService.findAllWithNames().stream()
                 .map(TicketService.TicketSearchData::ticket)
                 .toList();
+        boolean onlyActive = active != null
+                ? active
+                : status == null && group == null;
+        if (onlyActive) {
+            all = all.stream()
+                    .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
+                    .toList();
+        }
         if (status != null) {
             all = all.stream().filter(t -> t.getStatus().name().equalsIgnoreCase(status)).toList();
         }
