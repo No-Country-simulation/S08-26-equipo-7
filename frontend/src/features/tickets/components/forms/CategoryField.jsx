@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function TicketCategoryField({
+export default function CategoryField({
   categories,
   value,
   onChange,

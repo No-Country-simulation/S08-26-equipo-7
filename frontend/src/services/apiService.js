@@ -1,5 +1,9 @@
-const API_URL = import.meta.env.VITE_API_URL;
+// TEMPORAL: elimina esta importación junto con la llamada waitForApiDelay()
+// cuando ya no se necesite simular latencia en las respuestas de la API.
+import { waitForApiDelay } from "@/config/apiConfig";
 import { translateApiMessage } from "@/i18n/es/apiMessages";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function buildUrl(endpoint) {
   if (!API_URL) {
@@ -40,6 +44,8 @@ export async function apiRequest(endpoint, options = {}, _retryingAfterCsrf = fa
   let response;
 
   try {
+    // TEMPORAL: elimina esta línea para desactivar completamente el delay simulado.
+    await waitForApiDelay();
     response = await fetch(buildUrl(endpoint), {
       ...requestOptions,
       credentials: "include",

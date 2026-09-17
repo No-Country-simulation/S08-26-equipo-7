@@ -6,6 +6,7 @@ import java.util.UUID;
 public class Ticket {
 
     private UUID id;
+    private String codigo;
     private UUID userId;
     private String email;
     private String title;
@@ -19,6 +20,7 @@ public class Ticket {
     private LocalDateTime resolvedAt;
     private LocalDateTime closedAt;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Ticket(UUID id, UUID userId, String email, String title, String category, String description,
                   PrioridadTicket priority, EstadoTicket status, boolean requiresApproval,
@@ -38,10 +40,14 @@ public class Ticket {
         this.resolvedAt = resolvedAt;
         this.closedAt = closedAt;
         this.createdAt = createdAt;
+        this.updatedAt = createdAt;
     }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
@@ -81,4 +87,7 @@ public class Ticket {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

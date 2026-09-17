@@ -54,7 +54,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/logout")
+                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/logout",
+                                "/api/v1/knowledge/*/view")
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(ex -> ex
@@ -71,13 +72,18 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").authenticated()
                         .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tickets/stats/summary").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/knowledge", "/api/v1/knowledge/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/knowledge/*/view").permitAll()
+                        .requestMatchers("/api/v1/knowledge/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)

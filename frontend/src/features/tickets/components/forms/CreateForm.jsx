@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import { getCategories } from "../services/categoryApi";
-import { createTicket as sendTicket } from "../services/ticketApi";
-import TicketCategoryField from "./TicketCategoryField";
+import { getCategories } from "../../services/categoryApi";
+import { createTicket as sendTicket } from "../../services/ticketApi";
+import CategoryField from "./CategoryField";
 
 const MAX_TITLE_LENGTH = 120;
 const MAX_DESCRIPTION_LENGTH = 1000;
@@ -26,8 +26,6 @@ async function createTicketAction(_, formData) {
   const title = formData.get("title");
   const description = formData.get("description");
   const category = formData.get("category");
-
-  console.log({ title, description, category });
 
   if (!category) {
     return { errors: { category: "Selecciona un área responsable" } };
@@ -70,8 +68,7 @@ async function createTicketAction(_, formData) {
   }
 }
 
-// es todo el componente CreateTicketForm
-export default function CreateTicketForm({ onSuccess }) {
+export default function CreateForm({ onSuccess }) {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [title, setTitle] = useState("");
@@ -101,7 +98,7 @@ export default function CreateTicketForm({ onSuccess }) {
   return (
     <form action={formAction} onReset={(event) => event.preventDefault()}>
       <div className="space-y-2">
-        <TicketCategoryField
+        <CategoryField
           categories={categories}
           value={selectedCategory}
           onChange={setSelectedCategory}

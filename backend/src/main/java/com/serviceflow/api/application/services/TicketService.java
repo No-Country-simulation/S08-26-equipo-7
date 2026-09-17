@@ -1,13 +1,16 @@
 package com.serviceflow.api.application.services;
 
 import com.serviceflow.api.application.ports.CategoriaRepositoryPort;
+import com.serviceflow.api.application.ports.TicketEventoRepositoryPort;
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
 import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
+import com.serviceflow.api.adapters.in.dto.TicketResponse;
 import com.serviceflow.api.domain.Categoria;
 import com.serviceflow.api.domain.EstadoTicket;
 import com.serviceflow.api.domain.PrioridadTicket;
 import com.serviceflow.api.domain.RolUsuario;
 import com.serviceflow.api.domain.Ticket;
+import com.serviceflow.api.domain.TicketEvento;
 import com.serviceflow.api.domain.Usuario;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +32,21 @@ public class TicketService {
             PrioridadTicket.URGENT, Duration.ofHours(4)
     );
 
+    private static final Duration NEAR_SLA_WINDOW = Duration.ofHours(12);
+
     private final TicketRepositoryPort ticketRepository;
     private final UsuarioRepositoryPort usuarioRepository;
     private final CategoriaRepositoryPort categoriaRepository;
+    private final TicketEventoRepositoryPort eventoRepository;
 
     public TicketService(TicketRepositoryPort ticketRepository,
                          UsuarioRepositoryPort usuarioRepository,
-                         CategoriaRepositoryPort categoriaRepository) {
+                         CategoriaRepositoryPort categoriaRepository,
+                         TicketEventoRepositoryPort eventoRepository) {
         this.ticketRepository = ticketRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
+        this.eventoRepository = eventoRepository;
     }
 
     public Ticket createForRequester(String email, String title, String description, String categoryCode) {
@@ -67,7 +75,33 @@ public class TicketService {
                 null,
                 LocalDateTime.now()
         );
-        return ticketRepository.save(ticket);
+        ticket.setCodigo(generarCodigo(category));
+        Ticket saved = ticketRepository.save(ticket);
+        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "CREATED",
+                "Ticket creado", saved.getEmail(), usuarioRepository.findByEmail(saved.getEmail())
+                        .map(Usuario::getName).orElse(null)));
+        return saved;
+    }
+
+    private String generarCodigo(Categoria category) {
+        String prefix = category != null ? prefijoCategoria(category.getCode()) : "TK";
+        long next = ticketRepository.countByCategory(category != null ? category.getCode() : "") + 1;
+        return prefix + "-" + String.format("%04d", next);
+    }
+
+    private String prefijoCategoria(String code) {
+        if (code == null) {
+            return "TK";
+        }
+        return switch (code.toUpperCase()) {
+            case "IT" -> "IT";
+            case "ACCESS" -> "ACC";
+            case "HARDWARE" -> "HW";
+            case "FACILITIES" -> "FAC";
+            case "FINANCE" -> "FIN";
+            case "PASSWORD_RECOVERY" -> "PR";
+            default -> code.toUpperCase().substring(0, 2);
+        };
     }
 
     private Categoria resolveCategory(String categoryCode) {
@@ -87,11 +121,32 @@ public class TicketService {
                 .orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
     }
 
+    public TicketResponse toResponse(Ticket ticket) {
+        String createdByName = usuarioRepository.findByEmail(ticket.getEmail())
+                .map(Usuario::getName)
+                .orElse(null);
+        return TicketResponse.from(ticket, createdByName);
+    }
+
     public List<Ticket> findAll() {
         return ticketRepository.findAll();
     }
 
-    public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole) {
+    public record TicketSearchData(Ticket ticket, String createdByName, String assignedToName) {
+    }
+
+    public List<TicketSearchData> findAllWithNames() {
+        return ticketRepository.findAll().stream()
+                .map(t -> new TicketSearchData(
+                        t,
+                        usuarioRepository.findByEmail(t.getEmail()).map(Usuario::getName).orElse(""),
+                        t.getAssignedTo() != null
+                                ? usuarioRepository.findById(t.getAssignedTo()).map(Usuario::getName).orElse("")
+                                : ""))
+                .toList();
+    }
+
+    public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Categoria category = resolveCategory(categoryCode);
         Ticket ticket = findById(id);
@@ -99,29 +154,36 @@ public class TicketService {
         ticket.setCategory(category.getCode());
         ticket.setRequiresApproval(category.isRequiresApproval());
         ticket.setStatus(EstadoTicket.CATEGORIZED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "CATEGORIZED", "Categoría asignada: " + category.getCode(), actorEmail);
+        return saved;
     }
 
-    public Ticket prioritize(UUID id, PrioridadTicket priority, RolUsuario actorRole) {
+    public Ticket prioritize(UUID id, PrioridadTicket priority, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.CATEGORIZED);
         ticket.setPriority(priority);
         ticket.setSlaDueAt(LocalDateTime.now().plus(SLA_BY_PRIORITY.get(priority)));
         ticket.setStatus(EstadoTicket.PRIORITIZED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "PRIORITIZED", "Prioridad asignada: " + priority + " (SLA " + SLA_BY_PRIORITY.get(priority).toHours() + "h)", actorEmail);
+        return saved;
     }
 
-    public Ticket assign(UUID id, UUID assignedTo, RolUsuario actorRole) {
+    public Ticket assign(UUID id, UUID assignedTo, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.PRIORITIZED);
         ticket.setAssignedTo(assignedTo);
         ticket.setStatus(EstadoTicket.ASSIGNED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        String asignadoNombre = usuarioRepository.findById(assignedTo).map(Usuario::getName).orElse(null);
+        registrarEvento(saved, "ASSIGNED", "Asignado al agente " + (asignadoNombre != null ? asignadoNombre : assignedTo), actorEmail);
+        return saved;
     }
 
-    public Ticket approve(UUID id, RolUsuario actorRole) {
+    public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.ASSIGNED);
@@ -129,28 +191,34 @@ public class TicketService {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
         ticket.setStatus(EstadoTicket.APPROVED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "APPROVED", "Ticket aprobado", actorEmail);
+        return saved;
     }
 
-    public Ticket start(UUID id, RolUsuario actorRole) {
+    public Ticket start(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.APPROVED).contains(ticket.getStatus())) {
             throw new InvalidTransitionException("Ticket must be assigned (and approved if required) before starting");
         }
         ticket.setStatus(EstadoTicket.IN_PROGRESS);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "STARTED", "Trabajo iniciado", actorEmail);
+        return saved;
     }
 
-    public Ticket escalate(UUID id, RolUsuario actorRole) {
+    public Ticket escalate(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.IN_PROGRESS);
         ticket.setStatus(EstadoTicket.ESCALATED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "ESCALATED", "Ticket escalado manualmente", actorEmail);
+        return saved;
     }
 
-    public Ticket resolve(UUID id, RolUsuario actorRole) {
+    public Ticket resolve(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         if (!EnumSet.of(EstadoTicket.IN_PROGRESS, EstadoTicket.ESCALATED).contains(ticket.getStatus())) {
@@ -158,7 +226,9 @@ public class TicketService {
         }
         ticket.setResolvedAt(LocalDateTime.now());
         ticket.setStatus(EstadoTicket.RESOLVED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "RESOLVED", "Ticket resuelto", actorEmail);
+        return saved;
     }
 
     public Ticket close(UUID id, RolUsuario actorRole, String actorEmail) {
@@ -170,7 +240,23 @@ public class TicketService {
         requireStatus(ticket, EstadoTicket.RESOLVED);
         ticket.setClosedAt(LocalDateTime.now());
         ticket.setStatus(EstadoTicket.CLOSED);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "CLOSED", "Ticket cerrado", actorEmail);
+        return saved;
+    }
+
+    public List<TicketEvento> timeline(UUID id) {
+        findById(id);
+        return eventoRepository.findByTicketId(id);
+    }
+
+    private void registrarEvento(Ticket ticket, String tipo, String descripcion, String actorEmail) {
+        if (actorEmail == null || actorEmail.isBlank()) {
+            eventoRepository.save(TicketEvento.nuevo(ticket.getId(), tipo, descripcion, null, null));
+            return;
+        }
+        String nombre = usuarioRepository.findByEmail(actorEmail).map(Usuario::getName).orElse(null);
+        eventoRepository.save(TicketEvento.nuevo(ticket.getId(), tipo, descripcion, actorEmail, nombre));
     }
 
     public Map<String, Object> monthlyStats(LocalDateTime yearMonth) {
@@ -199,6 +285,77 @@ public class TicketService {
                 "byStatus", statusBreakdown(),
                 "byCategory", categoryBreakdown()
         );
+    }
+
+    public Map<String, Object> summaryStats(LocalDateTime month) {
+        LocalDateTime start = month.withDayOfMonth(1).toLocalDate().atStartOfDay();
+        LocalDateTime end = start.plusMonths(1);
+        LocalDateTime prevStart = start.minusMonths(1);
+        LocalDateTime prevEnd = start;
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Ticket> all = ticketRepository.findAll();
+
+        List<Ticket> active = all.stream()
+                .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
+                .toList();
+
+        long activeTickets = active.size();
+        long activePrev = activeCountAt(prevEnd);
+
+        long nearSlaExpiry = active.stream()
+                .filter(t -> t.getSlaDueAt() != null)
+                .filter(t -> !t.getSlaDueAt().isBefore(now) && !t.getSlaDueAt().isAfter(now.plus(NEAR_SLA_WINDOW)))
+                .count();
+
+        long overdueSla = active.stream()
+                .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(now))
+                .count();
+
+        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
+        List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd);
+
+        long resolvedOnTime = resolved.stream()
+                .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
+                .count();
+        long resolvedOnTimePrev = resolvedPrev.stream()
+                .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
+                .count();
+
+        double compliance = resolved.isEmpty() ? 0.0 : round2(resolvedOnTime * 100.0 / resolved.size());
+        double compliancePrev = resolvedPrev.isEmpty() ? 0.0 : round2(resolvedOnTimePrev * 100.0 / resolvedPrev.size());
+
+        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
+        List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd);
+
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("month", start.toLocalDate().getYear() + "-" + String.format("%02d", start.toLocalDate().getMonthValue()));
+        result.put("activeTickets", activeTickets);
+        result.put("activePrevMonth", activePrev);
+        result.put("activeDelta", activeTickets - activePrev);
+        result.put("nearSlaExpiry", nearSlaExpiry);
+        result.put("overdueSla", overdueSla);
+        result.put("resolved", resolved.size());
+        result.put("resolvedPrevMonth", resolvedPrev.size());
+        result.put("resolvedOnTime", resolvedOnTime);
+        result.put("resolvedOnTimePrev", resolvedOnTimePrev);
+        result.put("slaCompliance", compliance);
+        result.put("slaCompliancePrev", compliancePrev);
+        result.put("created", created.size());
+        result.put("createdPrevMonth", createdPrev.size());
+        return result;
+    }
+
+    private long activeCountAt(LocalDateTime until) {
+        return ticketRepository.findAll().stream()
+                .filter(t -> t.getCreatedAt() != null && !t.getCreatedAt().isAfter(until))
+                .filter(t -> t.getResolvedAt() == null || t.getResolvedAt().isAfter(until))
+                .filter(t -> t.getClosedAt() == null || t.getClosedAt().isAfter(until))
+                .count();
+    }
+
+    private double round2(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     private Map<String, Long> statusBreakdown() {
