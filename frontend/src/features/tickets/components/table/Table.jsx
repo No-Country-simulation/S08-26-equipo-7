@@ -1,5 +1,4 @@
 import { Inbox } from "lucide-react";
-import { useState } from "react";
 
 import {
   Pagination,
@@ -14,16 +13,14 @@ import TableManager from "@/features/tickets/components/table/TableManager";
 import TableSkeleton from "@/features/tickets/components/table/TableSkeleton";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
-export default function Table({ filters, onPageChange }) {
-  const [offsetPage, setOffsetPage] = useState(0);
-
-  const { tickets, total = 0, offset = 0, limit = 10, loading, error } = useTickets({
+export default function Table({ filters, offset = 0, onOffsetChange }) {
+  const { tickets, total = 0, offset: responseOffset = 0, limit = 10, loading, error } = useTickets({
     ...filters,
-    offset: offsetPage,
+    offset,
   });
 
   const totalPages = Math.ceil(total / limit) || 1;
-  const currentPage = Math.min(Math.floor(offset / limit) + 1, totalPages);
+  const currentPage = Math.min(Math.floor(responseOffset / limit) + 1, totalPages);
   const hasActiveFilters = Object.values(filters || {}).some(Boolean);
 
   const getPageNumbers = () => {
@@ -49,8 +46,7 @@ export default function Table({ filters, onPageChange }) {
       return;
     }
 
-    setOffsetPage((page - 1) * limit);
-    onPageChange?.(page);
+    onOffsetChange?.((page - 1) * limit);
   };
 
   return (
