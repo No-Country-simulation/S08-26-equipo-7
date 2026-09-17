@@ -1,6 +1,18 @@
+import { useEffect,useState } from "react";
+
 import SelectFilter from "@/components/SelectFilter";
+import { getPriority } from "@/features/tickets/services/priorityApi";
+
+async function fetchPriority() {
+  const priority = await getPriority();
+  return priority;
+}
 
 export default function TicketPriorityFilter({ value = "", onChange }) {
+  const [priority, setPriority] = useState([]);
+  useEffect(() => {
+    fetchPriority().then(setPriority);
+  }, []);
   return(
     <div>
       <SelectFilter 
@@ -8,11 +20,8 @@ export default function TicketPriorityFilter({ value = "", onChange }) {
         label="Prioridades" 
         options={[
           { value: "", label: "Todas las Prioridades" },
-          { value: "LOW", label: "Baja" },
-          { value: "MEDIUM", label: "Media" },
-          { value: "HIGH", label: "Alta" },
-          { value: "URGENT", label: "Crítica" },
-        ]} 
+          ...priority.map(p => ({ value: p.name, label: p.label }))
+        ]}
         value={value}
         onChange={onChange}
       />

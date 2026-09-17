@@ -1,6 +1,6 @@
 import { apiRequest } from "@/services/apiService";
 
-export async function getCategories() {
+export async function getPriority() {
   try {
     return await apiRequest("/tickets/meta/priorities");
   } catch (error) {
