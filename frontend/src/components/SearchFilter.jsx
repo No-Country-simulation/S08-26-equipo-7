@@ -1,4 +1,5 @@
 import { Search } from "lucide-react"
+import { useEffect,useState } from "react";
 
 import {
   InputGroup,
@@ -6,14 +7,32 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-export default function SearchFilter({ resultsCount, value, onChange }){
+export default function SearchFilter({ value, onChange }){
+  const[searchTerm, setSearchTerm] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const trimmedText = searchTerm.trim();
+
+      if (trimmedText.length >= 3 || trimmedText === "") {
+        if (trimmedText !== value) {
+          onChange(trimmedText);
+        }
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, value, onChange]);
   return(
     <InputGroup className="border border-border">
-      <InputGroupInput placeholder="Buscar ticket por ID, título o responsable..." value={value} onChange={onChange} />
+      <InputGroupInput
+        placeholder="Buscar ticket por ID, título o responsable..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <InputGroupAddon>
         <Search />
       </InputGroupAddon>
-      <InputGroupAddon align="inline-end" className="hidden sm:flex">{ resultsCount > 0 && resultsCount + " resultado" }</InputGroupAddon>
     </InputGroup>
   );
 }
