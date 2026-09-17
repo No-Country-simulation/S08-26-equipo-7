@@ -178,40 +178,45 @@ public class TicketController {
         return safeGet(() -> ticketService.toResponse(ticketService.findById(id)));
     }
 
+    @GetMapping("/{id}/timeline")
+    public ResponseEntity<?> timeline(@PathVariable UUID id) {
+        return safeGet(() -> ticketService.timeline(id));
+    }
+
     @PostMapping("/{id}/categorize")
     public ResponseEntity<?> categorize(@PathVariable UUID id, @RequestParam String category, Authentication auth) {
-        return safeTransition(() -> ticketService.categorize(id, category, role(auth)));
+        return safeTransition(() -> ticketService.categorize(id, category, role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/prioritize")
     public ResponseEntity<?> prioritize(@PathVariable UUID id, @RequestParam String priority, Authentication auth) {
         return safeTransition(() -> ticketService.prioritize(
-                id, com.serviceflow.api.domain.PrioridadTicket.valueOf(priority), role(auth)));
+                id, com.serviceflow.api.domain.PrioridadTicket.valueOf(priority), role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/assign")
     public ResponseEntity<?> assign(@PathVariable UUID id, @RequestParam String assignedTo, Authentication auth) {
-        return safeTransition(() -> ticketService.assign(id, UUID.fromString(assignedTo), role(auth)));
+        return safeTransition(() -> ticketService.assign(id, UUID.fromString(assignedTo), role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/approve")
     public ResponseEntity<?> approve(@PathVariable UUID id, Authentication auth) {
-        return safeTransition(() -> ticketService.approve(id, role(auth)));
+        return safeTransition(() -> ticketService.approve(id, role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/start")
     public ResponseEntity<?> start(@PathVariable UUID id, Authentication auth) {
-        return safeTransition(() -> ticketService.start(id, role(auth)));
+        return safeTransition(() -> ticketService.start(id, role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/escalate")
     public ResponseEntity<?> escalate(@PathVariable UUID id, Authentication auth) {
-        return safeTransition(() -> ticketService.escalate(id, role(auth)));
+        return safeTransition(() -> ticketService.escalate(id, role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/resolve")
     public ResponseEntity<?> resolve(@PathVariable UUID id, Authentication auth) {
-        return safeTransition(() -> ticketService.resolve(id, role(auth)));
+        return safeTransition(() -> ticketService.resolve(id, role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/close")
@@ -239,6 +244,11 @@ public class TicketController {
     private RolUsuario role(Authentication auth) {
         UsuarioAutenticado user = (UsuarioAutenticado) auth.getPrincipal();
         return RolUsuario.valueOf(user.role());
+    }
+
+    private String email(Authentication auth) {
+        UsuarioAutenticado user = (UsuarioAutenticado) auth.getPrincipal();
+        return user.email();
     }
 
     private ResponseEntity<?> safeTransition(Supplier<Ticket> action) {

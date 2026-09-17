@@ -65,7 +65,41 @@ Un **scheduler en el backend** revisa los tickets cada 60 segundos (configurable
 - Se actualiza también su `updatedAt`.
 - No se tocan tickets ya `ESCALATED`, `RESOLVED` o `CLOSED`.
 
-El ticket vencido aparece de inmediato en `GET /tickets?group=EXPIRADO` y en el contador `overdueSla` del resumen.
+El ticket vencido aparece de inmediato en `GET /tickets?group=EXPIRADO` y en el contador `overdueSla` del resumen. Además registra un evento `ESCALATED` ("Ticket expirado por SLA vencido") en su línea de tiempo.
+
+## GET /tickets/{id}/timeline
+
+Línea de tiempo (historial) del ticket, ordenada de más antigua a más reciente. Autenticado. `404` si el ticket no existe.
+
+```json
+[
+  {
+    "id": "0f3b...",
+    "ticketId": "e392...",
+    "tipo": "PRIORITIZED",
+    "descripcion": "Prioridad asignada: HIGH (SLA 8h)",
+    "actorEmail": "agente@serviceflow.com",
+    "actorNombre": "Agente Uno",
+    "fecha": "2026-09-16T23:59:47.833Z"
+  }
+]
+```
+
+Cada evento de la línea de tiempo:
+
+| Tipo | Descripción que se registra |
+|---|---|
+| `CREATED` | Ticket creado |
+| `CATEGORIZED` | Categoría asignada: `CODIGO` |
+| `PRIORITIZED` | Prioridad asignada: `PRIORIDAD` (SLA `Nh`) |
+| `ASSIGNED` | Asignado al agente `NOMBRE` |
+| `APPROVED` | Ticket aprobado |
+| `STARTED` | Trabajo iniciado |
+| `ESCALATED` | Ticket escalado manualmente · o "Ticket expirado por SLA vencido" (automático, actor "Sistema (SLA)") |
+| `RESOLVED` | Ticket resuelto |
+| `CLOSED` | Ticket cerrado |
+
+`actorEmail` y `actorNombre` identifican quién realizó la acción (el usuario autenticado de la llamada). Para más de un usuario con la misma acción, se dejan `null`. La fecha es UTC.
 
 ## POST /tickets
 
