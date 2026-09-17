@@ -15,7 +15,7 @@ export async function getTickets({
   limit = 10,
   offset = 0,
   category,
-  status,
+  group,
   priority,
   search,
 } = {}) {
@@ -25,7 +25,7 @@ export async function getTickets({
     offset,
     sort: "desc",
     category,
-    status,
+    group,
     priority,
     search: search?.trim(), // Limpiamos espacios innecesarios
   };

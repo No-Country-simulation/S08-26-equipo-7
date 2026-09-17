@@ -1,6 +1,6 @@
 import { useEffect,useState } from "react";
 
-import { getTickets } from "@/features/tickets/services/ticketApi"; // Ajusta la ruta a tu servicio
+import { getTickets } from "@/features/tickets/services/ticketApi";
 
 export function useTickets(params = { limit: 5 }) {
   const [tickets, setTickets] = useState([]);

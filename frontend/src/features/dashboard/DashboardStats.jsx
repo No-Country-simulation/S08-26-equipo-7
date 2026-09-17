@@ -2,7 +2,7 @@ import { Award,CircleCheck,Clock,OctagonAlert,Skull,Ticket,TrendingDown,Trending
 import { useEffect,useState } from 'react';
 
 import StatCard from '@/components/StatCard';
-import { getSummaryStats } from '@/features/tickets/services/statsApi';
+import { getSummaryStats } from '@/features/tickets/services/statsSummaryApi';
 
 export default function DashboardStats() {
   const [summaryStats, setSummaryStats] = useState(null);

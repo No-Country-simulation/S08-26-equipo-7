@@ -8,7 +8,7 @@ export default function TicketsPage() {
   const [filters, setFilters] = useState({
     search: "",
     category: "",
-    status: "",
+    group: "",
     priority: "",
   });
 

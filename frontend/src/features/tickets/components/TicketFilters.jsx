@@ -11,7 +11,7 @@ export default function TicketFilters({ filters, onFilterChange }) {
       </div>
       <div className="flex flex-col w-full gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
         <TicketCategoryFilter value={filters.category} onChange={(val) => onFilterChange("category", val)} />
-        <TicketStatusFilter value={filters.status} onChange={(val) => onFilterChange("status", val)} />
+        <TicketStatusFilter value={filters.group} onChange={(val) => onFilterChange("group", val)} />
         <TicketPriorityFilter value={filters.priority} onChange={(val) => onFilterChange("priority", val)} />
       </div>
     </div>
