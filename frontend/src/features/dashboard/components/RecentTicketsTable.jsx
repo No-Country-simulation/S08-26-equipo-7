@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import TableManager from "@/features/tickets/components/table/TableManager";
+import TableSkeleton from "@/features/tickets/components/table/TableSkeleton";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
 export default function RecentTicketsTable() {
@@ -17,9 +18,18 @@ export default function RecentTicketsTable() {
           </div>
         </Link>
       </div>
-      {loading && <p className="p-4 text-center" role="status">Cargando solicitudes...</p>}
-      {error && <p className="p-4 text-center text-destructive" role="alert">No se pudieron cargar las solicitudes.</p>}
-      {!loading && !error && <TableManager tickets={tickets} />}
+      {loading && <TableSkeleton mobile />}
+      {error && (
+        <p className="p-6 text-center text-destructive" role="alert">
+          No se pudieron cargar las solicitudes recientes.
+        </p>
+      )}
+      {!loading && !error && tickets.length === 0 && (
+        <p className="p-6 text-center text-muted-foreground" role="status">
+          Todavía no hay solicitudes recientes.
+        </p>
+      )}
+      {!loading && !error && tickets.length > 0 && <TableManager tickets={tickets} />}
     </div>
   );
 }

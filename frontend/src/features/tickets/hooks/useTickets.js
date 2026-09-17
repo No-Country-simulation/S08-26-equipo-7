@@ -15,6 +15,7 @@ export function useTickets(params = { limit: 5, offset: 0 }) {
     async function fetchTickets() {
       try {
         setLoading(true);
+        setError(null);
         const data = await getTickets(JSON.parse(paramsKey));
         setTickets(data.items);
         setTotal(data.total);

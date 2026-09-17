@@ -1,3 +1,4 @@
+import { Inbox } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -10,6 +11,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import TableManager from "@/features/tickets/components/table/TableManager";
+import TableSkeleton from "@/features/tickets/components/table/TableSkeleton";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
 export default function Table({ filters, onPageChange }) {
@@ -22,6 +24,7 @@ export default function Table({ filters, onPageChange }) {
 
   const totalPages = Math.ceil(total / limit) || 1;
   const currentPage = Math.min(Math.floor(offset / limit) + 1, totalPages);
+  const hasActiveFilters = Object.values(filters || {}).some(Boolean);
 
   const getPageNumbers = () => {
     if (totalPages <= 5) {
@@ -52,10 +55,28 @@ export default function Table({ filters, onPageChange }) {
 
   return (
     <div className="py-4 bg-card rounded-lg my-4 border border-border shadow-md">
-      <TableManager tickets={tickets} resume={false} />
-      
-      {loading && <p className="p-4 text-center">Cargando...</p>}
-      {error && <p className="p-4 text-center text-destructive">Error al cargar los tickets</p>}
+      {loading && <TableSkeleton />}
+      {!loading && error && (
+        <p className="p-6 text-center text-destructive" role="alert">
+          No se pudieron cargar los Tickets. Inténtalo de nuevo.
+        </p>
+      )}
+      {!loading && !error && tickets.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-4 text-center text-muted-foreground" role="status">
+          <div className="w-16 h-16 mb-4 bg-foreground/10 rounded-lg flex items-center justify-center ">
+            <Inbox className=" size-10" />
+          </div>
+          <p className="text-2xl font-bold">Resultados no encontrados</p>
+          <p className="text-xs">
+            {hasActiveFilters
+              ? "Intenta modificar los filtros para ver mas opciones"
+              : "No hay Tickets para mostrar."}
+          </p>
+        </div>
+      )}
+      {!loading && !error && tickets.length > 0 && (
+        <TableManager tickets={tickets} resume={false} />
+      )}
 
       {!loading && !error && (
         <Pagination className="mt-4">

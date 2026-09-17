@@ -15,7 +15,7 @@ import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 export default function MobileTable({ tickets, resume }) {
   return(
     <Table>
-      <TableBody className="border border-border">
+      <TableBody className="border border-border ">
         {tickets.map((ticket) => (
           <React.Fragment key={ticket.id}>
             <TableRow
