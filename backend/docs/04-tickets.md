@@ -126,6 +126,20 @@ Lista tickets con filtros opcionales por query string:
 GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH
 ```
 
+**Por defecto devuelve solo los tickets ACTIVOS** (todo menos `RESOLVED` y `CLOSED`), para que el listado no se llene de resueltos. Para traer todos se pasa `active=false`:
+
+```
+GET /tickets            // solo activos
+GET /tickets?active=false   // todos, incluidos resueltos y cerrados
+```
+
+Reglas del param `active`:
+
+- No se envía → solo activos.
+- `active=false` → todos.
+- `active=true` → fuerza solo activos aunque se pidan `status`/`group` de resueltos.
+- Si el request pide explícitamente un `status` o `group` (ej. `group=RESUELTO`) sin `active`, se respeta ese filtro (devuelve los resueltos pedidos): el "solo activos" por defecto aplica a la consulta general sin filtros de estado.
+
 **Los filtros devuelven todo si no se pasan** (son opcionales e independientes). Ejemplos:
 
 | Query | Resultado |
