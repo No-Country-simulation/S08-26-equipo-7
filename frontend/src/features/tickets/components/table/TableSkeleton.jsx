@@ -13,7 +13,7 @@ export default function TableSkeleton({ mobile = false }) {
         >
           {Array.from({ length: mobile ? 2 : 7 }, (_, cellIndex) => (
             <Skeleton
-              className={mobile ? "h-5" : cellIndex === 0 ? "h-6" : "h-5"}
+              className={mobile ? "h-5 bg-muted-foreground/20" : cellIndex === 0 ? "h-6 bg-muted-foreground/20" : "h-5 bg-muted-foreground/20"}
               key={cellIndex}
             />
           ))}

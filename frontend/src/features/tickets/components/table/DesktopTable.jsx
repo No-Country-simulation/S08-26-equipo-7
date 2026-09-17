@@ -17,7 +17,7 @@ import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 export default function DesktopTable({ tickets , resume }) {
   return (
     <Table>
-      <TableHeader className="bg-muted-foreground/10">
+      <TableHeader className="bg-muted-foreground/5">
         <TableRow >
           <TableHead className="text-muted-foreground font-bold text-xs text-center w-6/19">ID & TITULO</TableHead>
           {resume === false && <TableHead className="text-muted-foreground font-bold text-xs text-center w-3/19">SOLICITANTE</TableHead>}
