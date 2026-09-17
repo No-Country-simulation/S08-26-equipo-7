@@ -44,7 +44,7 @@ export default function TicketsTableDesktop({ tickets , resume }) {
                 <span>{ticket.title}</span>
               </div>
             </TableCell>
-            {resume === false && <TableCell>{ticket.createdByName}</TableCell>}
+            {resume === false && <TableCell className="text-center">{ticket.createdByName}</TableCell>}
             <TableCell className="text-center">{CATEGORY_CODE_CONFIG[ticket.category]?.label || ticket.category}</TableCell>
             <TableCell className="flex justify-center"><TicketPriorityBadge priority={ticket.priority} /></TableCell>
             <TableCell className="text-center">
