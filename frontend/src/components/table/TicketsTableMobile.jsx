@@ -47,7 +47,7 @@ export default function TicketsTableMobile({ tickets, resume }) {
             <TableRow key={`${ticket.id}-sla`}>
               <TableCell className="bg-muted-foreground/10 text-muted-foreground font-bold text-xs w-1/4 whitespace-normal">SLA RESTANTE</TableCell>
               <TableCell className="w-3/4 whitespace-normal wrap-break-words">
-                <SlaRemaining slaDueAt={ticket.slaDueAt} />
+                <SlaRemaining slaDueAt={ticket.slaDueAt} status={ticket.status} />
               </TableCell>
             </TableRow>
             <TableRow key={`${ticket.id}-status`}>

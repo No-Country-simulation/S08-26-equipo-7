@@ -48,7 +48,7 @@ export default function TicketsTableDesktop({ tickets , resume }) {
             <TableCell className="text-center">{CATEGORY_CODE_CONFIG[ticket.category]?.label || ticket.category}</TableCell>
             <TableCell className="flex justify-center"><TicketPriorityBadge priority={ticket.priority} /></TableCell>
             <TableCell className="text-center">
-              <SlaRemaining slaDueAt={ticket.slaDueAt} />
+              <SlaRemaining slaDueAt={ticket.slaDueAt} status={ticket.status} />
             </TableCell>
             <TableCell className="text-center"><TicketStatusBadge status={ticket.status} /></TableCell>
             <TableCell className="flex justify-center"> <Link to={`/tickets/${ticket.id}`}><ChevronRight /></Link> </TableCell>
