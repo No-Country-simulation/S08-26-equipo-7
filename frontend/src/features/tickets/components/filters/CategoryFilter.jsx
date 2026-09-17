@@ -1,14 +1,14 @@
 
 import { useEffect,useState } from "react";
 
-import SelectFilter from "@/components/SelectFilter";
+import SelectFilter from "@/features/tickets/components/filters/SelectFilter";
 import { getCategories } from "@/features/tickets/services/categoryApi";
 
 async function fetchCategories() {
   const categories = await getCategories();
   return categories;
 }
-export default function TicketCategoryFilter({ value = "", onChange }) {
+export default function CategoryFilter({ value = "", onChange }) {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     fetchCategories().then(setCategories);

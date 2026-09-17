@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import TicketsTableManager from "@/components/table/TicketsTableManager";
 import {
   Pagination,
   PaginationContent,
@@ -10,9 +9,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useTickets } from "@/hooks/useTickets";
+import TableManager from "@/features/tickets/components/table/TableManager";
+import { useTickets } from "@/features/tickets/hooks/useTickets";
 
-export default function TicketsTable({ filters, onPageChange }) {
+export default function Table({ filters, onPageChange }) {
   const [offsetPage, setOffsetPage] = useState(0);
 
   const { tickets, total = 0, offset = 0, limit = 10, loading, error } = useTickets({
@@ -52,7 +52,7 @@ export default function TicketsTable({ filters, onPageChange }) {
 
   return (
     <div className="py-4 bg-card rounded-lg my-4 border border-border shadow-md">
-      <TicketsTableManager tickets={tickets} resume={false} />
+      <TableManager tickets={tickets} resume={false} />
       
       {loading && <p className="p-4 text-center">Cargando...</p>}
       {error && <p className="p-4 text-center text-destructive">Error al cargar los tickets</p>}

@@ -1,6 +1,6 @@
 import { TICKET_STATUS_CONFIG } from "@/lib/ticketMappers";
 
-export default function TicketStatusBadge({ status }) {
+export default function StatusBadge({ status }) {
   const config = TICKET_STATUS_CONFIG[status] || TICKET_STATUS_CONFIG.SUBMITTED;
 
   return (

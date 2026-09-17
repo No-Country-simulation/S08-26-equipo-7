@@ -26,6 +26,7 @@ export default function SearchFilter({ value, onChange }){
   return(
     <InputGroup className="border border-border">
       <InputGroupInput
+        aria-label="Buscar tickets por ID, título o responsable"
         placeholder="Buscar ticket por ID, título o responsable..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

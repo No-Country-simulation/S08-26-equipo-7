@@ -2,8 +2,8 @@ import { useParams } from "react-router-dom";
 
 import { Skeleton } from "@/components/ui/skeleton";
 // Importamos los componentes puros de UI (tontos)
-import TicketDetailView from "@/features/tickets/components/TicketDetailView"; 
-import { useTicketDetails } from "@/hooks/useTicketDetails";
+import DetailView from "@/features/tickets/components/detail/DetailView";
+import { useTicketDetails } from "@/features/tickets/hooks/useTicketDetails";
 
 export default function TicketDetailPage() {
   const { id } = useParams();
@@ -24,7 +24,7 @@ export default function TicketDetailPage() {
   
   return (
     <div className="space-y-4 w-4/5 mx-auto">
-      <TicketDetailView ticket={ticket} />
+      <DetailView ticket={ticket} />
     </div>
   );
 }

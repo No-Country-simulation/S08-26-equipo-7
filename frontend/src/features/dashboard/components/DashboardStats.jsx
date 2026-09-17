@@ -1,7 +1,7 @@
 import { Award,CircleCheck,Clock,OctagonAlert,Skull,Ticket,TrendingDown,TrendingUp,TrendingUpDown,TriangleAlert } from 'lucide-react';
 import { useEffect,useState } from 'react';
 
-import StatCard from '@/components/StatCard';
+import StatCard from '@/features/dashboard/components/StatCard';
 import { getSummaryStats } from '@/features/tickets/services/statsSummaryApi';
 
 export default function DashboardStats() {

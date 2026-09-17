@@ -19,23 +19,22 @@ export async function getTickets({
   priority,
   search,
 } = {}) {
-  // 1. Agrupamos todos los parámetros en un objeto
+  const isAllOption = group === "all";
   const rawParams = {
     limit,
     offset,
     sort: "desc",
     category,
-    group,
+    group: isAllOption ? undefined : group,
+    active: isAllOption ? false : undefined,
     priority,
-    search: search?.trim(), // Limpiamos espacios innecesarios
+    search: search?.trim(),
   };
 
-  // 2. Filtramos claves que tengan valor (descartamos undefined, null, "")
   const cleanParams = Object.entries(rawParams).filter(
     ([, value]) => value !== undefined && value !== null && value !== ""
   );
 
-  // 3. Generamos los query params automáticamente y codificados
   const queryParams = new URLSearchParams(cleanParams).toString();
 
   return apiRequest(`tickets?${queryParams}`, {

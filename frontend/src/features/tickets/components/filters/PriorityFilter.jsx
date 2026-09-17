@@ -1,6 +1,6 @@
 import { useEffect,useState } from "react";
 
-import SelectFilter from "@/components/SelectFilter";
+import SelectFilter from "@/features/tickets/components/filters/SelectFilter";
 import { getPriority } from "@/features/tickets/services/priorityApi";
 
 async function fetchPriority() {
@@ -8,7 +8,7 @@ async function fetchPriority() {
   return priority;
 }
 
-export default function TicketPriorityFilter({ value = "", onChange }) {
+export default function PriorityFilter({ value = "", onChange }) {
   const [priority, setPriority] = useState([]);
   useEffect(() => {
     fetchPriority().then(setPriority);

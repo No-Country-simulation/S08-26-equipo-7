@@ -28,9 +28,9 @@ export default function AppSidebar() {
               <LayoutDashboard className="h-5 w-5 text-white min-[360px]:h-6 min-[360px]:w-6 sm:h-7 sm:w-7" />
             </div>
           </button>
-          <h1 className="absolute top-1/2 left-14 -translate-y-1/2 whitespace-nowrap text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-200 min-[360px]:text-base sm:text-2xl group-data-[collapsible=icon]:hidden">
+          <span className="absolute top-1/2 left-14 -translate-y-1/2 whitespace-nowrap text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-200 min-[360px]:text-base sm:text-2xl group-data-[collapsible=icon]:hidden">
             ServiceFlow
-          </h1>
+          </span>
           <SidebarTrigger className="absolute top-1/2 right-2 -translate-y-1/2! transition-none! group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>

@@ -1,4 +1,4 @@
-
+import { useId } from "react";
 
 import {
   Select,
@@ -12,10 +12,11 @@ import {
 
 
 export default function SelectFilter({ placeholder, label, options = [], value, onChange }) {
+  const id = useId();
 
   return(
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full border border-border p-4">
+      <SelectTrigger id={id} aria-label={label} className="w-full border border-border p-4">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

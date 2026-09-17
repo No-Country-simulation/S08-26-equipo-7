@@ -1,6 +1,6 @@
-import DashboardGreeting from "@/features/dashboard/DashboardGreeting";
-import DashboardStats from "@/features/dashboard/DashboardStats";
-import RecentTicketsTable from "@/features/dashboard/RecentTicketsTable";
+import DashboardGreeting from "@/features/dashboard/components/DashboardGreeting";
+import DashboardStats from "@/features/dashboard/components/DashboardStats";
+import RecentTicketsTable from "@/features/dashboard/components/RecentTicketsTable";
 
 export default function DashboardPage() {
   return (

@@ -1,5 +1,5 @@
 import { traslatePriority } from "@/i18n/es/priority";
-export default function TicketPriorityBadge({ priority }) {
+export default function PriorityBadge({ priority }) {
   const styles = {
     LOW: "text-muted-foreground bg-muted-foreground/10 border-muted-foreground/20",
     MEDIUM: "text-primary bg-primary/10 border-primary/20",

@@ -1,12 +1,12 @@
 import * as React from "react";
 
-import TicketsTableDesktop from "./TicketsTableDesktop";
-import TicketsTableMobile from "./TicketsTableMobile";
+import DesktopTable from "./DesktopTable";
+import MobileTable from "./MobileTable";
 
 const MOBILE_BREAKPOINT = 684;
 const MOBILE_BREAKPOINT_LARGE = 926;
 
-export default function TicketsTableManager({ isResume = false, ...props }) {
+export default function TableManager({ isResume = false, ...props }) {
   const containerRef = React.useRef(null);
   const [isMobile, setIsMobile] = React.useState(false);
 
@@ -24,7 +24,7 @@ export default function TicketsTableManager({ isResume = false, ...props }) {
 
   return (
     <div ref={containerRef}>
-      {isMobile ? <TicketsTableMobile {...props} /> : <TicketsTableDesktop {...props} />}
+      {isMobile ? <MobileTable {...props} /> : <DesktopTable {...props} />}
     </div>
   );
 };

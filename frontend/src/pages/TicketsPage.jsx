@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import InfoBanner from "@/components/InfoBanner";
-import TicketFilters from "@/features/tickets/components/TicketFilters";
-import TicketsTable from "@/features/tickets/components/TicketsTable";
+import Filters from "@/features/tickets/components/filters/Filters";
+import Table from "@/features/tickets/components/table/Table";
 
 export default function TicketsPage() {
   const [filters, setFilters] = useState({
@@ -24,8 +24,8 @@ export default function TicketsPage() {
         title="Listado Centralizado de Solicitudes"
         paragraph="Filtre, examine y supervise cada requerimiento interno de la compañía."
       />
-      <TicketFilters filters={filters} onFilterChange={handleFilterChange} />
-      <TicketsTable filters={filters} />
+      <Filters filters={filters} onFilterChange={handleFilterChange} />
+      <Table filters={filters} />
     </div>
   );
 }

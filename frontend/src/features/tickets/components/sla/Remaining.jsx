@@ -1,6 +1,6 @@
-import { useSlaCountdown } from "@/components/SlaCountdown";
+import { useSlaCountdown } from "@/features/tickets/hooks/useSlaCountdown";
 
-export default function SlaRemaining({ slaDueAt, status }) {
+export default function Remaining({ slaDueAt, status }) {
   const isResolved = status === "RESOLVED" || status === "CLOSED";
   const { timeLeft, isExpired, difference } = useSlaCountdown(slaDueAt);
   const isWarning = 12 * 60 * 60 * 1000;

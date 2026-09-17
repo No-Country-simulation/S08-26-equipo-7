@@ -12,9 +12,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import CreateTicketForm from "./CreateTicketForm";
+import CreateForm from "../forms/CreateForm";
 
-export default function CreateTicketDialog() {
+export default function CreateDialog() {
   const [open, setOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -66,7 +66,7 @@ export default function CreateTicketDialog() {
                   Completa los datos para registrar una nueva solicitud interna.
                 </DialogDescription>
               </DialogHeader>
-              <CreateTicketForm onSuccess={() => setShowSuccess(true)} />
+              <CreateForm onSuccess={() => setShowSuccess(true)} />
             </>
           )}
         </DialogContent>
