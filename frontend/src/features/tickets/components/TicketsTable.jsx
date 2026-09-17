@@ -15,15 +15,14 @@ import { useTickets } from "@/hooks/useTickets";
 export default function TicketsTable({ filters, onPageChange }) {
   const [offsetPage, setOffsetPage] = useState(0);
 
+  const { tickets, total = 0, offset = 0, limit = 10, loading, error } = useTickets({
+    ...filters,
+    offset: offsetPage,
+  });
 
-
-  const { tickets, total = 0, offsetResponse = 0, limit = 10, loading, error } = useTickets({ ...filters, offset: offsetPage });
-
-  // 1. Cálculos correctos de paginación
   const totalPages = Math.ceil(total / limit) || 1;
-  const currentPage = Math.floor(offsetResponse / limit) + 1;
+  const currentPage = Math.min(Math.floor(offset / limit) + 1, totalPages);
 
-  // 2. Lógica para limitar a máximo 5 elementos visibles con elipsis
   const getPageNumbers = () => {
     if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -42,6 +41,15 @@ export default function TicketsTable({ filters, onPageChange }) {
 
   const pages = getPageNumbers();
 
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) {
+      return;
+    }
+
+    setOffsetPage((page - 1) * limit);
+    onPageChange?.(page);
+  };
+
   return (
     <div className="py-4 bg-card rounded-lg my-4 border border-border shadow-md">
       <TicketsTableManager tickets={tickets} resume={false} />
@@ -52,25 +60,21 @@ export default function TicketsTable({ filters, onPageChange }) {
       {!loading && !error && (
         <Pagination className="mt-4">
           <PaginationContent>
-            {/* Botón Anterior */}
             <PaginationItem>
               <PaginationPrevious
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (currentPage > 1) {
-                    setOffsetPage((currentPage - 2) * limit);
-                    onPageChange?.(currentPage - 1);
-                  }
+                  goToPage(currentPage - 1);
                 }}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                aria-disabled={currentPage === 1}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : undefined}
               />
             </PaginationItem>
 
-            {/* Renderizado de Números y Elipsis */}
             {pages.map((page, index) => (
-              <PaginationItem key={index}>
-                {page === 'ellipsis' ? (
+              <PaginationItem key={page === "ellipsis" ? `ellipsis-${index}` : page}>
+                {page === "ellipsis" ? (
                   <PaginationEllipsis />
                 ) : (
                   <PaginationLink
@@ -78,8 +82,7 @@ export default function TicketsTable({ filters, onPageChange }) {
                     isActive={currentPage === page}
                     onClick={(e) => {
                       e.preventDefault();
-                      setOffsetPage((page - 1) * limit);
-                      onPageChange?.(page);
+                      goToPage(page);
                     }}
                   >
                     {page}
@@ -88,18 +91,15 @@ export default function TicketsTable({ filters, onPageChange }) {
               </PaginationItem>
             ))}
 
-            {/* Botón Siguiente */}
             <PaginationItem>
               <PaginationNext
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (currentPage < totalPages) {
-                    setOffsetPage(currentPage * limit);
-                    onPageChange?.(currentPage + 1);
-                  }
+                  goToPage(currentPage + 1);
                 }}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                aria-disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : undefined}
               />
             </PaginationItem>
           </PaginationContent>
