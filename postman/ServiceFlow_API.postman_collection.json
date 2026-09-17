@@ -324,7 +324,7 @@
 
                                                                  ],
                                                       "url":  {
-                                                                  "raw":  "{{baseUrl}}/tickets?status=\u0026group=\u0026category=\u0026priority=\u0026search=\u0026sort=desc\u0026limit=10\u0026offset=0",
+                                                                  "raw":  "{{baseUrl}}/tickets?active=false\u0026status=\u0026group=\u0026category=\u0026priority=\u0026search=\u0026sort=desc\u0026limit=10\u0026offset=0",
                                                                   "host":  [
                                                                                "{{baseUrl}}"
                                                                            ],
@@ -333,41 +333,48 @@
                                                                            ],
                                                                   "query":  [
                                                                                 {
+                                                                                    "key":  "active",
+                                                                                    "description":  "false = todos (incluye resueltos); omitir para solo activos (default)",
+                                                                                    "value":  "false"
+                                                                                },
+                                                                                {
                                                                                     "key":  "status",
-                                                                                    "value":  "",
-                                                                                    "description":  "Opcional"
+                                                                                    "description":  "opcional",
+                                                                                    "value":  ""
                                                                                 },
                                                                                 {
                                                                                     "key":  "group",
-                                                                                    "value":  "",
-                                                                                    "description":  "Opcional: PENDIENTE|EN_PROCESO|EN_APROBACION|EXPIRADO|RESUELTO"
+                                                                                    "description":  "opcional",
+                                                                                    "value":  ""
                                                                                 },
                                                                                 {
                                                                                     "key":  "category",
-                                                                                    "value":  "",
-                                                                                    "description":  "Opcional"
+                                                                                    "description":  "opcional",
+                                                                                    "value":  ""
                                                                                 },
                                                                                 {
                                                                                     "key":  "priority",
-                                                                                    "value":  "",
-                                                                                    "description":  "Opcional"
+                                                                                    "description":  "opcional",
+                                                                                    "value":  ""
                                                                                 },
                                                                                 {
                                                                                     "key":  "search",
-                                                                                    "value":  "",
-                                                                                    "description":  "Busca en cÃ³digo, ID, tÃ­tulo, creador y responsable"
+                                                                                    "description":  "opcional",
+                                                                                    "value":  ""
                                                                                 },
                                                                                 {
                                                                                     "key":  "sort",
-                                                                                    "value":  "desc",
-                                                                                    "description":  "asc|desc por updatedAt"
+                                                                                    "description":  "asc/desc por updatedAt",
+                                                                                    "value":  "desc"
                                                                                 },
                                                                                 {
                                                                                     "key":  "limit",
+                                                                                    "description":  "paginacion",
                                                                                     "value":  "10"
                                                                                 },
                                                                                 {
                                                                                     "key":  "offset",
+                                                                                    "description":  "paginacion",
                                                                                     "value":  "0"
                                                                                 }
                                                                             ]

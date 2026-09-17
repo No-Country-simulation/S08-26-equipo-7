@@ -283,7 +283,15 @@ Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prio
 Lista tickets con filtros opcionales por query string:
 `GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH`
 
-**Los filtros son opcionales e independientes** (si no se pasan, devuelve todo):
+**Por defecto devuelve solo los tickets ACTIVOS** (todo menos `RESOLVED`/`CLOSED`). Para traer todos: `GET /tickets?active=false`
+
+Reglas del param `active`:
+- No se envía → solo activos.
+- `active=false` → todos.
+- `active=true` → fuerza solo activos aun pidiendo `status`/`group` de resueltos.
+- Si se pide `status` o `group` explícito sin `active` (ej. `group=RESUELTO`), se respeta ese filtro.
+
+**Los filtros son opcionales e independientes** (si no se pasan, aplica el default de activos):
 
 | Query | Resultado |
 |---|---|
