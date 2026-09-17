@@ -18,7 +18,6 @@ export default function TicketsPage() {
       [key]: value,
     }));
   };
-  console.log(filters);
   return (
     <div className="space-y-4 w-4/5 mx-auto">
       <InfoBanner
