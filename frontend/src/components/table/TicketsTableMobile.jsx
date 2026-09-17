@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -16,7 +17,7 @@ export default function TicketsTableMobile({ tickets, resume }) {
     <Table>
       <TableBody className="border border-border">
         {tickets.map((ticket) => (
-          <>
+          <React.Fragment key={ticket.id}>
             <TableRow
               key={`${ticket.id}-title`}
               onClick={() => console.log(ticket)}
@@ -57,7 +58,7 @@ export default function TicketsTableMobile({ tickets, resume }) {
               <TableCell className="bg-muted-foreground/10 text-muted-foreground font-bold text-xs w-1/4 whitespace-normal border-b-4 border-border">ACCIÓN</TableCell>
               <TableCell className="w-3/4 whitespace-normal wrap-break-words text-primary border-b-4 border-border"><Link to={`/tickets/${ticket.id}`}>Ver detalles</Link></TableCell>
             </TableRow>
-          </>
+          </React.Fragment>
         ))}
       </TableBody>
     </Table>
