@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, LogOut, Ticket } from "lucide-react";
+import { BookOpen, ChartNoAxesCombined, LogOut, Ticket } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 import {
@@ -20,6 +20,11 @@ const navigationItems = [
     label: "Solicitudes",
     href: "/tickets",
     icon: Ticket,
+  },
+  {
+    label: "Base deConocimiento",
+    href: "/knowledge",
+    icon: BookOpen,
   },
 ];
 

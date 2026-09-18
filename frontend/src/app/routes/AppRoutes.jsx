@@ -5,6 +5,7 @@ import PublicRoute from "@/app/routes/PublicRoute";
 import AppLayout from "@/layout/AppLayout";
 import DashboardPage from "@/pages/DashboardPage";
 import ForgotPassPage from "@/pages/ForgotPassPage";
+import KnowledgePage from "@/pages/KnowledgePage"; 
 import LoginPage from "@/pages/LoginPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import TicketDetailPage from "@/pages/TicketDetailPage";
@@ -34,6 +35,7 @@ export default function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/tickets" element={<TicketsPage />} />
+          <Route path="/knowledge" element={<KnowledgePage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
         </Route>
       </Route>
