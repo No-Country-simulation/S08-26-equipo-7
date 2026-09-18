@@ -1,7 +1,9 @@
 package com.serviceflow.api.application.services;
 
 import com.serviceflow.api.application.ports.CategoriaRepositoryPort;
+import com.serviceflow.api.application.ports.NotificacionRepositoryPort;
 import com.serviceflow.api.application.ports.TicketEventoRepositoryPort;
+import com.serviceflow.api.application.ports.TicketMensajeRepositoryPort;
 import com.serviceflow.api.application.ports.TicketRepositoryPort;
 import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
 import com.serviceflow.api.adapters.in.dto.TicketResponse;
@@ -11,6 +13,7 @@ import com.serviceflow.api.domain.PrioridadTicket;
 import com.serviceflow.api.domain.RolUsuario;
 import com.serviceflow.api.domain.Ticket;
 import com.serviceflow.api.domain.TicketEvento;
+import com.serviceflow.api.domain.TicketMensaje;
 import com.serviceflow.api.domain.Usuario;
 import org.springframework.stereotype.Service;
 
@@ -38,15 +41,21 @@ public class TicketService {
     private final UsuarioRepositoryPort usuarioRepository;
     private final CategoriaRepositoryPort categoriaRepository;
     private final TicketEventoRepositoryPort eventoRepository;
+    private final TicketMensajeRepositoryPort mensajeRepository;
+    private final NotificacionService notificacionService;
 
     public TicketService(TicketRepositoryPort ticketRepository,
                          UsuarioRepositoryPort usuarioRepository,
                          CategoriaRepositoryPort categoriaRepository,
-                         TicketEventoRepositoryPort eventoRepository) {
+                         TicketEventoRepositoryPort eventoRepository,
+                         TicketMensajeRepositoryPort mensajeRepository,
+                         NotificacionService notificacionService) {
         this.ticketRepository = ticketRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
         this.eventoRepository = eventoRepository;
+        this.mensajeRepository = mensajeRepository;
+        this.notificacionService = notificacionService;
     }
 
     public Ticket createForRequester(String email, String title, String description, String categoryCode) {
@@ -59,6 +68,9 @@ public class TicketService {
     public Ticket create(String title, String description, Categoria category,
                          UUID userId, String email) {
         boolean requiresApproval = category != null && category.isRequiresApproval();
+        PrioridadTicket prioridad = category != null && category.getPrioridadDefecto() != null
+                ? category.getPrioridadDefecto()
+                : PrioridadTicket.MEDIUM;
         Ticket ticket = new Ticket(
                 null,
                 userId,
@@ -66,21 +78,85 @@ public class TicketService {
                 title,
                 category != null ? category.getCode() : null,
                 description,
-                PrioridadTicket.MEDIUM,
+                prioridad,
                 EstadoTicket.SUBMITTED,
                 requiresApproval,
                 null,
-                LocalDateTime.now().plus(SLA_BY_PRIORITY.get(PrioridadTicket.MEDIUM)),
+                LocalDateTime.now().plus(SLA_BY_PRIORITY.get(prioridad)),
                 null,
                 null,
                 LocalDateTime.now()
         );
         ticket.setCodigo(generarCodigo(category));
         Ticket saved = ticketRepository.save(ticket);
-        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "CREATED",
-                "Ticket creado", saved.getEmail(), usuarioRepository.findByEmail(saved.getEmail())
-                        .map(Usuario::getName).orElse(null)));
+        String creadorNombre = usuarioRepository.findByEmail(email).map(Usuario::getName).orElse(null);
+        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "CREATED", "Ticket creado", email, creadorNombre));
+
+        saved = autoCategorizar(saved, category);
+        saved = autoPriorizar(saved, prioridad);
+        saved = autoAsignar(saved, requiresApproval, email);
         return saved;
+    }
+
+    private Ticket autoCategorizar(Ticket ticket, Categoria category) {
+        ticket.setCategory(category.getCode());
+        ticket.setRequiresApproval(category.isRequiresApproval());
+        ticket.setStatus(EstadoTicket.CATEGORIZED);
+        Ticket saved = ticketRepository.save(ticket);
+        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "CATEGORIZED",
+                "Categoría asignada automáticamente: " + category.getCode(), null, "Sistema"));
+        return saved;
+    }
+
+    private Ticket autoPriorizar(Ticket ticket, PrioridadTicket prioridad) {
+        ticket.setPriority(prioridad);
+        ticket.setSlaDueAt(ticket.getSlaDueAt() != null
+                ? ticket.getSlaDueAt()
+                : LocalDateTime.now().plus(SLA_BY_PRIORITY.get(prioridad)));
+        ticket.setStatus(EstadoTicket.PRIORITIZED);
+        Ticket saved = ticketRepository.save(ticket);
+        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "PRIORITIZED",
+                "Prioridad asignada automáticamente: " + prioridad + " (SLA " + SLA_BY_PRIORITY.get(prioridad).toHours() + "h)",
+                null, "Sistema"));
+        return saved;
+    }
+
+    private Ticket autoAsignar(Ticket ticket, boolean requiereAprobacion, String requesterEmail) {
+        List<Usuario> agentes = usuarioRepository.findByRole(RolUsuario.AGENT);
+        if (agentes.isEmpty()) {
+            return ticket;
+        }
+        Usuario agente = agenteConMenosCarga(agentes);
+        ticket.setAssignedTo(agente.getId());
+        ticket.setStatus(EstadoTicket.ASSIGNED);
+        Ticket saved = ticketRepository.save(ticket);
+        eventoRepository.save(TicketEvento.nuevo(saved.getId(), "ASSIGNED",
+                "Asignado automáticamente al agente " + agente.getName(), null, "Sistema"));
+        notificacionService.notificar(agente.getId(), saved.getId(), "TICKET_ASIGNADO",
+                "Se te asignó el ticket " + saved.getCodigo() + ": " + saved.getTitle());
+        if (requiereAprobacion) {
+            eventoRepository.save(TicketEvento.nuevo(saved.getId(), "APPROVAL_REQUIRED",
+                    "Requiere autorización gerencial obligatoria", null, "Sistema"));
+            notificacionService.notificarSupervisores(saved.getId(), "APROBACION_REQUERIDA",
+                    "El ticket " + saved.getCodigo() + " de " + requesterEmail + " requiere aprobación");
+        }
+        return saved;
+    }
+
+    private Usuario agenteConMenosCarga(List<Usuario> agentes) {
+        List<Ticket> activos = ticketRepository.findAll().stream()
+                .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
+                .toList();
+        Usuario mejor = agentes.get(0);
+        long mejorCarga = Long.MAX_VALUE;
+        for (Usuario agente : agentes) {
+            long carga = activos.stream().filter(t -> agente.getId().equals(t.getAssignedTo())).count();
+            if (carga < mejorCarga) {
+                mejorCarga = carga;
+                mejor = agente;
+            }
+        }
+        return mejor;
     }
 
     private String generarCodigo(Categoria category) {
@@ -180,6 +256,12 @@ public class TicketService {
         Ticket saved = ticketRepository.save(ticket);
         String asignadoNombre = usuarioRepository.findById(assignedTo).map(Usuario::getName).orElse(null);
         registrarEvento(saved, "ASSIGNED", "Asignado al agente " + (asignadoNombre != null ? asignadoNombre : assignedTo), actorEmail);
+        notificacionService.notificar(assignedTo, saved.getId(), "TICKET_ASIGNADO",
+                "Se te asignó el ticket " + saved.getCodigo() + ": " + saved.getTitle());
+        if (saved.isRequiresApproval()) {
+            notificacionService.notificarSupervisores(saved.getId(), "APROBACION_REQUERIDA",
+                    "El ticket " + saved.getCodigo() + " requiere aprobación");
+        }
         return saved;
     }
 
@@ -193,6 +275,12 @@ public class TicketService {
         ticket.setStatus(EstadoTicket.APPROVED);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "APPROVED", "Ticket aprobado", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_APROBADO",
+                "Tu ticket " + saved.getCodigo() + " fue aprobado");
+        if (saved.getAssignedTo() != null) {
+            notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_APROBADO",
+                    "El ticket " + saved.getCodigo() + " fue aprobado, ya podés arrancar");
+        }
         return saved;
     }
 
@@ -215,6 +303,7 @@ public class TicketService {
         ticket.setStatus(EstadoTicket.ESCALATED);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "ESCALATED", "Ticket escalado manualmente", actorEmail);
+        notificarEscalado(saved);
         return saved;
     }
 
@@ -228,6 +317,8 @@ public class TicketService {
         ticket.setStatus(EstadoTicket.RESOLVED);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "RESOLVED", "Ticket resuelto", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_RESUELTO",
+                "Tu ticket " + saved.getCodigo() + " fue resuelto");
         return saved;
     }
 
@@ -242,7 +333,41 @@ public class TicketService {
         ticket.setStatus(EstadoTicket.CLOSED);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "CLOSED", "Ticket cerrado", actorEmail);
+        if (!isRequester) {
+            notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_CERRADO",
+                    "Tu ticket " + saved.getCodigo() + " fue cerrado");
+        }
         return saved;
+    }
+
+    public TicketMensaje agregarMensaje(UUID ticketId, String autorEmail, String mensajeTexto) {
+        Ticket ticket = findById(ticketId);
+        if (mensajeTexto == null || mensajeTexto.isBlank()) {
+            throw new InvalidTransitionException("El mensaje no puede estar vacío");
+        }
+        String autorNombre = usuarioRepository.findByEmail(autorEmail).map(Usuario::getName).orElse(null);
+        TicketMensaje guardado = mensajeRepository.save(
+                TicketMensaje.nuevo(ticketId, autorEmail, autorNombre, mensajeTexto.trim()));
+        eventoRepository.save(TicketEvento.nuevo(ticketId, "MESSAGE",
+                "Mensaje de " + (autorNombre != null ? autorNombre : autorEmail) + ": " + mensajeTexto.trim(),
+                autorEmail, autorNombre));
+        return guardado;
+    }
+
+    public List<TicketMensaje> mensajes(UUID ticketId) {
+        findById(ticketId);
+        return mensajeRepository.findByTicketId(ticketId);
+    }
+
+    private void notificarEscalado(Ticket ticket) {
+        notificacionService.notificarPorEmail(ticket.getEmail(), ticket.getId(), "TICKET_ESCALADO",
+                "Tu ticket " + ticket.getCodigo() + " fue escalado por vencimiento");
+        if (ticket.getAssignedTo() != null) {
+            notificacionService.notificar(ticket.getAssignedTo(), ticket.getId(), "TICKET_ESCALADO",
+                    "El ticket " + ticket.getCodigo() + " fue escalado");
+        }
+        notificacionService.notificarSupervisores(ticket.getId(), "TICKET_ESCALADO",
+                "El ticket " + ticket.getCodigo() + " se escaló por SLA vencido");
     }
 
     public List<TicketEvento> timeline(UUID id) {

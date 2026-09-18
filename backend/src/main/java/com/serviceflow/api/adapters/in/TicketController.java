@@ -193,6 +193,23 @@ public class TicketController {
         return safeGet(() -> ticketService.timeline(id));
     }
 
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<?> messages(@PathVariable UUID id) {
+        return safeGet(() -> ticketService.mensajes(id));
+    }
+
+    @PostMapping("/{id}/messages")
+    public ResponseEntity<?> addMessage(@PathVariable UUID id, @RequestBody MessageRequest request, Authentication auth) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    ticketService.agregarMensaje(id, email(auth), request.message()));
+        } catch (TicketNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (InvalidTransitionException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/{id}/categorize")
     public ResponseEntity<?> categorize(@PathVariable UUID id, @RequestParam String category, Authentication auth) {
         return safeTransition(() -> ticketService.categorize(id, category, role(auth), email(auth)));
@@ -280,5 +297,8 @@ public class TicketController {
     }
 
     public record CreateTicketRequest(String title, String description, String category) {
+    }
+
+    public record MessageRequest(String message) {
     }
 }

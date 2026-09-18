@@ -1,5 +1,6 @@
 package com.serviceflow.api.application.ports;
 
+import com.serviceflow.api.domain.RolUsuario;
 import com.serviceflow.api.domain.Usuario;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface UsuarioRepositoryPort {
     boolean existsByEmail(String email);
 
     List<Usuario> findAll();
+
+    List<Usuario> findByRole(RolUsuario role);
 }

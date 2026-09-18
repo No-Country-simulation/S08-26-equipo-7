@@ -10,7 +10,8 @@ public record CategoriaResponse(
         String name,
         String description,
         boolean active,
-        boolean requiresApproval
+        boolean requiresApproval,
+        String prioridadDefecto
 ) {
     public static CategoriaResponse from(Categoria categoria) {
         return new CategoriaResponse(
@@ -19,7 +20,8 @@ public record CategoriaResponse(
                 categoria.getName(),
                 categoria.getDescription(),
                 categoria.isActive(),
-                categoria.isRequiresApproval()
+                categoria.isRequiresApproval(),
+                categoria.getPrioridadDefecto() != null ? categoria.getPrioridadDefecto().name() : "MEDIUM"
         );
     }
 }

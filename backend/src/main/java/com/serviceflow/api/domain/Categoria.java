@@ -11,16 +11,24 @@ public class Categoria {
     private final String description;
     private final boolean active;
     private final boolean requiresApproval;
+    private final PrioridadTicket prioridadDefecto;
     private final LocalDateTime createdAt;
 
     public Categoria(UUID id, String code, String name, String description,
                      boolean active, boolean requiresApproval, LocalDateTime createdAt) {
+        this(id, code, name, description, active, requiresApproval, PrioridadTicket.MEDIUM, createdAt);
+    }
+
+    public Categoria(UUID id, String code, String name, String description,
+                     boolean active, boolean requiresApproval, PrioridadTicket prioridadDefecto,
+                     LocalDateTime createdAt) {
         this.id = id;
         this.code = code;
         this.name = name;
         this.description = description;
         this.active = active;
         this.requiresApproval = requiresApproval;
+        this.prioridadDefecto = prioridadDefecto;
         this.createdAt = createdAt;
     }
 
@@ -30,5 +38,6 @@ public class Categoria {
     public String getDescription() { return description; }
     public boolean isActive() { return active; }
     public boolean isRequiresApproval() { return requiresApproval; }
+    public PrioridadTicket getPrioridadDefecto() { return prioridadDefecto; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
