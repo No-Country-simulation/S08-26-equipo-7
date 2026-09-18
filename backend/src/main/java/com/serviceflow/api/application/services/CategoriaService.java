@@ -25,6 +25,11 @@ public class CategoriaService {
     }
 
     public Categoria create(String code, String name, String description, boolean requiresApproval) {
+        return create(code, name, description, requiresApproval, null);
+    }
+
+    public Categoria create(String code, String name, String description, boolean requiresApproval,
+                            com.serviceflow.api.domain.PrioridadTicket prioridadDefecto) {
         if (code == null || code.isBlank() || name == null || name.isBlank()) {
             throw new IllegalArgumentException("code and name are required");
         }
@@ -32,16 +37,26 @@ public class CategoriaService {
             throw new DuplicateCategoryException("Category already exists: " + code);
         }
         return categoriaRepository.save(new Categoria(
-                null, code.toUpperCase(), name, description, true, requiresApproval, null
+                null, code.toUpperCase(), name, description, true, requiresApproval,
+                prioridadDefecto != null ? prioridadDefecto : com.serviceflow.api.domain.PrioridadTicket.MEDIUM,
+                null
         ));
     }
 
     public Categoria update(UUID id, String name, String description, Boolean active, Boolean requiresApproval) {
+        return update(id, name, description, active, requiresApproval, null);
+    }
+
+    public Categoria update(UUID id, String name, String description, Boolean active, Boolean requiresApproval,
+                            com.serviceflow.api.domain.PrioridadTicket prioridadDefecto) {
         Categoria existing = categoriaRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
         String newName = name != null && !name.isBlank() ? name : existing.getName();
         boolean newActive = active != null ? active : existing.isActive();
         boolean newRequiresApproval = requiresApproval != null ? requiresApproval : existing.isRequiresApproval();
+        com.serviceflow.api.domain.PrioridadTicket newPrioridad = prioridadDefecto != null
+                ? prioridadDefecto
+                : existing.getPrioridadDefecto();
         return categoriaRepository.save(new Categoria(
                 existing.getId(),
                 existing.getCode(),
@@ -49,6 +64,7 @@ public class CategoriaService {
                 description != null ? description : existing.getDescription(),
                 newActive,
                 newRequiresApproval,
+                newPrioridad,
                 existing.getCreatedAt()
         ));
     }
