@@ -141,7 +141,7 @@ Crea un ticket y lo **auto-clasifica, auto-prioriza y auto-asigna** (ver *Automa
 
 ## Mensajes del ticket
 
-Hilo de comentarios/comunicaciones del ticket, separado de la línea de tiempo (aunque cada mensaje también deja un evento `MESSAGE`).
+Hilo de comentarios/comunicaciones del ticket, separado de la línea de tiempo (aunque cada mensaje también deja un evento `MESSAGE` y notifica a la contraparte como `TICKET_MENSAJE`).
 
 - `GET /tickets/{id}/messages` — lista los mensajes (más antiguo → más reciente). Autenticado.
 - `POST /tickets/{id}/messages` — body `{ "message": "..." }`; `201` con el mensaje creado, `409` si viene vacío, `404` si el ticket no existe.

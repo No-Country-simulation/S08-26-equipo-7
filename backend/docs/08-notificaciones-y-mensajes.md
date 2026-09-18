@@ -15,6 +15,7 @@ Sistema de avisos **in-app** por usuario. Se generan automáticamente en el back
 | `TICKET_CERRADO` | Se cierra el ticket (manual o auto-cierre) | Solicitante |
 | `TICKET_ESCALADO` | Escalado manual o por SLA | Solicitante, agente y supervisores |
 | `SLA_VENCIDO` | El scheduler marca el ticket como expirado | Solicitante, agente y supervisores |
+| `TICKET_MENSAJE` | Alguien agrega un mensaje al hilo del ticket | La contraparte: si comenta el solicitante → agente asignado; si comenta otro → solicitante |
 
 ### Endpoints
 

@@ -247,11 +247,11 @@ Agrega un mensaje al hilo del ticket. Autenticado. Body:
 - `201` con el mensaje creado (`autorEmail`/`autorNombre` del usuario autenticado).
 - `409` si el mensaje viene vacío.
 - `404` si el ticket no existe.
-- Además del hilo, se registra un evento `MESSAGE` en la línea de tiempo para trazabilidad.
+- Además del hilo, se registra un evento `MESSAGE` en la línea de tiempo y se notifica a la contraparte (`TICKET_MENSAJE`): si comenta el solicitante se avisa al agente asignado; si comenta cualquier otro, se avisa al solicitante.
 
 ## Notificaciones
 
-Sistema de avisos in-app por usuario. Se generan automáticamente en: creación/asignación (`TICKET_ASIGNADO`), aprobación requerida (`APROBACION_REQUERIDA`), aprobación (`TICKET_APROBADO`), resolución (`TICKET_RESUELTO`), cierre (`TICKET_CERRADO`), escalado (`TICKET_ESCALADO`) y vencimiento de SLA (`SLA_VENCIDO`).
+Sistema de avisos in-app por usuario. Se generan automáticamente en: creación/asignación (`TICKET_ASIGNADO`), aprobación requerida (`APROBACION_REQUERIDA`), aprobación (`TICKET_APROBADO`), resolución (`TICKET_RESUELTO`), cierre (`TICKET_CERRADO`), escalado (`TICKET_ESCALADO`), vencimiento de SLA (`SLA_VENCIDO`) y mensaje nuevo en el hilo (`TICKET_MENSAJE`).
 
 ### GET /notifications
 Notificaciones del usuario autenticado (más recientes primero) + contador de no leídas. Autenticado.
