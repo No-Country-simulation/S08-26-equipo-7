@@ -29,7 +29,11 @@ function calculateResolvedProgress(createdAt, slaDueAt, resolvedAt) {
 
 export function useProgress(createdAt, slaDueAt, resolvedAt) {
   const isResolved = hasResolvedAt(resolvedAt);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(() =>
+    isResolved
+      ? calculateResolvedProgress(createdAt, slaDueAt, resolvedAt)
+      : calculateProgress(createdAt, slaDueAt),
+  );
 
   useEffect(() => {
     const calculateCurrentProgress = () =>
@@ -37,14 +41,8 @@ export function useProgress(createdAt, slaDueAt, resolvedAt) {
         ? calculateResolvedProgress(createdAt, slaDueAt, resolvedAt)
         : calculateProgress(createdAt, slaDueAt);
 
-    setProgress(calculateCurrentProgress());
-
-    if (isResolved || calculateProgress(createdAt, slaDueAt) >= 100) {
-      return undefined;
-    }
-
     const actualizarProgress = () => {
-      const progreso = calculateProgress(createdAt, slaDueAt);
+      const progreso = calculateCurrentProgress();
 
       setProgress(progreso);
 
@@ -52,6 +50,11 @@ export function useProgress(createdAt, slaDueAt, resolvedAt) {
     };
 
     const initialUpdate = setTimeout(actualizarProgress, 0);
+
+    if (isResolved || calculateProgress(createdAt, slaDueAt) >= 100) {
+      return () => clearTimeout(initialUpdate);
+    }
+
     const interval = setInterval(() => {
       if (actualizarProgress()) clearInterval(interval);
     }, 60000);
