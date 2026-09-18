@@ -29,6 +29,7 @@ public class CategoriaRepositoryAdapter implements CategoriaRepositoryPort {
                 categoria.getDescription(),
                 categoria.isActive(),
                 categoria.isRequiresApproval(),
+                categoria.getPrioridadDefecto() != null ? categoria.getPrioridadDefecto().name() : "MEDIUM",
                 createdAt
         ));
         return toDomain(entity);
@@ -60,6 +61,12 @@ public class CategoriaRepositoryAdapter implements CategoriaRepositoryPort {
     }
 
     private Categoria toDomain(CategoriaEntity entity) {
+        com.serviceflow.api.domain.PrioridadTicket prioridad;
+        try {
+            prioridad = com.serviceflow.api.domain.PrioridadTicket.valueOf(entity.getPrioridadDefecto());
+        } catch (Exception e) {
+            prioridad = com.serviceflow.api.domain.PrioridadTicket.MEDIUM;
+        }
         return new Categoria(
                 entity.getId(),
                 entity.getCode(),
@@ -67,6 +74,7 @@ public class CategoriaRepositoryAdapter implements CategoriaRepositoryPort {
                 entity.getDescription(),
                 entity.isActive(),
                 entity.isRequiresApproval(),
+                prioridad,
                 entity.getCreatedAt()
         );
     }

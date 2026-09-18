@@ -56,7 +56,8 @@ public class CategoriaController {
         try {
             Categoria created = categoriaService.create(
                     request.code(), request.name(), request.description(),
-                    Boolean.TRUE.equals(request.requiresApproval())
+                    Boolean.TRUE.equals(request.requiresApproval()),
+                    parsePrioridad(request.prioridadDefecto())
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(CategoriaResponse.from(created));
         } catch (DuplicateCategoryException e) {
@@ -70,7 +71,8 @@ public class CategoriaController {
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody UpdateCategoryRequest request) {
         try {
             Categoria updated = categoriaService.update(
-                    id, request.name(), request.description(), request.active(), request.requiresApproval()
+                    id, request.name(), request.description(), request.active(), request.requiresApproval(),
+                    parsePrioridad(request.prioridadDefecto())
             );
             return ResponseEntity.ok(CategoriaResponse.from(updated));
         } catch (CategoryNotFoundException e) {
@@ -88,9 +90,22 @@ public class CategoriaController {
         }
     }
 
-    public record CreateCategoryRequest(String code, String name, String description, Boolean requiresApproval) {
+    private com.serviceflow.api.domain.PrioridadTicket parsePrioridad(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return com.serviceflow.api.domain.PrioridadTicket.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid prioridadDefecto: " + value);
+        }
     }
 
-    public record UpdateCategoryRequest(String name, String description, Boolean active, Boolean requiresApproval) {
+    public record CreateCategoryRequest(String code, String name, String description, Boolean requiresApproval,
+                                        String prioridadDefecto) {
+    }
+
+    public record UpdateCategoryRequest(String name, String description, Boolean active, Boolean requiresApproval,
+                                        String prioridadDefecto) {
     }
 }

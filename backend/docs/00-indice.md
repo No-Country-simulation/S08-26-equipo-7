@@ -41,3 +41,4 @@ Todas las respuestas son JSON. Los errores siguen el formato `{"error": "mensaje
 | [05-tickets-estadisticas.md](05-tickets-estadisticas.md) | `GET /tickets/stats/monthly`, `GET /tickets/stats/summary` |
 | [06-base-conocimiento.md](06-base-conocimiento.md) | `GET /knowledge`, `GET /knowledge/{id}`, `POST /knowledge/{id}/view`, `POST /knowledge`, `PUT /knowledge/{id}` |
 | [07-flujo-csrf.md](07-flujo-csrf.md) | Ejemplo completo: login → csrf → crear/transicionar ticket con CSRF |
+| [08-notificaciones-y-mensajes.md](08-notificaciones-y-mensajes.md) | Notificaciones in-app (`GET /notifications`, marcar leídas) y mensajes/comentarios del ticket |
