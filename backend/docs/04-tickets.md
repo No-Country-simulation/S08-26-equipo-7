@@ -141,20 +141,7 @@ Crea un ticket y lo **auto-clasifica, auto-prioriza y auto-asigna** (ver *Automa
 
 ## Mensajes del ticket
 
-Hilo de comentarios/comunicaciones del ticket, separado de la línea de tiempo (aunque cada mensaje también deja un evento `MESSAGE` y notifica a la contraparte como `TICKET_MENSAJE`).
-
-- `GET /tickets/{id}/messages` — lista los mensajes (más antiguo → más reciente). Autenticado.
-- `POST /tickets/{id}/messages` — body `{ "message": "..." }`; `201` con el mensaje creado, `409` si viene vacío, `404` si el ticket no existe.
-
-```json
-// POST body
-{ "message": "Necesario para desarrollo de interfaces" }
-```
-
-```json
-// respuesta
-{ "id": "…", "ticketId": "…", "autorEmail": "request@empresa.com", "autorNombre": "Usuario Uno", "mensaje": "Necesario para desarrollo de interfaces", "creadoEn": "2026-09-15T20:21:00.000Z" }
-```
+El hilo de comentarios del ticket tiene su propia documentación: ver [08-notificaciones-y-mensajes.md](08-notificaciones-y-mensajes.md). Resumen: `GET`/`POST /tickets/{id}/messages`; cada mensaje deja un evento `MESSAGE` en la línea de tiempo y notifica a la contraparte.
 
 ## GET /tickets
 
