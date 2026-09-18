@@ -7,7 +7,8 @@ export const API_DELAY_MS = Number.isFinite(configuredDelay)
   ? Math.max(0, configuredDelay)
   : 2000;
 
-export const API_DELAY_ENABLED = import.meta.env.VITE_API_DELAY_ENABLED !== "false";
+export const API_DELAY_ENABLED =
+  import.meta.env.VITE_API_DELAY_ENABLED !== "false";
 
 export function waitForApiDelay() {
   if (!API_DELAY_ENABLED || API_DELAY_MS === 0) {

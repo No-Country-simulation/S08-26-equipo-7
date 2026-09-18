@@ -11,7 +11,12 @@ export default function TicketDetailPage() {
 
   // El orquestador decide qué estado renderizar
   if (loading) {
-    return <div className="p-6 space-y-4"><Skeleton className="h-10 w-1/3" /><Skeleton className="h-40 w-full" /></div>;
+    return (
+      <div className="space-y-4 p-6">
+        <Skeleton className="h-10 w-1/3" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
   }
 
   if (error) {
@@ -21,9 +26,9 @@ export default function TicketDetailPage() {
   if (!ticket) {
     return <div className="p-6">Ticket no encontrado.</div>;
   }
-  
+
   return (
-    <div className="space-y-4 w-4/5 mx-auto">
+    <div className="mx-auto w-4/5 space-y-4">
       <DetailView ticket={ticket} />
     </div>
   );

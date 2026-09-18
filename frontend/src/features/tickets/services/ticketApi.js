@@ -1,10 +1,6 @@
 import { apiRequest } from "@/services/apiService";
 
-export async function createTicket({
-  title,
-  description,
-  category,
-}) {
+export async function createTicket({ title, description, category }) {
   return apiRequest("tickets", {
     method: "POST",
     body: { title, description, category },
@@ -32,7 +28,7 @@ export async function getTickets({
   };
 
   const cleanParams = Object.entries(rawParams).filter(
-    ([, value]) => value !== undefined && value !== null && value !== ""
+    ([, value]) => value !== undefined && value !== null && value !== "",
   );
 
   const queryParams = new URLSearchParams(cleanParams).toString();

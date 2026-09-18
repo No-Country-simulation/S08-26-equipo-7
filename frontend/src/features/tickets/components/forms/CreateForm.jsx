@@ -122,7 +122,7 @@ export default function CreateForm({ onSuccess }) {
         />
         <div className="flex items-start justify-between gap-2">
           <FieldError id="title-error" errors={state?.errors?.title} />
-          <span className="ml-auto text-xs text-muted-foreground">
+          <span className="text-muted-foreground ml-auto text-xs">
             {title.length}/{MAX_TITLE_LENGTH}
           </span>
         </div>
@@ -134,7 +134,7 @@ export default function CreateForm({ onSuccess }) {
           id="description"
           name="description"
           placeholder="Describe el problema, contexto y resultado esperado"
-          className="min-h-32 resize-y border border-border max-w-136"
+          className="border-border min-h-32 max-w-136 resize-y border"
           value={description}
           maxLength={MAX_DESCRIPTION_LENGTH}
           onChange={(event) => setDescription(event.target.value)}
@@ -149,7 +149,7 @@ export default function CreateForm({ onSuccess }) {
             id="description-error"
             errors={state?.errors?.description}
           />
-          <span className="ml-auto text-xs text-muted-foreground">
+          <span className="text-muted-foreground ml-auto text-xs">
             {description.length}/{MAX_DESCRIPTION_LENGTH}
           </span>
         </div>
@@ -157,7 +157,7 @@ export default function CreateForm({ onSuccess }) {
           <p
             role="alert"
             aria-live="polite"
-            className="my-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-center text-sm font-medium text-destructive"
+            className="border-destructive/30 bg-destructive/5 text-destructive my-2 rounded-md border px-3 py-2 text-center text-sm font-medium"
           >
             {state.error}
           </p>

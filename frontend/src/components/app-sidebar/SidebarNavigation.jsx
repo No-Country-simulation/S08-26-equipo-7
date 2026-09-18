@@ -15,7 +15,8 @@ const navigationItems = [
     label: "Resumen",
     href: "/dashboard",
     icon: ChartNoAxesCombined,
-  },{
+  },
+  {
     label: "Solicitudes",
     href: "/tickets",
     icon: Ticket,

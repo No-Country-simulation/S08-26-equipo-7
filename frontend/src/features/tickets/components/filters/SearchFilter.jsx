@@ -1,5 +1,5 @@
-import { Search } from "lucide-react"
-import { useEffect,useState } from "react";
+import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   InputGroup,
@@ -7,8 +7,8 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-export default function SearchFilter({ value, onChange }){
-  const[searchTerm, setSearchTerm] = useState(value);
+export default function SearchFilter({ value, onChange }) {
+  const [searchTerm, setSearchTerm] = useState(value);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,8 +23,8 @@ export default function SearchFilter({ value, onChange }){
 
     return () => clearTimeout(timer);
   }, [searchTerm, value, onChange]);
-  return(
-    <InputGroup className="border border-border">
+  return (
+    <InputGroup className="border-border border">
       <InputGroupInput
         aria-label="Buscar tickets por ID, título o responsable"
         placeholder="Buscar ticket por ID, título o responsable..."

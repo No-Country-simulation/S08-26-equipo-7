@@ -24,14 +24,14 @@ export default function NotificationPopover({ hasNotifications = true }) {
                 variant="ghost"
                 size="icon-2xl"
                 aria-label="Notificaciones"
-                className="relative size-8 cursor-pointer rounded-md border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground [&_svg]:size-5 sm:size-10 md:[&_svg]:size-6"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground relative size-8 cursor-pointer rounded-md border-0 bg-transparent sm:size-10 [&_svg]:size-5 md:[&_svg]:size-6"
               >
                 <span className="relative inline-flex size-5 items-center justify-center md:size-6">
                   <Bell className="size-5 md:size-6" />
                   {hasNotifications && (
                     <span
                       aria-hidden="true"
-                      className="absolute -top-1 -right-1 size-2 rounded-full bg-rose-500 animate-pulse md:-top-0.5 md:-right-0.5"
+                      className="absolute -top-1 -right-1 size-2 animate-pulse rounded-full bg-rose-500 md:-top-0.5 md:-right-0.5"
                     />
                   )}
                 </span>

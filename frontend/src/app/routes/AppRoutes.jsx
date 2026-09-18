@@ -1,4 +1,4 @@
-import { Navigate,Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "@/app/routes/ProtectedRoute";
 import PublicRoute from "@/app/routes/PublicRoute";
@@ -8,29 +8,28 @@ import ForgotPassPage from "@/pages/ForgotPassPage";
 import LoginPage from "@/pages/LoginPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import TicketDetailPage from "@/pages/TicketDetailPage";
-import TicketsPage from "@/pages/TicketsPage"; 
-
+import TicketsPage from "@/pages/TicketsPage";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
           <PublicRoute>
             <LoginPage />
           </PublicRoute>
-        } 
+        }
       />
-      <Route 
-        path="/forgot-password" 
+      <Route
+        path="/forgot-password"
         element={
           <PublicRoute>
             <ForgotPassPage />
           </PublicRoute>
-        } 
+        }
       />
-      
+
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />

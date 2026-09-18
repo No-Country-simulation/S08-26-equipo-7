@@ -1,5 +1,4 @@
-
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import SelectFilter from "@/features/tickets/components/filters/SelectFilter";
 import { getCategories } from "@/features/tickets/services/categoryApi";
@@ -13,17 +12,21 @@ export default function CategoryFilter({ value = "", onChange }) {
   useEffect(() => {
     fetchCategories().then(setCategories);
   }, []);
-  return(
+  return (
     <div>
-      <SelectFilter 
-        placeholder="Categorias" 
+      <SelectFilter
+        placeholder="Categorias"
         label="Categorías"
         value={value}
         onChange={onChange}
         options={[
           { value: "", label: "Todas las Categorías" },
-          ...categories.map(category => ({ value: category.code, label: category.name }))
-        ]} /> 
+          ...categories.map((category) => ({
+            value: category.code,
+            label: category.name,
+          })),
+        ]}
+      />
     </div>
   );
 }

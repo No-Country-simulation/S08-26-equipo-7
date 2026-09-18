@@ -18,7 +18,9 @@ function getCookie(name) {
     .split("; ")
     .find((entry) => entry.startsWith(`${name}=`));
 
-  return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : null;
+  return cookie
+    ? decodeURIComponent(cookie.split("=").slice(1).join("="))
+    : null;
 }
 
 function requiresCsrf(method, endpoint) {
@@ -36,7 +38,11 @@ function requiresCsrf(method, endpoint) {
   );
 }
 
-export async function apiRequest(endpoint, options = {}, _retryingAfterCsrf = false) {
+export async function apiRequest(
+  endpoint,
+  options = {},
+  _retryingAfterCsrf = false,
+) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
   const needsCsrf = requiresCsrf(method, endpoint);
@@ -87,10 +93,7 @@ export async function apiRequest(endpoint, options = {}, _retryingAfterCsrf = fa
       (publicEndpoint) => endpoint.replace(/^\/+/, "") === publicEndpoint,
     );
 
-    if (
-      !isPublicAuthEndpoint &&
-      response.status === 401
-    ) {
+    if (!isPublicAuthEndpoint && response.status === 401) {
       window.dispatchEvent(new CustomEvent("auth:expired"));
     }
 

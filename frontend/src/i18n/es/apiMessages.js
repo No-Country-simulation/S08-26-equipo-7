@@ -4,7 +4,8 @@ const API_MESSAGE_TRANSLATIONS = {
   "Ticket not found": "No se encontró el ticket",
   "Role not found": "No se encontró el rol del usuario",
   "This ticket does not require approval": "Este ticket no requiere aprobación",
-  "Too many requests, try again later": "Demasiadas solicitudes. Inténtalo más tarde",
+  "Too many requests, try again later":
+    "Demasiadas solicitudes. Inténtalo más tarde",
   "If the email exists, we will process the request":
     "Si el correo existe, procesaremos la solicitud",
 };
@@ -38,7 +39,10 @@ export function translateApiMessage(message, status) {
     return "Tu rol no permite realizar esta acción";
   }
 
-  if (message === "Only the requester, a supervisor or an admin can close the ticket") {
+  if (
+    message ===
+    "Only the requester, a supervisor or an admin can close the ticket"
+  ) {
     return "Solo el solicitante, un supervisor o un administrador pueden cerrar el ticket";
   }
 

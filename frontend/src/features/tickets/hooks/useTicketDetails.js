@@ -1,4 +1,4 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from "react";
 
 import { apiRequest } from "@/services/apiService";
 
@@ -14,7 +14,7 @@ export const useTicketDetails = (id) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const data = await apiRequest(`/tickets/${id}`);
         setTicket(data);
       } catch (err) {

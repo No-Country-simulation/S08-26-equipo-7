@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import SelectFilter from "@/features/tickets/components/filters/SelectFilter";
 import { getPriority } from "@/features/tickets/services/priorityApi";
@@ -13,14 +13,14 @@ export default function PriorityFilter({ value = "", onChange }) {
   useEffect(() => {
     fetchPriority().then(setPriority);
   }, []);
-  return(
+  return (
     <div>
-      <SelectFilter 
-        placeholder="Prioridades" 
-        label="Prioridades" 
+      <SelectFilter
+        placeholder="Prioridades"
+        label="Prioridades"
         options={[
           { value: "", label: "Todas las Prioridades" },
-          ...priority.map(p => ({ value: p.name, label: p.label }))
+          ...priority.map((p) => ({ value: p.name, label: p.label })),
         ]}
         value={value}
         onChange={onChange}

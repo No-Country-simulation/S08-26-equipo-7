@@ -6,148 +6,147 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    
-    /* Variables de Shadcn mapeadas */
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
+  --font-heading: var(--font-sans);
+  --font-sans: "Geist Variable", sans-serif;
 
-    /* Tus colores de Marca personalizados */
-    --color-brand-50: #eff6ff;
-    --color-brand-100: #dbeafe;
-    --color-brand-200: #bfdbfe;
-    --color-brand-300: #93c5fd;
-    --color-brand-400: #60a5fa;
-    --color-brand-500: #3b82f6;
-    --color-brand-600: #2563eb;
-    --color-brand-700: #1d4ed8;
-    --color-brand-800: #1e40af;
-    --color-brand-900: #1e3a8a;
-    --color-success: var(--success);
-    --color-warning: var(--warning);
+  /* Variables de Shadcn mapeadas */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
 
-    /* Tus Sombras personalizadas */
-    --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
-    --shadow-glow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+  /* Tus colores de Marca personalizados */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+  /* Tus Sombras personalizadas */
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
 
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
-    --background: #FAFAFA;
-    --foreground: #0F172A;
-    --card: #fefefe;
-    --card-foreground: #0F172A;
-    --popover: #FFFFFF;
-    --popover-foreground: #0F172A;
-    --primary: #2563eb;
-    --primary-foreground: #FFFFFF;
-    --secondary: #F8FAFC;
-    --secondary-foreground: #0F172A;
-    --muted: #F8FAFC;
-    --muted-foreground: #475569;
-    --accent: #F8FAFC;
-    --accent-foreground: #0F172A;
-    --destructive: #ec003f;
-    --border: #e2e8f0;
-    --input: #FFFFFF;
-    --ring: #2563eb;
-    --chart-1: #3b82f6;
-    --chart-2: #64748b;
-    --chart-3: #1d4ed8;
-    --chart-4: #93c5fd;
-    --chart-5: #1e3a8a;
-    --radius: 0.625rem;
-    --sidebar: #FFFFFF;
-    --sidebar-foreground: #0F172A;
-    --sidebar-primary: #2563eb;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F8FAFC;
-    --sidebar-accent-foreground: #0F172A;
-    --sidebar-border: #F1F5F9;
-    --sidebar-ring: #2563eb;
-    --success: oklch(59.6% 0.145 163.225);
-    --warning: oklch(76.9% 0.188 70.08);
+  --background: #fafafa;
+  --foreground: #0f172a;
+  --card: #fefefe;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f8fafc;
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #475569;
+  --accent: #f8fafc;
+  --accent-foreground: #0f172a;
+  --destructive: #ec003f;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #2563eb;
+  --chart-1: #3b82f6;
+  --chart-2: #64748b;
+  --chart-3: #1d4ed8;
+  --chart-4: #93c5fd;
+  --chart-5: #1e3a8a;
+  --radius: 0.625rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f8fafc;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #f1f5f9;
+  --sidebar-ring: #2563eb;
+  --success: oklch(59.6% 0.145 163.225);
+  --warning: oklch(76.9% 0.188 70.08);
 }
 
 .dark {
-    --background: #0F172A;
-    --foreground: #F1F5F9;
-    --card: #192234;
-    --card-foreground: #F1F5F9;
-    --popover: #1E293B;
-    --popover-foreground: #F1F5F9;
-    --primary: #3b82f6;
-    --primary-foreground: #FFFFFF;
-    --secondary: #334155;
-    --secondary-foreground: #F1F5F9;
-    --muted: #334155;
-    --muted-foreground: #CBD5E1;
-    --accent: #334155;
-    --accent-foreground: #F1F5F9;
-    --destructive: oklch(71.2% 0.194 13.428);
-    --border: #334155;
-    --input: #141d2f;
-    --ring: #3b82f6;
-    --chart-1: #1cabc2;
-    --chart-2: #94a3b8;
-    --chart-3: #2563eb;
-    --chart-4: #1d4ed8;
-    --chart-5: #1e3a8a;
-    --sidebar: #1E293B;
-    --sidebar-foreground: #F1F5F9;
-    --sidebar-primary: #3b82f6;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #334155;
-    --sidebar-accent-foreground: #F1F5F9;
-    --sidebar-border: #334155;
-    --sidebar-ring: #3b82f6;
-    --success: oklch(76.5% 0.177 163.223);
-    --warning: oklch(83% 0.15 80);
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #192234;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #334155;
+  --secondary-foreground: #f1f5f9;
+  --muted: #334155;
+  --muted-foreground: #cbd5e1;
+  --accent: #334155;
+  --accent-foreground: #f1f5f9;
+  --destructive: oklch(71.2% 0.194 13.428);
+  --border: #334155;
+  --input: #141d2f;
+  --ring: #3b82f6;
+  --chart-1: #1cabc2;
+  --chart-2: #94a3b8;
+  --chart-3: #2563eb;
+  --chart-4: #1d4ed8;
+  --chart-5: #1e3a8a;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: #3b82f6;
+  --success: oklch(76.5% 0.177 163.223);
+  --warning: oklch(83% 0.15 80);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  
+
   .body-app {
     min-height: 100vh;
     display: flex;
@@ -158,14 +157,27 @@
     color: var(--foreground);
     /* Fondo radial para el modo claro */
     background-color: #f8fafc;
-    background-image: radial-gradient(ellipse at top, #eff6ff, #f8fafc, #f8fafc);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    background-image: radial-gradient(
+      ellipse at top,
+      #eff6ff,
+      #f8fafc,
+      #f8fafc
+    );
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 
   /* Fondo radial exacto para el modo oscuro */
-  html.dark .body-auth, .dark .body-app {
+  html.dark .body-auth,
+  .dark .body-app {
     background-color: #020617;
-    background-image: radial-gradient(ellipse at top, #0f172a, #020617, #020617);
+    background-image: radial-gradient(
+      ellipse at top,
+      #0f172a,
+      #020617,
+      #020617
+    );
   }
 
   html {
@@ -175,11 +187,11 @@
 
 /* Estilos de botones principales con degradado (Login y Recuperar contraseña) */
 .btn-gradient-primary {
-  @apply bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md hover:shadow-lg hover:from-blue-700 hover:to-cyan-600 dark:hover:from-blue-500 dark:hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 h-11 px-6 py-2 rounded-xl text-sm font-semibold inline-flex items-center justify-center transition-all disabled:opacity-70 disabled:pointer-events-none;
+  @apply inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-cyan-600 hover:shadow-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none disabled:opacity-70 dark:hover:from-blue-500 dark:hover:to-cyan-400 dark:focus:ring-cyan-500 dark:focus:ring-offset-slate-800;
 }
 
 .color-brand-gradient {
-  @apply bg-gradient-to-br from-blue-600 to-cyan-500
+  @apply bg-gradient-to-br from-blue-600 to-cyan-500;
 }
 
 input[type="password"]::-ms-reveal {

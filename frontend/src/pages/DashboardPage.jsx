@@ -4,7 +4,7 @@ import RecentTicketsTable from "@/features/dashboard/components/RecentTicketsTab
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-4 w-4/5 mx-auto">
+    <div className="mx-auto w-4/5 space-y-4">
       <DashboardGreeting />
       <DashboardStats />
       <RecentTicketsTable />

@@ -1,8 +1,8 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { getCurrentUser, logout } from '@/features/auth/services/authService';
+import { getCurrentUser, logout } from "@/features/auth/services/authService";
 
-import { AuthContext } from './authContext';
+import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -61,7 +61,9 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginContext, logoutContext }}>
+    <AuthContext.Provider
+      value={{ user, loading, loginContext, logoutContext }}
+    >
       {children}
     </AuthContext.Provider>
   );

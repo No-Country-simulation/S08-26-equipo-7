@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 // En tu useSlaCountdown.js
 export const useSlaCountdown = (slaDueAt) => {
-  const [timeLeft, setTimeLeft] = useState('');
+  const [timeLeft, setTimeLeft] = useState("");
   const [isExpired, setIsExpired] = useState(false);
   const [difference, setDifference] = useState(0); // <-- Añadido
 
@@ -18,10 +18,14 @@ export const useSlaCountdown = (slaDueAt) => {
 
       const absDifference = Math.abs(diff);
       const days = Math.floor(absDifference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((absDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((absDifference % (1000 * 60 * 60)) / (1000 * 60));
+      const hours = Math.floor(
+        (absDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutes = Math.floor(
+        (absDifference % (1000 * 60 * 60)) / (1000 * 60),
+      );
 
-      let timeString = '';
+      let timeString = "";
       if (days > 0) timeString += `${days}d `;
       if (hours > 0) timeString += `${hours}h `;
       timeString += `${minutes}m`;

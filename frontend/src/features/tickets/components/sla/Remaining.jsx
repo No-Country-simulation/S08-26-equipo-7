@@ -10,8 +10,20 @@ export default function Remaining({ slaDueAt, status }) {
   }
 
   return (
-    <span className={isExpired ? "text-destructive" : difference < isWarning ? "text-warning" : "text-muted-foreground"}>
-      {isExpired ? `Vencido (${timeLeft})` : difference < isWarning ? `Por vencer (${timeLeft})` : timeLeft}
+    <span
+      className={
+        isExpired
+          ? "text-destructive"
+          : difference < isWarning
+            ? "text-warning"
+            : "text-muted-foreground"
+      }
+    >
+      {isExpired
+        ? `Vencido (${timeLeft})`
+        : difference < isWarning
+          ? `Por vencer (${timeLeft})`
+          : timeLeft}
     </span>
   );
 }

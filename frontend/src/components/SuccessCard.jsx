@@ -1,19 +1,18 @@
-import { CircleCheck } from 'lucide-react';
+import { CircleCheck } from "lucide-react";
 
-export default function SuccessCard ({ title, message, action }){
-
-  return(
-    <div className="flex flex-col items-center justify-center space-y-2 my-8">
-      <div className="w-16 h-16 flex items-center justify-center rounded-full bg-success/20 text-success">
+export default function SuccessCard({ title, message, action }) {
+  return (
+    <div className="my-8 flex flex-col items-center justify-center space-y-2">
+      <div className="bg-success/20 text-success flex h-16 w-16 items-center justify-center rounded-full">
         <CircleCheck size={36} />
       </div>
-      <div className="text-xl w-full flex justify-center font-semibold text-center">
-        { title }
+      <div className="flex w-full justify-center text-center text-xl font-semibold">
+        {title}
       </div>
-      <div className="text-sm w-full flex justify-center text-center text-muted-foreground">
-        { message }
+      <div className="text-muted-foreground flex w-full justify-center text-center text-sm">
+        {message}
       </div>
-      { action }
+      {action}
     </div>
   );
 }

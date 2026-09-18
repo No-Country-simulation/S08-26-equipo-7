@@ -1,9 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-import {
-  SidebarMenuButton,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 
 export default function SidebarMenuItemLink({
   icon: Icon,
@@ -24,11 +21,7 @@ export default function SidebarMenuItemLink({
   }
 
   return (
-    <SidebarMenuButton
-      asChild
-      isActive={to ? isActive : false}
-      tooltip={label}
-    >
+    <SidebarMenuButton asChild isActive={to ? isActive : false} tooltip={label}>
       <Component
         {...(to ? { to } : { type: "button" })}
         onClick={handleClick}
@@ -41,7 +34,7 @@ export default function SidebarMenuItemLink({
           aria-hidden="true"
           className="h-5 w-6 shrink-0 group-data-[collapsible=icon]:hidden"
         />
-        <span className="whitespace-nowrap text-xs min-[360px]:text-sm sm:text-sm group-data-[collapsible=icon]:hidden">
+        <span className="text-xs whitespace-nowrap group-data-[collapsible=icon]:hidden min-[360px]:text-sm sm:text-sm">
           {label}
         </span>
       </Component>
