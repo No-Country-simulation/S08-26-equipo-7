@@ -10,9 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Remaining from "@/features/tickets/components/sla/Remaining";
+import { useProgress } from "@/features/tickets/hooks/useProgress";
 import { getStatus } from "@/features/tickets/services/statusApi";
 
-import { useSlaCountdown } from "../../hooks/useSlaCountdown";
 
 async function fetchStatus() {
   const status = await getStatus();
@@ -22,17 +23,20 @@ async function fetchStatus() {
 export default function ControlPanel({ ticket }) {
   const [options, setOptions] = useState([]);
   const [valueOption, setValueOption] = useState(ticket.grupoEstado);
-  const { timeLeft, isExpired, difference } = useSlaCountdown(ticket.slaDueAt);
-
   useEffect(() => {
     fetchStatus().then(setOptions);
   }, []);
-  useEffect(() => {
-    console.log(valueOption);
-  }, [valueOption]);
-  console.log(timeLeft, isExpired, difference);
+  const isResolved =
+    ticket.resolvedAt !== null &&
+    ticket.resolvedAt !== undefined &&
+    String(ticket.resolvedAt).trim() !== "";
+  const progress = useProgress(
+    ticket.createdAt,
+    ticket.slaDueAt,
+    ticket.resolvedAt,
+  );
   return (
-    <div className="bg-card border-border order-3 rounded-lg border p-4 shadow-md lg:col-span-2 2xl:col-span-1">
+    <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
       <div className="border-border border-b text-lg font-semibold">
         Panel de Control & SLA
       </div>
@@ -58,8 +62,17 @@ export default function ControlPanel({ ticket }) {
         </SelectContent>
       </Select>
       <div className="mt-4">
-        <p className="text-muted-foreground text-sm">Progreso del SLA</p>
-        <Progress value={33} className="bg-foreground/15 h-2 w-full" />
+        <div className="mb-2 flex justify-between">
+          <p className="text-muted-foreground text-sm">Progreso del SLA</p>
+          <p className="text-sm">
+            <Remaining slaDueAt={ticket.slaDueAt} status={ticket.status} />
+          </p>
+        </div>
+        <Progress
+          value={progress}
+          indicatorClassName={isResolved ? "bg-success" : undefined}
+          className="bg-foreground/15 h-2 w-full"
+        />
       </div>
     </div>
   );

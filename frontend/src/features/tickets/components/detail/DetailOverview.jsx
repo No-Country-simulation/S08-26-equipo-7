@@ -1,7 +1,7 @@
 import PriorityBadge from "../badges/PriorityBadge";
 export default function DetailOverview({ ticket }) {
   return (
-    <div className="bg-card border-border order-2 rounded-lg border p-4 shadow-md lg:col-span-3">
+    <div className="bg-card border-border order-2 rounded-lg border p-4 shadow-md">
       <div className="flex items-center justify-between">
         <p className="text-md text-primary font-semibold">
           {ticket.category} • Creado por {ticket.createdByName}
