@@ -346,12 +346,29 @@ public class TicketService {
             throw new InvalidTransitionException("El mensaje no puede estar vacío");
         }
         String autorNombre = usuarioRepository.findByEmail(autorEmail).map(Usuario::getName).orElse(null);
+        String texto = mensajeTexto.trim();
         TicketMensaje guardado = mensajeRepository.save(
-                TicketMensaje.nuevo(ticketId, autorEmail, autorNombre, mensajeTexto.trim()));
+                TicketMensaje.nuevo(ticketId, autorEmail, autorNombre, texto));
         eventoRepository.save(TicketEvento.nuevo(ticketId, "MESSAGE",
-                "Mensaje de " + (autorNombre != null ? autorNombre : autorEmail) + ": " + mensajeTexto.trim(),
+                "Mensaje de " + (autorNombre != null ? autorNombre : autorEmail) + ": " + texto,
                 autorEmail, autorNombre));
+        notificarMensaje(ticket, autorEmail, autorNombre, texto);
         return guardado;
+    }
+
+    private void notificarMensaje(Ticket ticket, String autorEmail, String autorNombre, String texto) {
+        String resumen = texto.length() > 120 ? texto.substring(0, 117) + "..." : texto;
+        boolean esSolicitante = ticket.getEmail() != null && ticket.getEmail().equalsIgnoreCase(autorEmail);
+        if (esSolicitante) {
+            if (ticket.getAssignedTo() != null) {
+                notificacionService.notificar(ticket.getAssignedTo(), ticket.getId(), "TICKET_MENSAJE",
+                        "Nuevo mensaje del solicitante en " + ticket.getCodigo() + ": " + resumen);
+            }
+        } else {
+            notificacionService.notificarPorEmail(ticket.getEmail(), ticket.getId(), "TICKET_MENSAJE",
+                    "Nuevo mensaje de " + (autorNombre != null ? autorNombre : autorEmail)
+                            + " en el ticket " + ticket.getCodigo() + ": " + resumen);
+        }
     }
 
     public List<TicketMensaje> mensajes(UUID ticketId) {
