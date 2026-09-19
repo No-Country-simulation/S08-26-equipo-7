@@ -21,12 +21,14 @@ export default function MobileTable({ tickets, resume }) {
                 <div className="flex flex-col">
                   <Link
                     to={`/tickets/${ticket.id}`}
+                    state={{ ticket }}
                     className="text-primary focus-visible:ring-ring rounded-sm font-semibold underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
                   >
                     {ticket.codigo}
                   </Link>
                   <Link
                     to={`/tickets/${ticket.id}`}
+                    state={{ ticket }}
                     className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
                   >
                     {ticket.title}
@@ -82,7 +84,9 @@ export default function MobileTable({ tickets, resume }) {
                 ACCIÓN
               </TableCell>
               <TableCell className="wrap-break-words text-primary border-border w-3/4 border-b-4 whitespace-normal">
-                <Link to={`/tickets/${ticket.id}`}>Ver detalles</Link>
+                <Link to={`/tickets/${ticket.id}`} state={{ ticket }}>
+                  Ver detalles
+                </Link>
               </TableCell>
             </TableRow>
           </React.Fragment>

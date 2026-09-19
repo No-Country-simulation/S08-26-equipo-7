@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 // Importamos los componentes puros de UI (tontos)
 import DetailView from "@/features/tickets/components/detail/DetailView";
@@ -6,7 +6,8 @@ import { useTicketDetails } from "@/features/tickets/hooks/useTicketDetails";
 
 export default function TicketDetailPage() {
   const { id } = useParams();
-  const { ticket, loading, error } = useTicketDetails(id);
+  const { state } = useLocation();
+  const { ticket, loading, error } = useTicketDetails(id, state?.ticket);
 
   if (loading) {
     return (

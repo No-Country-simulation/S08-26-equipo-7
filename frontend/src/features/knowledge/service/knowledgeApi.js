@@ -8,3 +8,7 @@ export async function getKnowledge() {
     return [];
   }
 }
+
+export async function getKnowledgeById(id) {
+  return apiRequest(`/knowledge/${id}`);
+}

@@ -2,30 +2,33 @@ import { useEffect, useState } from "react";
 
 import { apiRequest } from "@/services/apiService";
 
-export const useTicketDetails = (id) => {
-  const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true);
+export const useTicketDetails = (id, initialTicket = null) => {
+  const [fetchedTicket, setFetchedTicket] = useState(null);
+  const [loadingRequest, setLoadingRequest] = useState(!initialTicket);
   const [error, setError] = useState(null);
 
+  const ticket = initialTicket ?? fetchedTicket;
+  const loading = initialTicket ? false : loadingRequest;
+
   useEffect(() => {
-    if (!id) return;
+    if (!id || initialTicket) return;
 
     const fetchTicket = async () => {
       try {
-        setLoading(true);
+        setLoadingRequest(true);
         setError(null);
 
         const data = await apiRequest(`/tickets/${id}`);
-        setTicket(data);
+        setFetchedTicket(data);
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false);
+        setLoadingRequest(false);
       }
     };
 
     fetchTicket();
-  }, [id]);
+  }, [id, initialTicket]);
 
   return { ticket, loading, error };
 };

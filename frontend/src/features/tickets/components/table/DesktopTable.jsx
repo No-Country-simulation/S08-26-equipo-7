@@ -51,12 +51,14 @@ export default function DesktopTable({ tickets, resume }) {
               <div className="flex flex-col">
                 <Link
                   to={`/tickets/${ticket.id}`}
+                  state={{ ticket }}
                   className="text-primary focus-visible:ring-ring rounded-sm font-semibold underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {ticket.codigo}
                 </Link>
                 <Link
                   to={`/tickets/${ticket.id}`}
+                  state={{ ticket }}
                   className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {ticket.title}
@@ -84,6 +86,7 @@ export default function DesktopTable({ tickets, resume }) {
               {" "}
               <Link
                 to={`/tickets/${ticket.id}`}
+                state={{ ticket }}
                 aria-label={`Ver detalles de ${ticket.codigo}`}
               >
                 <ChevronRight aria-hidden="true" />
