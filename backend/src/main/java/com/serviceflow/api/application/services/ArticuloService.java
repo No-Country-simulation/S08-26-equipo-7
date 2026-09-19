@@ -32,7 +32,8 @@ public class ArticuloService {
         }
         return articuloRepository.save(new Articulo(
                 null, titulo, descripcion, contenido, categoria,
-                0L, true, null, null
+                0L, 0L, 0L,
+                true, null, null
         ));
     }
 
@@ -47,6 +48,8 @@ public class ArticuloService {
                 contenido != null ? contenido : existing.getContenido(),
                 categoria != null && !categoria.isBlank() ? categoria : existing.getCategoria(),
                 existing.getVisualizaciones(),
+                existing.getMegusta(),
+                existing.getNomegusta(),
                 activo != null ? activo : existing.isActivo(),
                 existing.getCreatedAt(),
                 LocalDateTime.now()
@@ -63,10 +66,45 @@ public class ArticuloService {
                 existing.getContenido(),
                 existing.getCategoria(),
                 existing.getVisualizaciones() + 1,
+                existing.getMegusta(),
+                existing.getNomegusta(),
                 existing.isActivo(),
                 existing.getCreatedAt(),
                 LocalDateTime.now()
         ));
         return updated.getVisualizaciones();
+    }
+
+    public Articulo registrarVoto(UUID id, boolean megusta) {
+        Articulo existing = articuloRepository.findById(id)
+                .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
+        long nuevoMegusta = existing.getMegusta() + (megusta ? 1 : 0);
+        long nuevoNomegusta = existing.getNomegusta() + (megusta ? 0 : 1);
+        Articulo updated = articuloRepository.save(new Articulo(
+                existing.getId(),
+                existing.getTitulo(),
+                existing.getDescripcion(),
+                existing.getContenido(),
+                existing.getCategoria(),
+                existing.getVisualizaciones(),
+                nuevoMegusta,
+                nuevoNomegusta,
+                existing.isActivo(),
+                existing.getCreatedAt(),
+                LocalDateTime.now()
+        ));
+        return updated;
+    }
+
+    public double calcularSatisfaccion(Articulo articulo) {
+        long total = articulo.getMegusta() + articulo.getNomegusta();
+        if (total == 0) return 0.0;
+        return (articulo.getMegusta() * 100.0) / total;
+    }
+
+    public int calcularTiempoLecturaMin(Articulo articulo) {
+        if (articulo.getContenido() == null || articulo.getContenido().isBlank()) return 1;
+        int palabras = articulo.getContenido().trim().split("\\s+").length;
+        return Math.max(1, (int) Math.ceil(palabras / 200.0));
     }
 }
