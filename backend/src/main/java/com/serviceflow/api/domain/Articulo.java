@@ -11,18 +11,23 @@ public class Articulo {
     private final String contenido;
     private final String categoria;
     private final long visualizaciones;
+    private final long megusta;
+    private final long nomegusta;
     private final boolean activo;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
     public Articulo(UUID id, String titulo, String descripcion, String contenido, String categoria,
-                    long visualizaciones, boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                    long visualizaciones, long megusta, long nomegusta,
+                    boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.contenido = contenido;
         this.categoria = categoria;
         this.visualizaciones = visualizaciones;
+        this.megusta = megusta;
+        this.nomegusta = nomegusta;
         this.activo = activo;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -34,6 +39,8 @@ public class Articulo {
     public String getContenido() { return contenido; }
     public String getCategoria() { return categoria; }
     public long getVisualizaciones() { return visualizaciones; }
+    public long getMegusta() { return megusta; }
+    public long getNomegusta() { return nomegusta; }
     public boolean isActivo() { return activo; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

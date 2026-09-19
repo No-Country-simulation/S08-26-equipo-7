@@ -12,7 +12,12 @@ Artículos para la sección "Base de Conocimiento & Auto-Servicio": tarjetas con
 | `contenido` | Texto completo del artículo |
 | `categoria` | Code de la categoría (ej. `IT`, `ACCESS`, `FINANCE`, `FACILITIES`) |
 | `visualizaciones` | Contador de lecturas/vistas |
+| `megusta` | Votos positivos (útil) |
+| `nomegusta` | Votos negativos (no útil) |
+| `satisfaccion` | Porcentaje de satisfacción (`megusta / (megusta + nomegusta) * 100`) |
+| `tiempoLecturaMin` | Tiempo estimado de lectura en minutos (basado en ~200 palabras/min) |
 | `activo` | Si está publicado (`true`) o desactivado (`false`) |
+| `actualizadoEn` | Fecha de última actualización (UTC) |
 
 ## GET /knowledge
 
@@ -43,6 +48,23 @@ Incrementa en 1 las `visualizaciones` del artículo. **Público** y sin CSRF (es
 // respuesta 200
 { "id": "11111111-...", "visualizaciones": 1403 }
 ```
+
+## POST /knowledge/{id}/votar
+
+Registra un voto de satisfacción (útil / no útil) en el artículo. **Público** y sin CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado:
+
+```json
+// respuesta 200
+{
+  "id": "11111111-...",
+  "megusta": 42,
+  "nomegusta": 3,
+  "satisfaccion": 93.33,
+  "tiempoLecturaMin": 5
+}
+```
+
+- `404` si el artículo no existe.
 
 ## POST /knowledge
 

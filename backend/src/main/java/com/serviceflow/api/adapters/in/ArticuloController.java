@@ -54,6 +54,27 @@ public class ArticuloController {
         }
     }
 
+    @PostMapping("/{id}/votar")
+    public ResponseEntity<?> votar(@PathVariable UUID id, @RequestBody VotarRequest request) {
+        try {
+            Articulo updated = articuloService.registrarVoto(id, request.megusta());
+            double satisfaccion = articuloService.calcularSatisfaccion(updated);
+            int tiempoLectura = articuloService.calcularTiempoLecturaMin(updated);
+            return ResponseEntity.ok(Map.of(
+                    "id", id.toString(),
+                    "megusta", updated.getMegusta(),
+                    "nomegusta", updated.getNomegusta(),
+                    "satisfaccion", Math.round(satisfaccion * 100.0) / 100.0,
+                    "tiempoLecturaMin", tiempoLectura
+            ));
+        } catch (ArticuloNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    public record VotarRequest(boolean megusta) {
+    }
+
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateArticleRequest request) {
         try {
