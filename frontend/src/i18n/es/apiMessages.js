@@ -39,6 +39,10 @@ export function translateApiMessage(message, status) {
     return "Tu rol no permite realizar esta acción";
   }
 
+  if (message === "Forbidden: insufficient role") {
+    return "La sesión fue rechazada por seguridad. Vuelve a iniciar sesión e inténtalo de nuevo";
+  }
+
   if (
     message ===
     "Only the requester, a supervisor or an admin can close the ticket"

@@ -4,6 +4,7 @@ import { waitForApiDelay } from "@/config/apiConfig";
 import { translateApiMessage } from "@/i18n/es/apiMessages";
 
 const API_URL = import.meta.env.VITE_API_URL;
+let csrfTokenPromise;
 
 function buildUrl(endpoint) {
   if (!API_URL) {
@@ -23,46 +24,52 @@ function getCookie(name) {
     : null;
 }
 
-function requiresCsrf(method, endpoint) {
-  const normalizedEndpoint = endpoint.replace(/^\/+/, "");
-  const publicEndpoints = [
-    "auth/login",
-    "auth/recover-password",
-    "auth/logout",
-  ];
-  const safeMethods = ["GET", "HEAD", "OPTIONS"];
-
-  return (
-    !safeMethods.includes(method) &&
-    !publicEndpoints.includes(normalizedEndpoint)
-  );
+function requiresCsrf(method) {
+  return method === "POST";
 }
 
 async function ensureCsrfToken() {
-  if (getCookie("XSRF-TOKEN")) {
-    return;
+  const cookieToken = getCookie("XSRF-TOKEN");
+  if (cookieToken) {
+    return cookieToken;
   }
 
-  const response = await fetch(buildUrl("auth/csrf"), {
-    credentials: "include",
-  });
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = fetch(buildUrl("auth/csrf"), {
+      credentials: "include",
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
+        const csrfToken = getCookie("XSRF-TOKEN") || data?.token;
 
-  if (!response.ok || !getCookie("XSRF-TOKEN")) {
-    throw new Error("No se pudo obtener el token de seguridad del servidor.");
+        if (!response.ok || !csrfToken) {
+          throw new Error(
+            "No se pudo obtener el token de seguridad del servidor.",
+          );
+        }
+
+        return csrfToken;
+      })
+      .finally(() => {
+        csrfTokenPromise = null;
+      });
   }
+
+  return csrfTokenPromise;
+}
+
+export function initializeCsrfToken() {
+  return ensureCsrfToken();
 }
 
 export async function apiRequest(endpoint, options = {}) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
-  const needsCsrf = requiresCsrf(method, endpoint);
-  const csrfToken = needsCsrf ? getCookie("XSRF-TOKEN") : null;
+  const needsCsrf = requiresCsrf(method);
   let response;
 
   try {
-    if (needsCsrf) {
-      await ensureCsrfToken();
-    }
+    const csrfToken = needsCsrf ? await ensureCsrfToken() : null;
 
     // TEMPORAL: elimina esta línea para desactivar completamente el delay simulado.
     await waitForApiDelay();
