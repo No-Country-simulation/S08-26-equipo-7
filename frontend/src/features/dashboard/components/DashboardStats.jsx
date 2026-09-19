@@ -17,21 +17,26 @@ import { getSummaryStats } from "@/features/tickets/services/statsSummaryApi";
 
 export default function DashboardStats() {
   const [summaryStats, setSummaryStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [percentChange, setPercentChange] = useState(0);
 
   useEffect(() => {
     async function fetchSummaryStats() {
-      const stats = await getSummaryStats();
-      setSummaryStats(stats);
-      setPercentChange(
-        parseFloat(
-          (
-            ((stats?.activeTickets - stats?.activePrevMonth) /
-              (stats?.activePrevMonth || 1)) *
-            100
-          ).toFixed(2),
-        ),
-      );
+      try {
+        const stats = await getSummaryStats();
+        setSummaryStats(stats);
+        setPercentChange(
+          parseFloat(
+            (
+              ((stats?.activeTickets - stats?.activePrevMonth) /
+                (stats?.activePrevMonth || 1)) *
+              100
+            ).toFixed(2),
+          ),
+        );
+      } finally {
+        setLoading(false);
+      }
     }
     fetchSummaryStats();
   }, []);
@@ -42,6 +47,7 @@ export default function DashboardStats() {
         label="TICKETS ACTIVOS"
         value={summaryStats?.activeTickets}
         icon={<Ticket />}
+        loading={loading}
         iconText={
           percentChange > 0 ? (
             <TrendingUp />
@@ -64,6 +70,7 @@ export default function DashboardStats() {
         label="PRÓXIMOS A VENCER SLA"
         value={summaryStats?.nearSlaExpiry}
         icon={<Clock />}
+        loading={loading}
         iconText={
           summaryStats?.nearSlaExpiry > 0 ? <TriangleAlert /> : <CircleCheck />
         }
@@ -75,6 +82,7 @@ export default function DashboardStats() {
         label="FUERA DE SLA"
         value={summaryStats?.overdueSla || 0}
         icon={<OctagonAlert />}
+        loading={loading}
         iconText={
           summaryStats?.overdueSla > 0 ? <TrendingDown /> : <CircleCheck />
         }
@@ -86,6 +94,7 @@ export default function DashboardStats() {
         label="CUMPLIMIENTO SLA"
         value={`${summaryStats?.slaCompliance}%`}
         icon={<Award />}
+        loading={loading}
         iconText={
           summaryStats?.slaCompliance >= 90 ? (
             <CircleCheck />

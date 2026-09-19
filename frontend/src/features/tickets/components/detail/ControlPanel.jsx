@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import Remaining from "@/features/tickets/components/sla/Remaining";
 import { useProgress } from "@/features/tickets/hooks/useProgress";
 import { getStatus } from "@/features/tickets/services/statusApi";
@@ -22,9 +23,12 @@ async function fetchStatus() {
 
 export default function ControlPanel({ ticket }) {
   const [options, setOptions] = useState([]);
+  const [loadingOptions, setLoadingOptions] = useState(true);
   const [valueOption, setValueOption] = useState(ticket.grupoEstado);
   useEffect(() => {
-    fetchStatus().then(setOptions);
+    fetchStatus()
+      .then(setOptions)
+      .finally(() => setLoadingOptions(false));
   }, []);
   const isResolved =
     ticket.resolvedAt !== null &&
@@ -43,24 +47,35 @@ export default function ControlPanel({ ticket }) {
       <p className="text-muted-foreground mt-4 mb-2 text-sm">
         Estado de atención
       </p>
-      <Select
-        value={valueOption}
-        onValueChange={(value) => setValueOption(value)}
-      >
-        <SelectTrigger className="border-border w-full border p-4">
-          <SelectValue placeholder="Seleccione un estado" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Estado de atención</SelectLabel>
-            {options.map((option) => (
-              <SelectItem key={option.name} value={option.name}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      {loadingOptions ? (
+        <div
+          className="border-border flex h-12 w-full items-center rounded-md border p-4"
+          role="status"
+          aria-label="Cargando estados"
+        >
+          <span className="sr-only">Cargando estados...</span>
+          <Skeleton className="bg-muted-foreground/10 h-4 w-36" />
+        </div>
+      ) : (
+        <Select
+          value={valueOption}
+          onValueChange={(value) => setValueOption(value)}
+        >
+          <SelectTrigger className="border-border w-full border p-4">
+            <SelectValue placeholder="Seleccione un estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Estado de atención</SelectLabel>
+              {options.map((option) => (
+                <SelectItem key={option.name} value={option.name}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      )}
       <div className="mt-4">
         <div className="mb-2 flex justify-between">
           <p className="text-muted-foreground text-sm">Progreso del SLA</p>
