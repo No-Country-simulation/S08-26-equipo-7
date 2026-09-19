@@ -20,6 +20,7 @@ export function useTickets(params = { limit: 5, offset: 0 }) {
       setLimit(data.limit);
     },
     interval: TICKETS_POLL_INTERVAL,
+    reloadKey: paramsKey,
   });
 
   useEffect(() => {

@@ -6,6 +6,7 @@ export function usePolling({
   interval = 30_000,
   enabled = true,
   showInitialLoading = true,
+  reloadKey,
 }) {
   const fetchDataRef = useRef(fetchData);
   const onSuccessRef = useRef(onSuccess);
@@ -32,6 +33,7 @@ export function usePolling({
     let cancelled = false;
     let isFetching = false;
     let timeoutId;
+    hasLoadedRef.current = false;
 
     function clearPoll() {
       window.clearTimeout(timeoutId);
@@ -83,7 +85,7 @@ export function usePolling({
       refreshRef.current = null;
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [enabled, interval, showInitialLoading]);
+  }, [enabled, interval, reloadKey, showInitialLoading]);
 
   return { loading, error, refresh };
 }

@@ -27,10 +27,8 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
   });
 
   const totalPages = Math.ceil(total / limit) || 1;
-  const currentPage = Math.min(
-    Math.floor(responseOffset / limit) + 1,
-    totalPages,
-  );
+  const pageOffset = loading ? offset : responseOffset;
+  const currentPage = Math.min(Math.floor(pageOffset / limit) + 1, totalPages);
   const hasActiveFilters = Object.values(filters || {}).some(Boolean);
 
   const getPageNumbers = () => {
@@ -76,7 +74,7 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
 
   return (
     <div className="bg-card border-border my-4 rounded-lg border py-4 shadow-md">
-      {loading && tickets.length === 0 && <TableSkeleton />}
+      {loading && <TableSkeleton />}
       {error && tickets.length === 0 && (
         <div
           className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
@@ -104,9 +102,11 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
           </p>
         </div>
       )}
-      {tickets.length > 0 && <TableManager tickets={tickets} resume={false} />}
+      {!loading && tickets.length > 0 && (
+        <TableManager tickets={tickets} resume={false} />
+      )}
 
-      {!loading && !error && (
+      {!error && (
         <Pagination className="mt-4">
           <PaginationContent>
             <PaginationItem>
