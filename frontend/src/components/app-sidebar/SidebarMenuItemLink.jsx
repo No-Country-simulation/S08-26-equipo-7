@@ -9,11 +9,13 @@ export default function SidebarMenuItemLink({
   onClick,
   isActive = false,
 }) {
-  const { state, setOpen } = useSidebar();
+  const { state, setOpen, toggleSidebar } = useSidebar();
   const Component = to ? NavLink : "button";
 
   function handleClick(event) {
-    if (to && state === "collapsed") {
+    if (to && isActive) {
+      toggleSidebar();
+    } else if (to && state === "collapsed") {
       setOpen(true);
     }
 
