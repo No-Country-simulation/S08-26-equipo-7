@@ -10,47 +10,33 @@ import {
   TrendingUpDown,
   TriangleAlert,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import StatCard from "@/features/dashboard/components/StatCard";
 import { getSummaryStats } from "@/features/tickets/services/statsSummaryApi";
+import { usePolling } from "@/hooks/usePolling";
+
+const SUMMARY_POLL_INTERVAL = 30_000;
 
 export default function DashboardStats() {
   const [summaryStats, setSummaryStats] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [percentChange, setPercentChange] = useState(0);
-
-  useEffect(() => {
-    async function fetchSummaryStats() {
-      setLoading(true);
-      try {
-        const stats = await getSummaryStats();
-        setSummaryStats(stats);
-        setPercentChange(
-          parseFloat(
-            (
-              ((stats?.activeTickets - stats?.activePrevMonth) /
-                (stats?.activePrevMonth || 1)) *
-              100
-            ).toFixed(2),
-          ),
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    function handleTicketCreated() {
-      fetchSummaryStats();
-    }
-
-    window.addEventListener("ticket-created", handleTicketCreated);
-    fetchSummaryStats();
-
-    return () => {
-      window.removeEventListener("ticket-created", handleTicketCreated);
-    };
-  }, []);
+  const { loading } = usePolling({
+    fetchData: getSummaryStats,
+    onSuccess: (stats) => {
+      setSummaryStats(stats);
+      setPercentChange(
+        parseFloat(
+          (
+            ((stats?.activeTickets - stats?.activePrevMonth) /
+              (stats?.activePrevMonth || 1)) *
+            100
+          ).toFixed(2),
+        ),
+      );
+    },
+    interval: SUMMARY_POLL_INTERVAL,
+  });
 
   return (
     <div className="flex flex-wrap justify-between">
@@ -58,7 +44,7 @@ export default function DashboardStats() {
         label="TICKETS ACTIVOS"
         value={summaryStats?.activeTickets}
         icon={<Ticket />}
-        loading={loading}
+        loading={loading && !summaryStats}
         iconText={
           percentChange > 0 ? (
             <TrendingUp />
@@ -81,7 +67,7 @@ export default function DashboardStats() {
         label="PRÓXIMOS A VENCER SLA"
         value={summaryStats?.nearSlaExpiry}
         icon={<Clock />}
-        loading={loading}
+        loading={loading && !summaryStats}
         iconText={
           summaryStats?.nearSlaExpiry > 0 ? <TriangleAlert /> : <CircleCheck />
         }
@@ -93,7 +79,7 @@ export default function DashboardStats() {
         label="FUERA DE SLA"
         value={summaryStats?.overdueSla || 0}
         icon={<OctagonAlert />}
-        loading={loading}
+        loading={loading && !summaryStats}
         iconText={
           summaryStats?.overdueSla > 0 ? <TrendingDown /> : <CircleCheck />
         }
@@ -105,7 +91,7 @@ export default function DashboardStats() {
         label="CUMPLIMIENTO SLA"
         value={`${summaryStats?.slaCompliance}%`}
         icon={<Award />}
-        loading={loading}
+        loading={loading && !summaryStats}
         iconText={
           summaryStats?.slaCompliance >= 90 ? (
             <CircleCheck />

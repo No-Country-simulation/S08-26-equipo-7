@@ -76,13 +76,13 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
 
   return (
     <div className="bg-card border-border my-4 rounded-lg border py-4 shadow-md">
-      {loading && <TableSkeleton />}
-      {!loading && error && (
+      {loading && tickets.length === 0 && <TableSkeleton />}
+      {error && tickets.length === 0 && (
         <div
           className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
           role="status"
         >
-          <CircleX className="mb-4 size-10 text-destructive" />
+          <CircleX className="text-destructive mb-4 size-10" />
           <p className="text-destructive p-6 text-center" role="alert">
             No se pudieron cargar las solicitudes recientes.
           </p>
@@ -104,9 +104,7 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
           </p>
         </div>
       )}
-      {!loading && !error && tickets.length > 0 && (
-        <TableManager tickets={tickets} resume={false} />
-      )}
+      {tickets.length > 0 && <TableManager tickets={tickets} resume={false} />}
 
       {!loading && !error && (
         <Pagination className="mt-4">

@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,25 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getNotifications } from "@/features/notifications/services/notificationApi";
+import { usePolling } from "@/hooks/usePolling";
 
-export default function NotificationPopover({ hasNotifications = true }) {
+const NOTIFICATIONS_POLL_INTERVAL = 30_000;
+
+export default function NotificationPopover() {
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const { error } = usePolling({
+    fetchData: getNotifications,
+    onSuccess: (data) => {
+      setNotifications(data.items ?? []);
+      setUnreadCount(data.unread ?? 0);
+    },
+    interval: NOTIFICATIONS_POLL_INTERVAL,
+    showInitialLoading: false,
+  });
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -28,7 +46,7 @@ export default function NotificationPopover({ hasNotifications = true }) {
               >
                 <span className="relative inline-flex size-5 items-center justify-center md:size-6">
                   <Bell className="size-5 md:size-6" />
-                  {hasNotifications && (
+                  {unreadCount > 0 && (
                     <span
                       aria-hidden="true"
                       className="absolute -top-1 -right-1 size-2 animate-pulse rounded-full bg-rose-500 md:-top-0.5 md:-right-0.5"
@@ -37,7 +55,25 @@ export default function NotificationPopover({ hasNotifications = true }) {
                 </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" />
+            <PopoverContent className="w-80">
+              {error && notifications.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  No se pudieron cargar las notificaciones.
+                </p>
+              ) : notifications.length > 0 ? (
+                <div className="space-y-3">
+                  {notifications.map((notification) => (
+                    <p key={notification.id} className="text-sm">
+                      {notification.mensaje}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No tienes notificaciones.
+                </p>
+              )}
+            </PopoverContent>
           </Popover>
         </span>
       </TooltipTrigger>

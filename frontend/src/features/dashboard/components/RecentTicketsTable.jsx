@@ -18,13 +18,13 @@ export default function RecentTicketsTable() {
           </div>
         </Link>
       </div>
-      {loading && <TableSkeleton mobile />}
-      {error && (
+      {loading && tickets.length === 0 && <TableSkeleton mobile />}
+      {error && tickets.length === 0 && (
         <div
           className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
           role="status"
         >
-          <CircleX className="mb-4 size-10 text-destructive" />
+          <CircleX className="text-destructive mb-4 size-10" />
           <p className="text-destructive p-6 text-center" role="alert">
             No se pudieron cargar las solicitudes recientes.
           </p>
@@ -42,9 +42,7 @@ export default function RecentTicketsTable() {
           <p className="text-xs">Todavia no hay solicitudes recientes.</p>
         </div>
       )}
-      {!loading && !error && tickets.length > 0 && (
-        <TableManager tickets={tickets} />
-      )}
+      {tickets.length > 0 && <TableManager tickets={tickets} />}
     </div>
   );
 }
