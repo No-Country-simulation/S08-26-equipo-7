@@ -28,7 +28,16 @@ export function useTickets(params = { limit: 5, offset: 0 }) {
       }
     }
 
+    function handleTicketCreated() {
+      fetchTickets();
+    }
+
+    window.addEventListener("ticket-created", handleTicketCreated);
     fetchTickets();
+
+    return () => {
+      window.removeEventListener("ticket-created", handleTicketCreated);
+    };
   }, [paramsKey]); // Se reejecuta si cambian los parámetros de búsqueda/paginación
 
   return { tickets, total, offset, limit, loading, error };

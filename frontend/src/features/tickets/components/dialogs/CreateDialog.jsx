@@ -20,7 +20,12 @@ export default function CreateDialog({ trigger }) {
 
   function handleOpenChange(nextOpen) {
     setOpen(nextOpen);
-    if (!nextOpen) setShowSuccess(false);
+    if (!nextOpen) {
+      if (showSuccess) {
+        window.dispatchEvent(new Event("ticket-created"));
+      }
+      setShowSuccess(false);
+    }
   }
 
   return (

@@ -35,5 +35,6 @@ export async function getTickets({
 
   return apiRequest(`tickets?${queryParams}`, {
     method: "GET",
+    cache: "no-store",
   });
 }

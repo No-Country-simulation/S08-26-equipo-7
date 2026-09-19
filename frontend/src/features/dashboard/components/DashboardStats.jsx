@@ -22,6 +22,7 @@ export default function DashboardStats() {
 
   useEffect(() => {
     async function fetchSummaryStats() {
+      setLoading(true);
       try {
         const stats = await getSummaryStats();
         setSummaryStats(stats);
@@ -38,7 +39,17 @@ export default function DashboardStats() {
         setLoading(false);
       }
     }
+
+    function handleTicketCreated() {
+      fetchSummaryStats();
+    }
+
+    window.addEventListener("ticket-created", handleTicketCreated);
     fetchSummaryStats();
+
+    return () => {
+      window.removeEventListener("ticket-created", handleTicketCreated);
+    };
   }, []);
 
   return (
