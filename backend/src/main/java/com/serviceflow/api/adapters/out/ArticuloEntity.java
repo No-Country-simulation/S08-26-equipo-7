@@ -31,6 +31,12 @@ public class ArticuloEntity {
     private long visualizaciones;
 
     @Column(nullable = false)
+    private long megusta;
+
+    @Column(nullable = false)
+    private long nomegusta;
+
+    @Column(nullable = false)
     private boolean activo;
 
     @Column(name = "creado_en", nullable = false)
@@ -43,13 +49,16 @@ public class ArticuloEntity {
     }
 
     public ArticuloEntity(UUID id, String titulo, String descripcion, String contenido, String categoria,
-                          long visualizaciones, boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                          long visualizaciones, long megusta, long nomegusta,
+                          boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.contenido = contenido;
         this.categoria = categoria;
         this.visualizaciones = visualizaciones;
+        this.megusta = megusta;
+        this.nomegusta = nomegusta;
         this.activo = activo;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -72,6 +81,12 @@ public class ArticuloEntity {
 
     public long getVisualizaciones() { return visualizaciones; }
     public void setVisualizaciones(long visualizaciones) { this.visualizaciones = visualizaciones; }
+
+    public long getMegusta() { return megusta; }
+    public void setMegusta(long megusta) { this.megusta = megusta; }
+
+    public long getNomegusta() { return nomegusta; }
+    public void setNomegusta(long nomegusta) { this.nomegusta = nomegusta; }
 
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }

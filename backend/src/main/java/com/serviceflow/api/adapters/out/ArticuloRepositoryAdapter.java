@@ -29,6 +29,8 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
                 articulo.getContenido(),
                 articulo.getCategoria(),
                 articulo.getVisualizaciones(),
+                articulo.getMegusta(),
+                articulo.getNomegusta(),
                 articulo.isActivo(),
                 articulo.getCreatedAt() != null ? articulo.getCreatedAt() : now,
                 articulo.getUpdatedAt() != null ? articulo.getUpdatedAt() : now
@@ -54,6 +56,8 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
                 entity.getContenido(),
                 entity.getCategoria(),
                 entity.getVisualizaciones(),
+                entity.getMegusta(),
+                entity.getNomegusta(),
                 entity.isActivo(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
