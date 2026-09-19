@@ -1,4 +1,4 @@
-import { Inbox } from "lucide-react";
+import { CircleX, Inbox } from "lucide-react";
 
 import {
   Pagination,
@@ -78,9 +78,15 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
     <div className="bg-card border-border my-4 rounded-lg border py-4 shadow-md">
       {loading && <TableSkeleton />}
       {!loading && error && (
-        <p className="text-destructive p-6 text-center" role="alert">
-          No se pudieron cargar los Tickets. Inténtalo de nuevo.
-        </p>
+        <div
+          className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
+          role="status"
+        >
+          <CircleX className="mb-4 size-10 text-destructive" />
+          <p className="text-destructive p-6 text-center" role="alert">
+            No se pudieron cargar las solicitudes recientes.
+          </p>
+        </div>
       )}
       {!loading && !error && tickets.length === 0 && (
         <div

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CircleX, Inbox } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import TableManager from "@/features/tickets/components/table/TableManager";
@@ -20,14 +20,27 @@ export default function RecentTicketsTable() {
       </div>
       {loading && <TableSkeleton mobile />}
       {error && (
-        <p className="text-destructive p-6 text-center" role="alert">
-          No se pudieron cargar las solicitudes recientes.
-        </p>
+        <div
+          className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
+          role="status"
+        >
+          <CircleX className="mb-4 size-10 text-destructive" />
+          <p className="text-destructive p-6 text-center" role="alert">
+            No se pudieron cargar las solicitudes recientes.
+          </p>
+        </div>
       )}
       {!loading && !error && tickets.length === 0 && (
-        <p className="text-muted-foreground p-6 text-center" role="status">
-          Todavía no hay solicitudes recientes.
-        </p>
+        <div
+          className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
+          role="status"
+        >
+          <div className="bg-foreground/10 mb-4 flex h-16 w-16 items-center justify-center rounded-lg">
+            <Inbox className="size-10" />
+          </div>
+          <p className="text-2xl font-bold">Resultados no encontrados</p>
+          <p className="text-xs">Todavia no hay solicitudes recientes.</p>
+        </div>
       )}
       {!loading && !error && tickets.length > 0 && (
         <TableManager tickets={tickets} />

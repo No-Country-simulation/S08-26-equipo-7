@@ -90,14 +90,6 @@ export async function apiRequest(endpoint, options = {}) {
     );
     error.status = response.status;
 
-    const isPublicAuthEndpoint = ["auth/login", "auth/recover-password"].some(
-      (publicEndpoint) => endpoint.replace(/^\/+/, "") === publicEndpoint,
-    );
-
-    if (!isPublicAuthEndpoint && response.status === 401) {
-      window.dispatchEvent(new CustomEvent("auth:expired"));
-    }
-
     throw error;
   }
 
