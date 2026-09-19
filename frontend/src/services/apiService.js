@@ -38,11 +38,21 @@ function requiresCsrf(method, endpoint) {
   );
 }
 
-export async function apiRequest(
-  endpoint,
-  options = {},
-  _retryingAfterCsrf = false,
-) {
+async function ensureCsrfToken() {
+  if (getCookie("XSRF-TOKEN")) {
+    return;
+  }
+
+  const response = await fetch(buildUrl("auth/csrf"), {
+    credentials: "include",
+  });
+
+  if (!response.ok || !getCookie("XSRF-TOKEN")) {
+    throw new Error("No se pudo obtener el token de seguridad del servidor.");
+  }
+}
+
+export async function apiRequest(endpoint, options = {}) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
   const needsCsrf = requiresCsrf(method, endpoint);
@@ -50,6 +60,10 @@ export async function apiRequest(
   let response;
 
   try {
+    if (needsCsrf) {
+      await ensureCsrfToken();
+    }
+
     // TEMPORAL: elimina esta línea para desactivar completamente el delay simulado.
     await waitForApiDelay();
     response = await fetch(buildUrl(endpoint), {
@@ -71,19 +85,6 @@ export async function apiRequest(
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    // El backend recién emite la cookie XSRF-TOKEN en la respuesta del primer POST
-    // que la necesitaba. Si no teníamos token para enviar, reintentamos una vez
-    // ahora que el navegador ya guardó la cookie que vino en este 403.
-    if (
-      !_retryingAfterCsrf &&
-      needsCsrf &&
-      !csrfToken &&
-      response.status === 403 &&
-      getCookie("XSRF-TOKEN")
-    ) {
-      return apiRequest(endpoint, options, true);
-    }
-
     const error = new Error(
       translateApiMessage(data?.error || data?.message, response.status),
     );
