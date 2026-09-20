@@ -74,7 +74,11 @@ sla_calc AS (
             WHEN 'MEDIUM' THEN INTERVAL '24 hours'
             WHEN 'HIGH' THEN INTERVAL '8 hours'
             ELSE INTERVAL '4 hours'
+<<<<<<< HEAD
         END AS sla_duracion
+=======
+        END AS sla_dur
+>>>>>>> 78d5177ae51653ae6ee06e8a1615a64f17112b50
     FROM base b
 ),
 sla_due AS (
@@ -88,6 +92,7 @@ sla_due AS (
             WHEN 'IN_PROGRESS' THEN NOW() - (random() * 7 + 2) * INTERVAL '1 day'
             WHEN 'RESOLVED' THEN NOW() - (random() * 30 + 10) * INTERVAL '1 day'
             ELSE NOW() - (random() * 60 + 20) * INTERVAL '1 day'
+<<<<<<< HEAD
         END AS creado_en,
         CASE s.prioridad
             WHEN 'LOW' THEN INTERVAL '72 hours'
@@ -95,12 +100,16 @@ sla_due AS (
             WHEN 'HIGH' THEN INTERVAL '8 hours'
             ELSE INTERVAL '4 hours'
         END AS sla_duracion
+=======
+        END AS creado_en
+>>>>>>> 78d5177ae51653ae6ee06e8a1615a64f17112b50
     FROM sla_calc s
 ),
-sla_due AS (
+sla_final AS (
     SELECT
         f.*,
         CASE
+<<<<<<< HEAD
             WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion * 0.6
             ELSE f.creado_en + f.sla_duracion
         END AS sla_due_at,
@@ -110,8 +119,22 @@ sla_due AS (
         END AS resuelto_en,
         CASE
             WHEN f.estado = 'CLOSED' THEN f.creado_en + f.sla_duracion + (random() * 2 + 1) * INTERVAL '1 day'
+=======
+            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_dur * 0.6
+            ELSE f.creado_en + f.sla_dur
+        END AS sla_due_at,
+        CASE
+            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_dur * 0.6
             ELSE NULL
-        END AS cerrado_en
+        END AS resuelto_en,
+        CASE
+            WHEN f.estado = 'CLOSED' THEN f.creado_en + f.sla_dur + (random() * 2 + 1) * INTERVAL '1 day'
+>>>>>>> 78d5177ae51653ae6ee06e8a1615a64f17112b50
+            ELSE NULL
+        END AS cerrado_en,
+        'DEMO-' || lpad(f.n::text, 4, '0') AS codigo,
+        'Ticket de demostración ' || f.n || ' - ' || f.categoria AS titulo,
+        'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
     FROM fechas f
 ),
 preparados AS (
@@ -150,6 +173,7 @@ SELECT
     p.cerrado_en,
     p.titulo,
     p.codigo,
+<<<<<<< HEAD
     COALESCE(p.cerrado_en, p.resuelto_en, p.creado_base + INTERVAL '1 hour')
 FROM (
     SELECT
@@ -171,6 +195,10 @@ FROM (
         'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
     FROM fechas f
 ) p
+=======
+    COALESCE(p.cerrado_en, p.resuelto_en, p.creado_en + INTERVAL '1 hour')
+FROM sla_final p
+>>>>>>> 78d5177ae51653ae6ee06e8a1615a64f17112b50
 WHERE NOT EXISTS (
     SELECT 1 FROM tickets t WHERE t.codigo = p.codigo
 );
