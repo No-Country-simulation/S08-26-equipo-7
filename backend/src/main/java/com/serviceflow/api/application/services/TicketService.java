@@ -457,23 +457,15 @@ public class TicketService {
         List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
         List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd);
 
-        // SLA Compliance CORREGIDO: denominador = tickets evaluables (resueltos + vencidos activos)
         long resolvedOnTime = resolved.stream()
                 .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
                 .count();
-
-        // Tickets evaluables en el periodo = resueltos en el mes + activos vencidos (overdue) en el mes
-        long evaluables = resolved.size() + overdueSla;
-        long evaluablesPrev = resolvedPrev.size() + countOverdueAt(prevEnd);
-
         long resolvedOnTimePrev = resolvedPrev.stream()
                 .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
                 .count();
 
-        double compliance = evaluables == 0 ? 0.0 : round2(resolvedOnTime * 100.0 / evaluables);
-        long overduePrev = countOverdueAt(prevEnd);
-        long evaluablesPrevTotal = resolvedPrev.size() + overduePrev;
-        double compliancePrev = evaluablesPrevTotal == 0 ? 0.0 : round2(resolvedOnTimePrev * 100.0 / evaluablesPrevTotal);
+        double compliance = resolved.isEmpty() ? 0.0 : round2(resolvedOnTime * 100.0 / resolved.size());
+        double compliancePrev = resolvedPrev.isEmpty() ? 0.0 : round2(resolvedOnTimePrev * 100.0 / resolvedPrev.size());
 
         List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
         List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd);
@@ -494,13 +486,6 @@ public class TicketService {
         result.put("created", created.size());
         result.put("createdPrevMonth", createdPrev.size());
         return result;
-    }
-
-    private long countOverdueAt(LocalDateTime until) {
-        return ticketRepository.findAll().stream()
-                .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(until))
-                .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
-                .count();
     }
 
     private long activeCountAt(LocalDateTime until) {

@@ -1,26 +1,20 @@
 package com.serviceflow.api.application.services;
 
 import com.serviceflow.api.application.ports.ArticuloRepositoryPort;
-import com.serviceflow.api.application.ports.ArticuloVotoRepositoryPort;
 import com.serviceflow.api.domain.Articulo;
-import com.serviceflow.api.domain.ArticuloVoto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ArticuloService {
 
     private final ArticuloRepositoryPort articuloRepository;
-    private final ArticuloVotoRepositoryPort articuloVotoRepository;
 
-    public ArticuloService(ArticuloRepositoryPort articuloRepository,
-                           ArticuloVotoRepositoryPort articuloVotoRepository) {
+    public ArticuloService(ArticuloRepositoryPort articuloRepository) {
         this.articuloRepository = articuloRepository;
-        this.articuloVotoRepository = articuloVotoRepository;
     }
 
     public List<Articulo> listActive() {
@@ -112,32 +106,5 @@ public class ArticuloService {
         if (articulo.getContenido() == null || articulo.getContenido().isBlank()) return 1;
         int palabras = articulo.getContenido().trim().split("\\s+").length;
         return Math.max(1, (int) Math.ceil(palabras / 200.0));
-    }
-
-    // --- Votos de usuario ---
-    public ArticuloVoto votar(UUID articuloId, UUID usuarioId, Boolean megusta) {
-        if (megusta == null) {
-            throw new IllegalArgumentException("megusta es requerido (true/false)");
-        }
-        ArticuloVoto nuevo = new ArticuloVoto(
-                null, articuloId, usuarioId, megusta, null, null
-        );
-        return articuloVotoRepository.save(nuevo);
-    }
-
-    public Optional<ArticuloVoto> obtenerVotoUsuario(UUID articuloId, UUID usuarioId) {
-        return articuloVotoRepository.findByArticuloIdAndUsuarioId(articuloId, usuarioId);
-    }
-
-    public long contarMegusta(UUID articuloId) {
-        return articuloVotoRepository.countMegusta(articuloId);
-    }
-
-    public long contarNoMegusta(UUID articuloId) {
-        return articuloVotoRepository.countNoMegusta(articuloId);
-    }
-
-    public void quitarVoto(UUID articuloId, UUID usuarioId) {
-        articuloVotoRepository.deleteByArticuloIdAndUsuarioId(articuloId, usuarioId);
     }
 }
