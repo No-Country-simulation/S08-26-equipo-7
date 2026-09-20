@@ -55,7 +55,7 @@ base AS (
         ORDER BY random() LIMIT 1
     ) u
 ),
-sla_calc AS (
+sla_vals AS (
     SELECT
         b.*,
         CASE b.prioridad
@@ -63,10 +63,10 @@ sla_calc AS (
             WHEN 'MEDIUM' THEN INTERVAL '24 hours'
             WHEN 'HIGH' THEN INTERVAL '8 hours'
             ELSE INTERVAL '4 hours'
-        END AS sla_duracion_calc
+        END AS sla_duracion_val
     FROM base b
 ),
-fechas AS (
+fechas_calc AS (
     SELECT
         s.*,
         CASE s.estado
@@ -77,26 +77,34 @@ fechas AS (
             WHEN 'IN_PROGRESS' THEN NOW() - (random() * 7 + 2) * INTERVAL '1 day'
             WHEN 'RESOLVED' THEN NOW() - (random() * 30 + 10) * INTERVAL '1 day'
             ELSE NOW() - (random() * 60 + 20) * INTERVAL '1 day'
-        END AS creado_en,
-        s.sla_duracion_calc
-    FROM sla_calc s
+        END AS creado_en_val,
+        s.sla_duracion_val
+    FROM sla_vals s
 ),
-sla_due AS (
+sla_due_calc AS (
     SELECT
         f.*,
         CASE
-            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion_calc * 0.6
-            ELSE f.creado_en + f.sla_duracion_calc
-        END AS sla_due_at,
+            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en_val + f.sla_duracion_val * 0.6
+            ELSE f.creado_en_val + f.sla_duracion_val
+        END AS sla_due_at_val,
         CASE
-            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion_calc * 0.6
+            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en_val + f.sla_duracion_val * 0.6
             ELSE NULL
-        END AS resuelto_en,
+        END AS resuelto_en_val,
         CASE
-            WHEN f.estado = 'CLOSED' THEN f.creado_en + f.sla_duracion_calc + (random() * 2 + 1) * INTERVAL '1 day'
+            WHEN f.estado = 'CLOSED' THEN f.creado_en_val + f.sla_duracion_val + (random() * 2 + 1) * INTERVAL '1 day'
             ELSE NULL
-        END AS cerrado_en
-    FROM fechas f
+        END AS cerrado_en_val
+    FROM fechas_calc f
+),
+preparados AS (
+    SELECT
+        d.*,
+        'DEMO-' || lpad(d.n::text, 4, '0') AS codigo,
+        'Ticket de demostración ' || d.n || ' - ' || d.categoria AS titulo,
+        'Descripción automática de prueba para el ticket ' || d.n || ' en categoría ' || d.categoria AS descripcion
+    FROM fechas_calc d
 )
 INSERT INTO tickets (
     id, usuario_id, email, categoria, descripcion, prioridad, estado,
@@ -112,40 +120,34 @@ SELECT
     p.prioridad,
     p.estado,
     p.requiere_aprobacion,
-    p.creado_en,
+    p.creado_en_val,
     p.asignado_a,
-    p.sla_due_at,
-    p.resuelto_en,
-    p.cerrado_en,
+    CASE
+        WHEN p.estado IN ('RESOLVED', 'CLOSED') THEN p.creado_en_val + p.sla_duracion_val * 0.6
+        ELSE p.creado_en_val + p.sla_duracion_val
+    END AS sla_due_at,
+    CASE
+        WHEN p.estado IN ('RESOLVED', 'CLOSED') THEN p.creado_en_val + p.sla_duracion_val * 0.6
+        ELSE NULL
+    END AS resuelto_en,
+    CASE
+        WHEN p.estado = 'CLOSED' THEN p.creado_en_val + p.sla_duracion_val + (random() * 2 + 1) * INTERVAL '1 day'
+        ELSE NULL
+    END AS cerrado_en,
     p.titulo,
     p.codigo,
-    COALESCE(p.cerrado_en, p.resuelto_en, p.creado_en + INTERVAL '1 hour')
+    COALESCE(
+        CASE WHEN p.estado = 'CLOSED' THEN p.creado_en_val + p.sla_duracion_val + (random() * 2 + 1) * INTERVAL '1 day' END,
+        CASE WHEN p.estado IN ('RESOLVED', 'CLOSED') THEN p.creado_en_val + p.sla_duracion_val * 0.6 END,
+        p.creado_en_val + INTERVAL '1 hour'
+    ) AS actualizado_en
 FROM (
     SELECT
-        d.*,
-        CASE
-            WHEN d.estado IN ('RESOLVED', 'CLOSED') THEN d.creado_en + d.sla_duracion_calc * 0.6
-            ELSE d.creado_en + d.sla_duracion_calc
-        END AS sla_due_at,
-        CASE
-            WHEN d.estado IN ('RESOLVED', 'CLOSED') THEN d.creado_en + d.sla_duracion_calc * 0.6
-            ELSE NULL
-        END AS resuelto_en,
-        CASE
-            WHEN d.estado = 'CLOSED' THEN d.creado_en + d.sla_duracion_calc + (random() * 2 + 1) * INTERVAL '1 day'
-            ELSE NULL
-        END AS cerrado_en,
-        'DEMO-' || lpad(d.n::text, 4, '0') AS codigo,
-        'Ticket de demostración ' || d.n || ' - ' || d.categoria AS titulo,
-        'Descripción automática de prueba para el ticket ' || d.n || ' en categoría ' || d.categoria AS descripcion
-    FROM (
-        SELECT
-            f.*,
-            'DEMO-' || lpad(f.n::text, 4, '0') AS codigo,
-            'Ticket de demostración ' || f.n || ' - ' || f.categoria AS titulo,
-            'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
-        FROM fechas f
-    ) d
+        f.*,
+        'DEMO-' || lpad(f.n::text, 4, '0') AS codigo,
+        'Ticket de demostración ' || f.n || ' - ' || f.categoria AS titulo,
+        'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
+    FROM fechas_calc f
 ) p
 WHERE NOT EXISTS (
     SELECT 1 FROM tickets t WHERE t.codigo = p.codigo
