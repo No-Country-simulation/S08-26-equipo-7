@@ -63,7 +63,7 @@ sla_calc AS (
             WHEN 'MEDIUM' THEN INTERVAL '24 hours'
             WHEN 'HIGH' THEN INTERVAL '8 hours'
             ELSE INTERVAL '4 hours'
-        END AS sla_duracion
+        END AS sla_duracion_calc
     FROM base b
 ),
 fechas AS (
@@ -78,45 +78,25 @@ fechas AS (
             WHEN 'RESOLVED' THEN NOW() - (random() * 30 + 10) * INTERVAL '1 day'
             ELSE NOW() - (random() * 60 + 20) * INTERVAL '1 day'
         END AS creado_en,
-        CASE s.prioridad
-            WHEN 'LOW' THEN INTERVAL '72 hours'
-            WHEN 'MEDIUM' THEN INTERVAL '24 hours'
-            WHEN 'HIGH' THEN INTERVAL '8 hours'
-            ELSE INTERVAL '4 hours'
-        END AS sla_duracion
+        s.sla_duracion_calc
     FROM sla_calc s
 ),
 sla_due AS (
     SELECT
         f.*,
         CASE
-            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion * 0.6
-            ELSE f.creado_en + f.sla_duracion
+            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion_calc * 0.6
+            ELSE f.creado_en + f.sla_duracion_calc
         END AS sla_due_at,
         CASE
-            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion * 0.6
+            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion_calc * 0.6
             ELSE NULL
         END AS resuelto_en,
         CASE
-            WHEN f.estado = 'CLOSED' THEN f.creado_en + f.sla_duracion + (random() * 2 + 1) * INTERVAL '1 day'
+            WHEN f.estado = 'CLOSED' THEN f.creado_en + f.sla_duracion_calc + (random() * 2 + 1) * INTERVAL '1 day'
             ELSE NULL
         END AS cerrado_en
     FROM fechas f
-),
-preparados AS (
-    SELECT
-        d.*,
-        'DEMO-' || lpad(d.n::text, 4, '0') AS codigo,
-        'Ticket de demostración ' || d.n || ' - ' || d.categoria AS titulo,
-        'Descripción automática de prueba para el ticket ' || d.n || ' en categoría ' || d.categoria AS descripcion
-    FROM (
-        SELECT
-            f.*,
-            'DEMO-' || lpad(f.n::text, 4, '0') AS codigo,
-            'Ticket de demostración ' || f.n || ' - ' || f.categoria AS titulo,
-            'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
-        FROM fechas f
-    ) f
 )
 INSERT INTO tickets (
     id, usuario_id, email, categoria, descripcion, prioridad, estado,
@@ -142,23 +122,30 @@ SELECT
     COALESCE(p.cerrado_en, p.resuelto_en, p.creado_en + INTERVAL '1 hour')
 FROM (
     SELECT
-        f.*,
+        d.*,
         CASE
-            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion * 0.6
-            ELSE f.creado_en + f.sla_duracion
+            WHEN d.estado IN ('RESOLVED', 'CLOSED') THEN d.creado_en + d.sla_duracion_calc * 0.6
+            ELSE d.creado_en + d.sla_duracion_calc
         END AS sla_due_at,
         CASE
-            WHEN f.estado IN ('RESOLVED', 'CLOSED') THEN f.creado_en + f.sla_duracion * 0.6
+            WHEN d.estado IN ('RESOLVED', 'CLOSED') THEN d.creado_en + d.sla_duracion_calc * 0.6
             ELSE NULL
         END AS resuelto_en,
         CASE
-            WHEN f.estado = 'CLOSED' THEN f.creado_en + f.sla_duracion + (random() * 2 + 1) * INTERVAL '1 day'
+            WHEN d.estado = 'CLOSED' THEN d.creado_en + d.sla_duracion_calc + (random() * 2 + 1) * INTERVAL '1 day'
             ELSE NULL
         END AS cerrado_en,
-        'DEMO-' || lpad(f.n::text, 4, '0') AS codigo,
-        'Ticket de demostración ' || f.n || ' - ' || f.categoria AS titulo,
-        'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
-    FROM fechas f
+        'DEMO-' || lpad(d.n::text, 4, '0') AS codigo,
+        'Ticket de demostración ' || d.n || ' - ' || d.categoria AS titulo,
+        'Descripción automática de prueba para el ticket ' || d.n || ' en categoría ' || d.categoria AS descripcion
+    FROM (
+        SELECT
+            f.*,
+            'DEMO-' || lpad(f.n::text, 4, '0') AS codigo,
+            'Ticket de demostración ' || f.n || ' - ' || f.categoria AS titulo,
+            'Descripción automática de prueba para el ticket ' || f.n || ' en categoría ' || f.categoria AS descripcion
+        FROM fechas f
+    ) d
 ) p
 WHERE NOT EXISTS (
     SELECT 1 FROM tickets t WHERE t.codigo = p.codigo
