@@ -2,7 +2,11 @@
 
 ## GET /tickets/{id}/timeline
 
-Línea de tiempo (historial) del ticket, ordenada de más antigua a más reciente. Autenticado. `404` si el ticket no existe.
+Línea de tiempo (historial) del ticket, ordenada de más antigua a más reciente. **Autenticado (requiere cookie `access_token`)**. `404` si el ticket no existe.
+
+**Headers requeridos:**
+- `Cookie: access_token=<jwt>` (HttpOnly, se setea en login)
+- `X-XSRF-TOKEN: <valor de cookie XSRF-TOKEN>` (solo para POST, no para GET)
 
 ```json
 [
