@@ -38,3 +38,15 @@ export async function getTickets({
     cache: "no-store",
   });
 }
+
+export async function getStoryLine(ticketId) {
+  return apiRequest(`tickets/${ticketId}/storyline`, {
+    method: "GET",
+  });
+}
+
+export async function getMessage(ticketId) {
+  return apiRequest(`tickets/${ticketId}/message`, {
+    method: "GET",
+  });
+}

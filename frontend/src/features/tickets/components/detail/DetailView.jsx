@@ -1,4 +1,11 @@
+import { useState } from "react";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  getMessage,
+  getStoryLine,
+} from "@/features/tickets/services/ticketApi";
+import { usePolling } from "@/hooks/usePolling";
 
 import ActivityFeed from "./ActivityFeed";
 import ControlPanel from "./ControlPanel";
@@ -50,8 +57,25 @@ function DetailViewSkeleton() {
     </div>
   );
 }
+const STORYLINE_INTERVAL = 30_000;
 
 export default function DetailView({ ticket, loading = false }) {
+  const [storyLine, setStoryLine] = useState([]);
+  const [message, setMessage] = useState(null);
+
+  const { error, refresh } = usePolling({
+    fetchData: async () => {
+      const data = await getStoryLine(ticket.id);
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log("Fetched storyLine data:", data);
+      setStoryLine(data);
+    },
+    interval: STORYLINE_INTERVAL,
+    showInitialLoading: false,
+  });
+
   if (loading) {
     return <DetailViewSkeleton />;
   }
@@ -59,10 +83,21 @@ export default function DetailView({ ticket, loading = false }) {
   return (
     <div className="grid w-full grid-cols-1 gap-6 py-4 lg:grid-cols-5 2xl:grid-cols-4">
       <DetailHeader ticket={ticket} />
-      <div className="order-2 contents lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:flex lg:flex-col lg:gap-6 2xl:col-span-3">
+
+      <div className="order-2 space-y-6 lg:col-span-3 lg:col-start-1 lg:row-start-2 2xl:col-span-3">
         <DetailOverview ticket={ticket} />
-        <ActivityFeed activities={ticket} />
+        {error ? (
+          <div className="bg-destructive/10 text-destructive flex items-center justify-between rounded-lg p-4 text-sm">
+            <span>Error al actualizar la actividad en tiempo real.</span>
+            <button onClick={refresh} className="font-medium underline">
+              Reintentar
+            </button>
+          </div>
+        ) : (
+          <ActivityFeed storyLine={storyLine} message={message} />
+        )}
       </div>
+
       <ControlPanel ticket={ticket} />
     </div>
   );
