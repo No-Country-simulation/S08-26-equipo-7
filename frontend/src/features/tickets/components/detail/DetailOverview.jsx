@@ -8,8 +8,8 @@ export default function DetailOverview({ ticket }) {
         </p>
         <PriorityBadge priority={ticket.priority} className="mx-2 text-xs sm:text-sm" />
       </div>
-      <h1 className="mb-2 text-lg sm:text-xl lg:text-2xl font-bold">{ticket.title}</h1>
-      <p className="text-muted-foreground bg-ring rounded-md px-2 sm:px-4 py-2 text-xs sm:text-sm">
+      <h1 className="mb-2 text-lg sm:text-xl lg:text-2xl font-bold whitespace-break-spaces break-all">{ticket.title}</h1>
+      <p className="text-muted-foreground bg-ring rounded-md px-2 sm:px-4 py-2 text-xs sm:text-sm whitespace-break-spaces break-all">
         {ticket.description}
       </p>
     </div>
