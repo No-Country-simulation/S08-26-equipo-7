@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   getMessage,
   getStoryLine,
@@ -63,6 +64,10 @@ const STORYLINE_INTERVAL = 10_000;
 export default function DetailView({ ticket, loading = false }) {
   const [timeline, setTimeline] = useState([]);
   const [message, setMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { user } = useAuth();
+  const currentUserEmail = user?.email;
 
   const { error, refresh } = usePolling({
     fetchData: async () => {
@@ -70,7 +75,6 @@ export default function DetailView({ ticket, loading = false }) {
         getStoryLine(ticket.id),
         getMessage(ticket.id),
       ]);
-
       return { timeline: timelineData, message: messageData };
     },
     onSuccess: (data) => {
@@ -81,12 +85,25 @@ export default function DetailView({ ticket, loading = false }) {
     showInitialLoading: false,
   });
 
-  const handleSendMessage = async (newMessage) => {
+  const handleSendMessage = async (text) => {
+    if (isSubmitting || !text.trim()) return;
+
     try {
-      await sendMessage(ticket.id, newMessage);
+      setIsSubmitting(true);
+      const optimisticMessage = {
+        actorNombre: "Tú",
+        autorEmail: currentUserEmail,
+        mensaje: text,
+        creadoEn: new Date().toISOString(),
+      };
+      setMessage((prev) => [...(Array.isArray(prev) ? prev : []), optimisticMessage]);
+      await sendMessage(ticket.id, text);
       refresh();
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch (err) {
+      console.error("Error al enviar mensaje:", err);
+      refresh();
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -111,7 +128,9 @@ export default function DetailView({ ticket, loading = false }) {
           <ActivityFeed
             timeline={timeline}
             conversation={message}
+            currentUserEmail={currentUserEmail}
             onSendMessage={handleSendMessage}
+            isSubmitting={isSubmitting}
           />
         )}
       </div>

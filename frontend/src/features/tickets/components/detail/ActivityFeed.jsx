@@ -6,7 +6,9 @@ import { formatTicketDate } from "@/lib/utils";
 export default function ActivityFeed({
   timeline,
   conversation,
+  currentUserEmail,
   onSendMessage,
+  isSubmitting,
 }) {
   const { user } = useAuth();
   console.log(user);
@@ -53,7 +55,11 @@ export default function ActivityFeed({
                         {formatTicketDate(item.fecha)}&nbsp;&mdash;&nbsp;
                       </span>
                       <span className="text-muted-foreground text-xs font-medium">
-                        {item.actorNombre}
+                        {(() => {
+                          const isMe = item.actorEmail === currentUserEmail;
+                          const displayName = isMe ? "Tú" : item.actorNombre;
+                          return displayName;
+                        })()}
                       </span>
                     </div>
                     <p className="text-muted-foreground/90 mt-0.5 text-xs sm:text-sm">
@@ -65,7 +71,7 @@ export default function ActivityFeed({
             </div>
           </div>
         </div>
-        <div className="p-4 border-t border-border">
+        <div className="border-border border-t p-2 sm:p-4">
           <h3 className="text-muted-foreground/70 mb-2 text-sm font-semibold">
             Conversación
           </h3>
@@ -73,13 +79,17 @@ export default function ActivityFeed({
             {conversation?.map((message, index) => (
               <div
                 key={index}
-                className="text-muted-foreground/90 bg-ring w-full space-y-1 rounded-lg p-4 text-xs sm:text-sm"
+                className="bg-ring w-full space-y-1 rounded-lg p-4 text-xs sm:text-sm"
               >
-                <div className="flex justify-between items-center">
+                <div className="text-muted-foreground/90 flex items-center justify-between space-x-2">
                   <div className="text-muted-foreground/70 text-xs font-semibold">
-                    {message.autorNombre}
+                    {(() => {
+                      const isMe = message.autorEmail === currentUserEmail;
+                      const displayName = isMe ? "Tú" : message.actorNombre;
+                      return displayName;
+                    })()}
                   </div>
-                  <div className="text-muted-foreground/70 text-xs font-semibold">
+                  <div className="text-muted-foreground/70 text-center text-xs font-semibold">
                     {message.creadoEn && formatTicketDate(message.creadoEn)}
                   </div>
                 </div>
@@ -96,18 +106,24 @@ export default function ActivityFeed({
               e.target.reset();
             }}
           >
-            <Input
-              placeholder="Escribe un mensaje..."
-              id="message"
-              name="message"
-              className="w-full"
-            />
-            <Button
-              type="submit"
-              className="btn-gradient-primary ml-2 cursor-pointer py-5"
-            >
-              Enviar
-            </Button>
+            <div className="flex w-full flex-wrap items-center gap-2">
+              <Input
+                id="message"
+                name="message"
+                className="min-w-35 flex-1"
+                placeholder="Escribe un mensaje..."
+                disabled={isSubmitting}
+              />
+              <Button
+                type="submit"
+                className="btn-gradient-primary w-full cursor-pointer py-5 sm:w-auto"
+                aria-busy={isSubmitting}
+                aria-label={isSubmitting ? "Enviando mensaje" : "Enviar mensaje"}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Enviando..." : "Enviar"}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
