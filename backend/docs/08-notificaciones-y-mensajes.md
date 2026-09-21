@@ -53,8 +53,8 @@ Hilo de comunicaciones del ticket, separado de la línea de tiempo.
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/api/v1/tickets/{id}/messages` | Lista los mensajes (más antiguo → más reciente) |
-| `POST` | `/api/v1/tickets/{id}/messages` | Agrega un mensaje. Body `{ "message": "..." }` |
+| `GET` | `/api/v1/tickets/{id}/messages` | Lista los mensajes (más antiguo → más reciente). **Autenticado (requiere cookie `access_token`)** |
+| `POST` | `/api/v1/tickets/{id}/messages` | Agrega un mensaje. Body `{ "message": "..." }`. **Autenticado + CSRF** |
 
 - El autor sale del usuario autenticado (`autorEmail` / `autorNombre`).
 - `409` si el mensaje viene vacío; `404` si el ticket no existe.
