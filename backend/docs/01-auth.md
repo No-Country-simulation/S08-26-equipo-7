@@ -8,7 +8,7 @@ Inicia sesión y setea la cookie `access_token` (HttpOnly).
 
 ```json
 // body
-{ "email": "admin@serviceflow.com", "password": "Admin123!" }
+{ "email": "admin@serviceflow.com", "password": "admin123" }
 ```
 
 ```json
