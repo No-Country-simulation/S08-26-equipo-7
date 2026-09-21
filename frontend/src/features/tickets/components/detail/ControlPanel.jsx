@@ -42,10 +42,10 @@ export default function ControlPanel({ ticket }) {
   );
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
-      <div className="border-border border-b text-lg font-semibold">
+      <div className="border-border border-b text-sm sm:text-lg font-semibold">
         Panel de Control & SLA
       </div>
-      <p className="text-muted-foreground/70 font-semibold mt-4 mb-2 text-sm">
+      <p className="text-muted-foreground/70 font-semibold mt-4 mb-2 text-xs sm:text-sm">
         Estado de atención
       </p>
       {loadingOptions ? (
@@ -62,7 +62,7 @@ export default function ControlPanel({ ticket }) {
           value={valueOption}
           onValueChange={(value) => setValueOption(value)}
         >
-          <SelectTrigger className="border-border w-full border p-4">
+          <SelectTrigger className="border-border w-full border p-2 sm:p-4">
             <SelectValue placeholder="Seleccione un estado" />
           </SelectTrigger>
           <SelectContent>
@@ -77,10 +77,10 @@ export default function ControlPanel({ ticket }) {
           </SelectContent>
         </Select>
       )}
-      <div className="mt-4 bg-foreground/5 p-4 rounded-lg">
+      <div className="mt-4 bg-ring p-4 rounded-lg">
         <div className="mb-2 flex justify-between">
-          <p className="text-muted-foreground text-sm">Progreso del SLA</p>
-          <p className="text-sm">
+          <p className="text-muted-foreground text-xs sm:text-sm">Progreso del SLA</p>
+          <p className="text-xs sm:text-sm">
             <Remaining slaDueAt={ticket.slaDueAt} status={ticket.status} />
           </p>
         </div>
@@ -92,20 +92,20 @@ export default function ControlPanel({ ticket }) {
       </div>
       <div className="mt-4">
         <div className="flex justify-between border-b border-border pb-2 mb-2">
-          <p className="text-muted-foreground/70 text-sm">Agente Asignado:</p>
-          <p className="text-xs font-semibold">
+          <p className="text-muted-foreground/70 text-xs sm:text-sm">Agente Asignado:</p>
+          <p className="text-xs sm:text-sm font-semibold">
             {ticket.assignedAgent ? ticket.assignedAgent : "No asignado"}
           </p>
         </div>
         <div className="flex justify-between border-b border-border pb-2 mb-2">
-          <p className="text-muted-foreground/70 text-sm">Requiere Aprovación:</p>
-          <p className="text-xs font-semibold">
+          <p className="text-muted-foreground/70 text-xs sm:text-sm">Requiere Aprovación:</p>
+          <p className="text-xs sm:text-sm font-semibold">
             {ticket.requiresApproval ? "Sí" : "No"}
           </p>
         </div>
         <div className="flex justify-between border-b border-border pb-2 mb-2">
-          <p className="text-muted-foreground/70 text-sm">Fecha de Creación:</p>
-          <p className="text-xs font-semibold">
+          <p className="text-muted-foreground/70 text-xs sm:text-sm">Fecha de Creación:</p>
+          <p className="text-xs sm:text-sm font-semibold">
             {formatTicketDate(ticket.createdAt)}
           </p>
         </div>

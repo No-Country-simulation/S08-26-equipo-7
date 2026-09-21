@@ -10,15 +10,15 @@ export default function DetailHeader({ ticket }) {
       <Link to="/tickets">
         <Button
           variant="ghost"
-          className="text-secondary-foreground cursor-pointer"
+          className="text-secondary-foreground cursor-pointer text-xs sm:text-sm"
         >
-          <ArrowLeft />
+          <ArrowLeft className="size-4 sm:size-5" />
           Volver al Listado
         </Button>
       </Link>
       <div>
-        <StatusBadge className="mr-2" status={ticket.codigo} />
-        <StatusBadge status={ticket.grupoEstado} />
+        <StatusBadge className="mr-2 text-xs sm:text-sm" status={ticket.codigo} />
+        <StatusBadge className=" text-xs sm:text-sm" status={ticket.grupoEstado} />
       </div>
     </div>
   );
