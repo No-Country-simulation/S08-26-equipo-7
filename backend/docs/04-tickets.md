@@ -136,6 +136,7 @@ Crea un ticket y lo **auto-clasifica, auto-prioriza y auto-asigna** (ver *Automa
 ```
 
 - `title`, `description` y `category` son **requeridos** (400 si falta alguno)
+- **Límites de longitud:** `title` máx 180, `description` máx 1000 (si se supera, devuelve 400 con `@Size`)
 - `409` si la categoría no existe o está inactiva
 - `201` con el ticket creado. Por el flujo automático el `status` inicial es `ASSIGNED` (si hay agentes) o `PRIORITIZED` (si no); `priority` sale de `prioridadDefecto` de la categoría. Si requiere aprobación, queda en `ASSIGNED`.
 

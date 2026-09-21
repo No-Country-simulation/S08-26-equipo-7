@@ -135,6 +135,8 @@ public class TicketService {
         notificacionService.notificar(agente.getId(), saved.getId(), "TICKET_ASIGNADO",
                 "Se te asignó el ticket " + saved.getCodigo() + ": " + saved.getTitle());
         if (requiereAprobacion) {
+            ticket.setStatus(EstadoTicket.PENDING_APPROVAL);
+            saved = ticketRepository.save(ticket);
             eventoRepository.save(TicketEvento.nuevo(saved.getId(), "APPROVAL_REQUIRED",
                     "Requiere autorización gerencial obligatoria", null, "Sistema"));
             notificacionService.notificarSupervisores(saved.getId(), "APROBACION_REQUERIDA",
@@ -268,7 +270,9 @@ public class TicketService {
     public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
-        requireStatus(ticket, EstadoTicket.ASSIGNED);
+        if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL).contains(ticket.getStatus())) {
+            throw new InvalidTransitionException("Ticket must be assigned before approval");
+        }
         if (!ticket.isRequiresApproval()) {
             throw new InvalidTransitionException("This ticket does not require approval");
         }

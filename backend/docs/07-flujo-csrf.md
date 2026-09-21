@@ -23,7 +23,7 @@ POST /api/v1/auth/login
 Body: { "email": "admin@serviceflow.com", "password": "Admin123!" }
 ```
 
-Devuelve `{ "nombre": "Alejandro", "rol": "ADMIN" }` y setea la cookie `access_token` (HttpOnly).
+Devuelve `{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN" }` y setea la cookie `access_token` (HttpOnly).
 
 ## 3. Categorías
 

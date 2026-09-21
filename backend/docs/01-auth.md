@@ -13,7 +13,7 @@ Inicia sesión y setea la cookie `access_token` (HttpOnly).
 
 ```json
 // respuesta 200
-{ "nombre": "Alejandro", "rol": "ADMIN" }
+{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN" }
 ```
 
 - `400` si falta algún campo
@@ -50,7 +50,7 @@ Devuelve la sesión actual (requiere cookie `access_token`).
 
 ```json
 // respuesta 200
-{ "nombre": "Alejandro", "rol": "ADMIN" }
+{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN" }
 ```
 
 - `401` si no hay token

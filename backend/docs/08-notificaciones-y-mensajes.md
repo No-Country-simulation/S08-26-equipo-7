@@ -58,4 +58,5 @@ Hilo de comunicaciones del ticket, separado de la línea de tiempo.
 
 - El autor sale del usuario autenticado (`autorEmail` / `autorNombre`).
 - `409` si el mensaje viene vacío; `404` si el ticket no existe.
+- **Límite:** `message` máx **500** caracteres (si se supera, devuelve 400 con `@Size`).
 - Cada mensaje también deja un evento `MESSAGE` en la línea de tiempo (`GET /tickets/{id}/timeline`) para trazabilidad.
