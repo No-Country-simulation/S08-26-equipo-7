@@ -1,3 +1,4 @@
+import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Progress } from "@/components/ui/progress";
@@ -15,7 +16,6 @@ import Remaining from "@/features/tickets/components/sla/Remaining";
 import { useProgress } from "@/features/tickets/hooks/useProgress";
 import { getStatus } from "@/features/tickets/services/statusApi";
 import { formatTicketDate } from "@/lib/utils";
-
 
 async function fetchStatus() {
   const status = await getStatus();
@@ -42,10 +42,10 @@ export default function ControlPanel({ ticket }) {
   );
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
-      <div className="border-border border-b text-sm sm:text-lg font-semibold">
+      <div className="border-border border-b text-sm font-semibold sm:text-lg">
         Panel de Control & SLA
       </div>
-      <p className="text-muted-foreground/70 font-semibold mt-4 mb-2 text-xs sm:text-sm">
+      <p className="text-muted-foreground/70 mt-4 mb-2 text-xs font-semibold sm:text-sm">
         Estado de atención
       </p>
       {loadingOptions ? (
@@ -77,9 +77,11 @@ export default function ControlPanel({ ticket }) {
           </SelectContent>
         </Select>
       )}
-      <div className="mt-4 bg-ring p-4 rounded-lg">
+      <div className="bg-ring mt-4 rounded-lg p-4">
         <div className="mb-2 flex justify-between">
-          <p className="text-muted-foreground text-xs sm:text-sm">Progreso del SLA</p>
+          <p className="text-muted-foreground text-xs sm:text-sm">
+            Progreso del SLA
+          </p>
           <p className="text-xs sm:text-sm">
             <Remaining slaDueAt={ticket.slaDueAt} status={ticket.status} />
           </p>
@@ -91,25 +93,48 @@ export default function ControlPanel({ ticket }) {
         />
       </div>
       <div className="mt-4">
-        <div className="flex justify-between border-b border-border pb-2 mb-2">
-          <p className="text-muted-foreground/70 text-xs sm:text-sm">Agente Asignado:</p>
-          <p className="text-xs sm:text-sm font-semibold">
+        <div className="border-border mb-2 flex justify-between border-b pb-2">
+          <p className="text-muted-foreground/70 text-xs sm:text-sm">
+            Agente Asignado:
+          </p>
+          <p className="text-xs font-semibold sm:text-sm">
             {ticket.assignedAgent ? ticket.assignedAgent : "No asignado"}
           </p>
         </div>
-        <div className="flex justify-between border-b border-border pb-2 mb-2">
-          <p className="text-muted-foreground/70 text-xs sm:text-sm">Requiere Aprovación:</p>
-          <p className="text-xs sm:text-sm font-semibold">
+        <div className="border-border mb-2 flex justify-between border-b pb-2">
+          <p className="text-muted-foreground/70 text-xs sm:text-sm">
+            Requiere Aprovación:
+          </p>
+          <p className="text-xs font-semibold sm:text-sm">
             {ticket.requiresApproval ? "Sí" : "No"}
           </p>
         </div>
-        <div className="flex justify-between border-b border-border pb-2 mb-2">
-          <p className="text-muted-foreground/70 text-xs sm:text-sm">Fecha de Creación:</p>
-          <p className="text-xs sm:text-sm font-semibold">
+        <div className="border-border mb-2 flex justify-between border-b pb-2">
+          <p className="text-muted-foreground/70 text-xs sm:text-sm">
+            Fecha de Creación:
+          </p>
+          <p className="text-xs font-semibold sm:text-sm">
             {formatTicketDate(ticket.createdAt)}
           </p>
         </div>
       </div>
+      {ticket.requiresApproval && (
+        <div className="mb-2 pb-2">
+          <p className="text-muted-foreground/70 text-xs font-semibold sm:text-sm">
+            Aprovar Solicitud?
+          </p>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+            <button className="bg-success text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm">
+              <Check size="14" className="mr-2" />
+              Aprobar
+            </button>
+            <button className="bg-destructive text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm">
+              <X size="16" className="mr-2" />
+              Rechazar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
