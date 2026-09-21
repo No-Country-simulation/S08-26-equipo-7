@@ -81,13 +81,13 @@
   --secondary: #f8fafc;
   --secondary-foreground: #0f172a;
   --muted: #f8fafc;
-  --muted-foreground: #475569;
+  --muted-foreground: #788695;
   --accent: #f8fafc;
   --accent-foreground: #0f172a;
   --destructive: #ec003f;
   --border: #e2e8f0;
   --input: #ffffff;
-  --ring: #2563eb;
+  --ring: #f7f8f8;
   --chart-1: #3b82f6;
   --chart-2: #64748b;
   --chart-3: #1d4ed8;
@@ -124,7 +124,7 @@
   --destructive: oklch(71.2% 0.194 13.428);
   --border: #334155;
   --input: #141d2f;
-  --ring: #3b82f6;
+  --ring: #222b3c;
   --chart-1: #1cabc2;
   --chart-2: #94a3b8;
   --chart-3: #2563eb;
