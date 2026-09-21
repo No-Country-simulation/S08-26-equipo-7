@@ -189,7 +189,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}/timeline")
-    public ResponseEntity<?> timeline(@PathVariable UUID id) {
+    public ResponseEntity<?> timeline(@PathVariable UUID id, Authentication auth) {
         return safeGet(() -> ticketService.timeline(id));
     }
 
