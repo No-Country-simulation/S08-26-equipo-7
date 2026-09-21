@@ -305,6 +305,6 @@ public class TicketController {
             @NotBlank String category) {
     }
 
-    public record MessageRequest(String message) {
+    public record MessageRequest(@NotBlank @Size(max = 500, message = "El mensaje no puede superar 500 caracteres") String message) {
     }
 }
