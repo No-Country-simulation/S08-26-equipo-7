@@ -59,7 +59,7 @@ export default function DesktopTable({ tickets, resume }) {
                 <Link
                   to={`/tickets/${ticket.id}`}
                   state={{ ticket }}
-                  className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                  className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none whitespace-break-spaces"
                 >
                   {ticket.title}
                 </Link>
