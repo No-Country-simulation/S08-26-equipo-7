@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Remaining from "@/features/tickets/components/sla/Remaining";
 import { useProgress } from "@/features/tickets/hooks/useProgress";
 import { getStatus } from "@/features/tickets/services/statusApi";
+import { formatTicketDate } from "@/lib/utils";
 
 
 async function fetchStatus() {
@@ -44,7 +45,7 @@ export default function ControlPanel({ ticket }) {
       <div className="border-border border-b text-lg font-semibold">
         Panel de Control & SLA
       </div>
-      <p className="text-muted-foreground mt-4 mb-2 text-sm">
+      <p className="text-muted-foreground/70 font-semibold mt-4 mb-2 text-sm">
         Estado de atención
       </p>
       {loadingOptions ? (
@@ -76,7 +77,7 @@ export default function ControlPanel({ ticket }) {
           </SelectContent>
         </Select>
       )}
-      <div className="mt-4">
+      <div className="mt-4 bg-foreground/5 p-4 rounded-lg">
         <div className="mb-2 flex justify-between">
           <p className="text-muted-foreground text-sm">Progreso del SLA</p>
           <p className="text-sm">
@@ -88,6 +89,26 @@ export default function ControlPanel({ ticket }) {
           indicatorClassName={isResolved ? "bg-success" : undefined}
           className="bg-foreground/15 h-2 w-full"
         />
+      </div>
+      <div className="mt-4">
+        <div className="flex justify-between border-b border-border pb-2 mb-2">
+          <p className="text-muted-foreground/70 text-sm">Agente Asignado:</p>
+          <p className="text-xs font-semibold">
+            {ticket.assignedAgent ? ticket.assignedAgent : "No asignado"}
+          </p>
+        </div>
+        <div className="flex justify-between border-b border-border pb-2 mb-2">
+          <p className="text-muted-foreground/70 text-sm">Requiere Aprovación:</p>
+          <p className="text-xs font-semibold">
+            {ticket.requiresApproval ? "Sí" : "No"}
+          </p>
+        </div>
+        <div className="flex justify-between border-b border-border pb-2 mb-2">
+          <p className="text-muted-foreground/70 text-sm">Fecha de Creación:</p>
+          <p className="text-xs font-semibold">
+            {formatTicketDate(ticket.createdAt)}
+          </p>
+        </div>
       </div>
     </div>
   );
