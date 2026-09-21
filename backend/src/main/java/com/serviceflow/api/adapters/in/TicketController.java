@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +40,7 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody CreateTicketRequest request, Authentication auth) {
+    public ResponseEntity<?> create(@Valid @RequestBody CreateTicketRequest request, Authentication auth) {
         UsuarioAutenticado user = (UsuarioAutenticado) auth.getPrincipal();
         if (request.title() == null || request.title().isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "title is required"));
@@ -296,9 +299,12 @@ public class TicketController {
         }
     }
 
-    public record CreateTicketRequest(String title, String description, String category) {
+    public record CreateTicketRequest(
+            @NotBlank @Size(max = 180, message = "title no puede superar 180 caracteres") String title,
+            @NotBlank @Size(max = 1000, message = "description no puede superar 1000 caracteres") String description,
+            @NotBlank String category) {
     }
 
-    public record MessageRequest(String message) {
+    public record MessageRequest(@NotBlank @Size(max = 500, message = "El mensaje no puede superar 500 caracteres") String message) {
     }
 }
