@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   getMessage,
   getStoryLine,
+  sendMessage,
 } from "@/features/tickets/services/ticketApi";
 import { usePolling } from "@/hooks/usePolling";
 
@@ -57,24 +58,37 @@ function DetailViewSkeleton() {
     </div>
   );
 }
-const STORYLINE_INTERVAL = 30_000;
+const STORYLINE_INTERVAL = 10_000;
 
 export default function DetailView({ ticket, loading = false }) {
-  const [storyLine, setStoryLine] = useState([]);
+  const [timeline, setTimeline] = useState([]);
   const [message, setMessage] = useState(null);
 
   const { error, refresh } = usePolling({
     fetchData: async () => {
-      const data = await getStoryLine(ticket.id);
-      return data;
+      const [timelineData, messageData] = await Promise.all([
+        getStoryLine(ticket.id),
+        getMessage(ticket.id),
+      ]);
+
+      return { timeline: timelineData, message: messageData };
     },
     onSuccess: (data) => {
-      console.log("Fetched storyLine data:", data);
-      setStoryLine(data);
+      setTimeline(data.timeline);
+      setMessage(data.message);
     },
     interval: STORYLINE_INTERVAL,
     showInitialLoading: false,
   });
+
+  const handleSendMessage = async (newMessage) => {
+    try {
+      await sendMessage(ticket.id, newMessage);
+      refresh();
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
 
   if (loading) {
     return <DetailViewSkeleton />;
@@ -94,10 +108,13 @@ export default function DetailView({ ticket, loading = false }) {
             </button>
           </div>
         ) : (
-          <ActivityFeed storyLine={storyLine} message={message} />
+          <ActivityFeed
+            timeline={timeline}
+            conversation={message}
+            onSendMessage={handleSendMessage}
+          />
         )}
       </div>
-
       <ControlPanel ticket={ticket} />
     </div>
   );

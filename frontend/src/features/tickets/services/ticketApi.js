@@ -40,13 +40,20 @@ export async function getTickets({
 }
 
 export async function getStoryLine(ticketId) {
-  return apiRequest(`tickets/${ticketId}/storyline`, {
+  return apiRequest(`tickets/${ticketId}/timeline`, {
     method: "GET",
   });
 }
 
 export async function getMessage(ticketId) {
-  return apiRequest(`tickets/${ticketId}/message`, {
+  return apiRequest(`tickets/${ticketId}/messages`, {
     method: "GET",
+  });
+}
+
+export async function sendMessage(ticketId, message) {
+  return apiRequest(`tickets/${ticketId}/messages`, {
+    method: "POST",
+    body: { message },
   });
 }
