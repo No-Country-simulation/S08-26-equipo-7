@@ -67,7 +67,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
         UsuarioAutenticado usuario = (UsuarioAutenticado) authentication.getPrincipal();
-        return ResponseEntity.ok(Map.of("nombre", usuario.name(), "rol", usuario.role()));
+        return ResponseEntity.ok(Map.of("email", usuario.email(), "nombre", usuario.name(), "rol", usuario.role()));
     }
 
     @GetMapping("/csrf")
