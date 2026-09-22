@@ -1,11 +1,10 @@
 const PRIORITY = {
-  "LOW": "Baja",
-  "MEDIUM": "Media",
-  "HIGH": "Alta",
-  "URGENT": "Urgente"
+  LOW: "Baja",
+  MEDIUM: "Media",
+  HIGH: "Alta",
+  URGENT: "Urgente",
 };
 
-
-export function traslatePriority(priority) {
+export function translatePriority(priority) {
   return PRIORITY[priority] || priority;
 }

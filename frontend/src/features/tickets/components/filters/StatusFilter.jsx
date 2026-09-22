@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import SelectFilter from "@/features/tickets/components/filters/SelectFilter";
 import { getStatus } from "@/features/tickets/services/statusApi";
@@ -13,15 +13,15 @@ export default function StatusFilter({ value = "", onChange }) {
   useEffect(() => {
     fetchStatus().then(setStatus);
   }, []);
-  return(
+  return (
     <div>
-      <SelectFilter 
-        placeholder="Estados" 
-        label="Estados" 
+      <SelectFilter
+        placeholder="Estados"
+        label="Estados"
         options={[
           { value: "", label: "Todos los Activos" },
           { value: "all", label: "Todos" },
-          ...status.map(s => ({ value: s.name, label: s.label }))
+          ...status.map((s) => ({ value: s.name, label: s.label })),
         ]}
         value={value}
         onChange={onChange}

@@ -183,14 +183,35 @@ Lista todos los usuarios. **Solo ADMIN**. La respuesta **nunca incluye** `passwo
 
 ---
 
-## Vencimiento automático del SLA (EXPIRADO)
+## Automatizaciones del flujo
 
-Un **scheduler en el backend** revisa los tickets cada 60 segundos (configurable con `SLA_EXPIRY_CHECK_MS`, default `60000`):
+El backend automatiza lo máximo posible para que un ticket no dependa de gestión humana salvo que realmente la necesite. Al **crear** un ticket, además de registrarlo, el sistema:
 
-- Si un ticket **activo** (estado distinto de `RESOLVED`/`CLOSED`) tiene `slaDueAt` **vencido**, cambia solo a `ESCALATED` (grupo `EXPIRADO`) y actualiza `updatedAt`.
+1. **Auto-clasifica** (`CATEGORIZED`) con la categoría enviada.
+2. **Auto-prioriza** (`PRIORITIZED`) con la prioridad por defecto de la categoría (`categorias.prioridad_defecto`) y calcula el SLA.
+3. **Auto-asigna** (`ASSIGNED`) al agente **con menos tickets activos** (`role=AGENT`). Si no hay agentes, queda en `PRIORITIZED`.
+4. Si la categoría **requiere aprobación**, deja el ticket en `ASSIGNED`, registra `APPROVAL_REQUIRED` en la línea de tiempo y notifica a supervisores/admin.
+5. Notifica al agente asignado (`TICKET_ASIGNADO`).
+
+Cada paso se registra en la línea de tiempo con `actorNombre = "Sistema"`.
+
+### Vencimiento automático del SLA (EXPIRADO)
+
+Un **scheduler** revisa los tickets cada 60 segundos (configurable con `SLA_EXPIRY_CHECK_MS`, default `60000`):
+
+- Si un ticket **activo** (distinto de `RESOLVED`/`CLOSED`/`ESCALATED`) tiene `slaDueAt` **vencido**, cambia solo a `ESCALATED` (grupo `EXPIRADO`), registra el evento y **notifica** al solicitante, al agente asignado y a los supervisores (`SLA_VENCIDO`).
 - No toca tickets ya `ESCALATED`, `RESOLVED` o `CLOSED`.
 
-Se ve de inmediato en `GET /tickets?group=EXPIRADO` y en `overdueSla` del summary, y se registra un evento `ESCALATED` en la línea de tiempo del ticket.
+### Auto-cierre de resueltos inactivos
+
+Otro **scheduler** cierra automáticamente los tickets `RESOLVED` que llevan más de `48 h` sin actividad (configurable con `AUTO_CLOSE_RESOLVED_HOURS`, revisión cada `AUTO_CLOSE_CHECK_MS`, default `300000`):
+
+- Pasa el ticket a `CLOSED`, registra el evento `CLOSED` ("cerrado automáticamente por inactividad tras resolución") y notifica al solicitante.
+
+### Prioridad por defecto por categoría
+
+Cada categoría tiene `prioridadDefecto` (`LOW`, `MEDIUM`, `HIGH`, `URGENT`, default `MEDIUM`) que se usa al auto-priorizar. Se administra desde `POST/PUT /categories` (campo `prioridadDefecto`) y viene en `GET /categories`.
+
 
 ## GET /tickets/{id}/timeline
 
@@ -203,7 +224,50 @@ Historial del ticket (línea de tiempo), ordenado de más antigua a más recient
 ]
 ```
 
-Tipos de evento: `CREATED`, `CATEGORIZED`, `PRIORITIZED`, `ASSIGNED`, `APPROVED`, `STARTED`, `ESCALATED` (manual o automático por SLA), `RESOLVED`, `CLOSED`. `actorEmail`/`actorNombre` = quién ejecutó la acción.
+Tipos de evento: `CREATED`, `CATEGORIZED`, `PRIORITIZED`, `ASSIGNED`, `APPROVAL_REQUIRED`, `APPROVED`, `STARTED`, `ESCALATED` (manual o automático por SLA), `RESOLVED`, `CLOSED` (manual o auto-cierre), `MESSAGE` (mensaje agregado al hilo). `actorEmail`/`actorNombre` = quién ejecutó la acción; las acciones automáticas usan `actorNombre = "Sistema"`, `"Sistema (SLA)"` o `"Sistema (auto-cierre)"`.
+
+## GET /tickets/{id}/messages
+
+Lista los mensajes/comentarios del ticket, ordenados de más antiguo a más reciente. Autenticado. `404` si el ticket no existe.
+
+```json
+[
+  { "id": "…", "ticketId": "…", "autorEmail": "request@empresa.com", "autorNombre": "Usuario Uno", "mensaje": "Necesario para desarrollo", "creadoEn": "2026-09-15T20:21:00.000Z" }
+]
+```
+
+## POST /tickets/{id}/messages
+
+Agrega un mensaje al hilo del ticket. Autenticado. Body:
+
+```json
+{ "message": "Necesario para desarrollo de interfaces" }
+```
+
+- `201` con el mensaje creado (`autorEmail`/`autorNombre` del usuario autenticado).
+- `409` si el mensaje viene vacío.
+- `404` si el ticket no existe.
+- Además del hilo, se registra un evento `MESSAGE` en la línea de tiempo y se notifica a la contraparte (`TICKET_MENSAJE`): si comenta el solicitante se avisa al agente asignado; si comenta cualquier otro, se avisa al solicitante.
+
+## Notificaciones
+
+Sistema de avisos in-app por usuario. Se generan automáticamente en: creación/asignación (`TICKET_ASIGNADO`), aprobación requerida (`APROBACION_REQUERIDA`), aprobación (`TICKET_APROBADO`), resolución (`TICKET_RESUELTO`), cierre (`TICKET_CERRADO`), escalado (`TICKET_ESCALADO`), vencimiento de SLA (`SLA_VENCIDO`) y mensaje nuevo en el hilo (`TICKET_MENSAJE`).
+
+### GET /notifications
+Notificaciones del usuario autenticado (más recientes primero) + contador de no leídas. Autenticado.
+
+```json
+{ "items": [ { "id": "…", "usuarioId": "…", "ticketId": "…", "tipo": "TICKET_ASIGNADO", "mensaje": "Se te asignó el ticket HW-0003: Monitor roto", "leida": false, "creadoEn": "2026-09-15T20:22:00.000Z" } ], "unread": 3 }
+```
+
+### GET /notifications/unread-count
+Devuelve `{ "unread": 3 }`. Autenticado.
+
+### POST /notifications/{id}/read
+Marca una notificación como leída (solo si es del usuario). Autenticado.
+
+### POST /notifications/read-all
+Marca todas las notificaciones del usuario como leídas. Autenticado.
 
 ## Tickets
 
@@ -230,7 +294,7 @@ Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fi
 | `title` | Título del ticket (requerido en creación) |
 | `category` | Code de la categoría (ej. `IT`, `HARDWARE`, `FINANCE`) |
 | `description` | Descripción del problema |
-| `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` — fijada en `MEDIUM` al crear; solo el supervisor la cambia vía `prioritize` |
+| `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` — al crear sale de `prioridadDefecto` de la categoría (auto-priorización); se puede cambiar con `prioritize` |
 | `status` | Estado del ciclo de vida (lista arriba) |
 | `grupoEstado` | Grupo del estado para la UI: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO` o `RESUELTO` |
 | `requiresApproval` | Viene de la categoría (automático) |
@@ -265,7 +329,7 @@ Se genera en el backend en la creación y sigue el patrón `PREFIJO-NNNN` (máx.
 | `LOW` | 72 h |
 
 ### POST /tickets
-Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prioridad siempre es `MEDIUM`** (seteada en el backend, no enviada desde el front). `requiresApproval` viene automáticamente de la categoría seleccionada.
+Crea un ticket y lo **auto-clasifica, auto-prioriza y auto-asigna** (ver *Automatizaciones del flujo*). Usa el email del usuario autenticado. `requiresApproval` viene automáticamente de la categoría seleccionada.
 
 ```json
 // body
@@ -277,7 +341,7 @@ Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prio
 ```
 - `title` y `description` y `category` son **requeridos** (400 si falta alguno)
 - `409` si la categoría no existe o está inactiva
-- `201` respuesta con el ticket creado (`priority: "MEDIUM"`, `requiresApproval` según categoría)
+- `201` con el ticket creado. Según el flujo automático el `status` inicial es `ASSIGNED` (si hay agentes) o `PRIORITIZED` (si no hay); `priority` sale de `prioridadDefecto` de la categoría. Si requiere aprobación, queda en `ASSIGNED` esperando aprobación.
 
 ### GET /tickets
 Lista tickets con filtros opcionales por query string:
@@ -435,7 +499,12 @@ Artículos para la sección "Base de Conocimiento & Auto-Servicio": tarjetas con
 | `contenido` | Texto completo del artículo |
 | `categoria` | Code de la categoría (ej. `IT`, `ACCESS`, `FINANCE`, `FACILITIES`) |
 | `visualizaciones` | Contador de lecturas/vistas |
+| `megusta` | Votos positivos (útil) |
+| `nomegusta` | Votos negativos (no útil) |
+| `satisfaccion` | Porcentaje de satisfacción (`megusta / (megusta + nomegusta) * 100`) |
+| `tiempoLecturaMin` | Tiempo estimado de lectura en minutos (basado en ~200 palabras/min) |
 | `activo` | Si está publicado (`true`) o desactivado (`false`) |
+| `actualizadoEn` | Fecha de última actualización (UTC) |
 
 ### GET /knowledge
 Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por más reciente. **Público** (sin login).
@@ -455,13 +524,30 @@ Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por
 
 ### GET /knowledge/{id}
 Trae un artículo por ID (con su `contenido`). **Público**. `404` si no existe.
-
 ### POST /knowledge/{id}/view
+
 Incrementa en 1 las `visualizaciones` del artículo. **Público** y sin CSRF (es un contador de clics). Devuelve:
 
 ```json
 { "id": "11111111-...", "visualizaciones": 1403 }
 ```
+
+### POST /knowledge/{id}/votar
+
+Registra un voto de satisfacción (útil / no útil) en el artículo. **Público** y sin CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado:
+
+```json
+// respuesta 200
+{
+  "id": "11111111-...",
+  "megusta": 42,
+  "nomegusta": 3,
+  "satisfaccion": 93.33,
+  "tiempoLecturaMin": 5
+}
+```
+
+- `404` si el artículo no existe.
 
 ### POST /knowledge
 Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF. Body: `{ "titulo", "descripcion", "contenido", "categoria" }`. `201` con el artículo creado.

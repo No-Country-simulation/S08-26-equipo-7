@@ -20,10 +20,10 @@ A partir de acá, todo POST con datos lleva `X-XSRF-TOKEN: <ese token>`.
 
 ```
 POST /api/v1/auth/login
-Body: { "email": "admin@serviceflow.com", "password": "Admin123!" }
+Body: { "email": "admin@serviceflow.com", "password": "admin123" }
 ```
 
-Devuelve `{ "nombre": "Alejandro", "rol": "ADMIN" }` y setea la cookie `access_token` (HttpOnly).
+Devuelve `{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN" }` y setea la cookie `access_token` (HttpOnly).
 
 ## 3. Categorías
 

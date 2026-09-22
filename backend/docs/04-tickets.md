@@ -23,7 +23,7 @@ Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fi
 | `title` | Título del ticket (requerido en creación) |
 | `category` | Code de la categoría (ej. `IT`, `HARDWARE`, `FINANCE`) |
 | `description` | Descripción del problema |
-| `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` — fijada en `MEDIUM` al crear; solo el supervisor la cambia vía `prioritize` |
+| `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` — al crear sale de `prioridadDefecto` de la categoría (auto-priorización); se puede cambiar con `prioritize` |
 | `status` | Estado del ciclo de vida (lista arriba) |
 | `grupoEstado` | Grupo del estado para la UI: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO` o `RESUELTO` |
 | `requiresApproval` | Viene de la categoría (automático) |
@@ -57,15 +57,34 @@ Se genera en el backend en la creación y sigue el patrón `PREFIJO-NNNN` (máx.
 | `MEDIUM` | 24 h |
 | `LOW` | 72 h |
 
+## Automatizaciones del flujo
+
+Al **crear** un ticket el backend automatiza lo máximo posible (el ticket no depende de gestión humana salvo que realmente la necesite):
+
+1. **Auto-clasifica** (`CATEGORIZED`) con la categoría enviada.
+2. **Auto-prioriza** (`PRIORITIZED`) con la prioridad por defecto de la categoría (`prioridad_defecto`) y calcula el SLA.
+3. **Auto-asigna** (`ASSIGNED`) al agente (`role=AGENT`) **con menos tickets activos**. Si no hay agentes, queda en `PRIORITIZED`.
+4. Si la categoría **requiere aprobación**, deja el ticket en `ASSIGNED`, registra `APPROVAL_REQUIRED` ("Requiere autorización gerencial obligatoria") y notifica a supervisores/admin.
+5. Notifica al agente asignado.
+
+Cada paso queda en la línea de tiempo con `actorNombre = "Sistema"`.
+
 ## Vencimiento automático del SLA (EXPIRADO)
 
 Un **scheduler en el backend** revisa los tickets cada 60 segundos (configurable con la env var `SLA_EXPIRY_CHECK_MS`, default `60000`):
 
-- Si un ticket **activo** (cualquier estado excepto `RESOLVED`/`CLOSED`) tiene `slaDueAt` **ya vencido**, el sistema lo cambia **automáticamente** a `ESCALATED` (grupo `EXPIRADO`).
+- Si un ticket **activo** (cualquier estado excepto `RESOLVED`/`CLOSED`/`ESCALATED`) tiene `slaDueAt` **ya vencido**, el sistema lo cambia **automáticamente** a `ESCALATED` (grupo `EXPIRADO`).
 - Se actualiza también su `updatedAt`.
 - No se tocan tickets ya `ESCALATED`, `RESOLVED` o `CLOSED`.
+- Se **notifica** al solicitante, al agente asignado y a los supervisores (`SLA_VENCIDO`).
 
 El ticket vencido aparece de inmediato en `GET /tickets?group=EXPIRADO` y en el contador `overdueSla` del resumen. Además registra un evento `ESCALATED` ("Ticket expirado por SLA vencido") en su línea de tiempo.
+
+## Auto-cierre de resueltos inactivos
+
+Un **scheduler** cierra solos los tickets `RESOLVED` que llevan más de `48 h` sin actividad (env var `AUTO_CLOSE_RESOLVED_HOURS`, default `48`; revisión cada `AUTO_CLOSE_CHECK_MS`, default `300000`):
+
+- Pasa el ticket a `CLOSED`, registra el evento `CLOSED` ("Ticket cerrado automáticamente por inactividad tras resolución", actor `"Sistema (auto-cierre)"`) y notifica al solicitante.
 
 ## GET /tickets/{id}/timeline
 
@@ -90,20 +109,22 @@ Cada evento de la línea de tiempo:
 | Tipo | Descripción que se registra |
 |---|---|
 | `CREATED` | Ticket creado |
-| `CATEGORIZED` | Categoría asignada: `CODIGO` |
-| `PRIORITIZED` | Prioridad asignada: `PRIORIDAD` (SLA `Nh`) |
-| `ASSIGNED` | Asignado al agente `NOMBRE` |
+| `CATEGORIZED` | Categoría asignada: `CODIGO` (manual) · o "Categoría asignada automáticamente" (actor "Sistema") |
+| `PRIORITIZED` | Prioridad asignada: `PRIORIDAD` (SLA `Nh`) · o automática (actor "Sistema") |
+| `ASSIGNED` | Asignado al agente `NOMBRE` · o automático (actor "Sistema") |
+| `APPROVAL_REQUIRED` | Requiere autorización gerencial obligatoria (actor "Sistema") |
 | `APPROVED` | Ticket aprobado |
 | `STARTED` | Trabajo iniciado |
 | `ESCALATED` | Ticket escalado manualmente · o "Ticket expirado por SLA vencido" (automático, actor "Sistema (SLA)") |
 | `RESOLVED` | Ticket resuelto |
-| `CLOSED` | Ticket cerrado |
+| `CLOSED` | Ticket cerrado · o "cerrado automáticamente por inactividad tras resolución" (actor "Sistema (auto-cierre)") |
+| `MESSAGE` | Mensaje de `NOMBRE`: `texto` |
 
-`actorEmail` y `actorNombre` identifican quién realizó la acción (el usuario autenticado de la llamada). Para más de un usuario con la misma acción, se dejan `null`. La fecha es UTC.
+`actorEmail` y `actorNombre` identifican quién realizó la acción. Las acciones del sistema usan `actorNombre = "Sistema"`, `"Sistema (SLA)"` o `"Sistema (auto-cierre)"`. La fecha es UTC.
 
 ## POST /tickets
 
-Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prioridad siempre es `MEDIUM`** (seteada en el backend, no enviada desde el front). `requiresApproval` viene automáticamente de la categoría seleccionada.
+Crea un ticket y lo **auto-clasifica, auto-prioriza y auto-asigna** (ver *Automatizaciones del flujo*). Usa el email del usuario autenticado. `requiresApproval` viene automáticamente de la categoría seleccionada.
 
 ```json
 // body
@@ -115,8 +136,13 @@ Crea un ticket como `SUBMITTED`. Usa el email del usuario autenticado. **La prio
 ```
 
 - `title`, `description` y `category` son **requeridos** (400 si falta alguno)
+- **Límites de longitud:** `title` máx 180, `description` máx 1000 (si se supera, devuelve 400 con `@Size`)
 - `409` si la categoría no existe o está inactiva
-- `201` respuesta con el ticket creado (`priority: "MEDIUM"`, `requiresApproval` según categoría)
+- `201` con el ticket creado. Por el flujo automático el `status` inicial es `ASSIGNED` (si hay agentes) o `PRIORITIZED` (si no); `priority` sale de `prioridadDefecto` de la categoría. Si requiere aprobación, queda en `ASSIGNED`.
+
+## Mensajes del ticket
+
+El hilo de comentarios del ticket tiene su propia documentación: ver [08-notificaciones-y-mensajes.md](08-notificaciones-y-mensajes.md). Resumen: `GET`/`POST /tickets/{id}/messages`; cada mensaje deja un evento `MESSAGE` en la línea de tiempo y notifica a la contraparte.
 
 ## GET /tickets
 

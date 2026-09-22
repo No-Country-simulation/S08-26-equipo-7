@@ -15,7 +15,10 @@ export default function TableManager({ isResume = false, ...props }) {
     if (!el) return;
 
     const observer = new ResizeObserver(([entry]) => {
-      setIsMobile(entry.contentRect.width < (isResume ? MOBILE_BREAKPOINT : MOBILE_BREAKPOINT_LARGE));
+      setIsMobile(
+        entry.contentRect.width <
+          (isResume ? MOBILE_BREAKPOINT : MOBILE_BREAKPOINT_LARGE),
+      );
     });
     observer.observe(el);
 
@@ -27,4 +30,4 @@ export default function TableManager({ isResume = false, ...props }) {
       {isMobile ? <MobileTable {...props} /> : <DesktopTable {...props} />}
     </div>
   );
-};
+}

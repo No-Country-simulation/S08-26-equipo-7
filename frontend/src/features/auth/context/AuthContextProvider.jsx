@@ -1,8 +1,8 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { getCurrentUser, logout } from '@/features/auth/services/authService';
+import { getCurrentUser, logout } from "@/features/auth/services/authService";
 
-import { AuthContext } from './authContext';
+import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -23,27 +23,6 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    async function handleAuthExpired() {
-      setUser(null);
-
-      if (["/login", "/forgot-password"].includes(window.location.pathname)) {
-        return;
-      }
-
-      try {
-        await logout();
-      } catch {
-        // The access token is already invalid; local cleanup still proceeds.
-      } finally {
-        window.location.assign("/login");
-      }
-    }
-
-    window.addEventListener("auth:expired", handleAuthExpired);
-    return () => window.removeEventListener("auth:expired", handleAuthExpired);
-  }, []);
-
   const loginContext = (userData) => {
     setUser(userData);
   };
@@ -61,7 +40,9 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginContext, logoutContext }}>
+    <AuthContext.Provider
+      value={{ user, loading, loginContext, logoutContext }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,8 +1,8 @@
-import { ArrowLeftIcon,Loader2 } from 'lucide-react';
-import { useActionState } from 'react';
-import { Link } from 'react-router-dom';
+import { ArrowLeftIcon, Loader2 } from "lucide-react";
+import { useActionState } from "react";
+import { Link } from "react-router-dom";
 
-import SuccessCard from '@/components/SuccessCard';
+import SuccessCard from "@/components/SuccessCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { forgotPassword } from "@/features/auth/services/authService.js";
 
 async function forgotPassAction(prevState, formData) {
-  const email = formData.get('email');
+  const email = formData.get("email");
 
   try {
     const result = await forgotPassword(email);
@@ -21,20 +21,22 @@ async function forgotPassAction(prevState, formData) {
 }
 
 export default function ForgotPassForm() {
-
-  const [state, formAction, isPending] = useActionState(forgotPassAction,null);
+  const [state, formAction, isPending] = useActionState(forgotPassAction, null);
 
   return (
     <div className="w-full max-w-md space-y-1 px-3 py-2">
-      <Card className="space-y-1.5 p-8 rounded-4xl shadow-md w-full" aria-live="polite">
+      <Card
+        className="w-full space-y-1.5 rounded-4xl p-8 shadow-md"
+        aria-live="polite"
+      >
         {state?.success ? (
-          <SuccessCard 
-            title="¡Solicitud enviada!" 
-            message="Si el correo existe, se creará un ticket automático para que puedas recuperar tu contraseña. Para más información, comunícate con el administrador." 
+          <SuccessCard
+            title="¡Solicitud enviada!"
+            message="Si el correo existe, se creará un ticket automático para que puedas recuperar tu contraseña. Para más información, comunícate con el administrador."
             action={
               <Link
                 to="/login"
-                className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base"
               >
                 <ArrowLeftIcon className="h-4 w-4" />
                 Volver al inicio de sesión
@@ -44,16 +46,17 @@ export default function ForgotPassForm() {
         ) : (
           <form action={formAction} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs sm:text-sm font-bold">
-          Correo asociado a tu cuenta
+              <Label htmlFor="email" className="text-xs font-bold sm:text-sm">
+                Correo asociado a tu cuenta
               </Label>
-              <p className="text-sm text-muted-foreground">
-            Ingresa tu correo corporativo; si está en la base de datos, crearemos un ticket.
+              <p className="text-muted-foreground text-sm">
+                Ingresa tu correo corporativo; si está en la base de datos,
+                crearemos un ticket.
               </p>
-              <Input 
-                type="email" 
-                name="email" 
-                id="email" 
+              <Input
+                type="email"
+                name="email"
+                id="email"
                 placeholder="nombre@tuempresa.com"
                 required
                 disabled={isPending}
@@ -62,11 +65,15 @@ export default function ForgotPassForm() {
               />
             </div>
             {state?.error && (
-              <p role="alert" className="text-sm font-medium text-destructive">
+              <p role="alert" className="text-destructive text-sm font-medium">
                 {state.error}
               </p>
             )}
-            <Button type="submit" className="w-full btn-gradient-primary cursor-pointer" disabled={isPending}>
+            <Button
+              type="submit"
+              className="btn-gradient-primary w-full cursor-pointer"
+              disabled={isPending}
+            >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -83,7 +90,7 @@ export default function ForgotPassForm() {
             </Button>
             <Link
               to="/login"
-              className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base"
             >
               <ArrowLeftIcon className="h-4 w-4" />
               <span className="min-[360px]:hidden">Volver al inicio</span>

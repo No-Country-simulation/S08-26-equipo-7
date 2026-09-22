@@ -3,7 +3,7 @@ import { SidebarFooter } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getRoleLabel } from "@/i18n/es/roles";
 
-export default function SidebarUser(){
+export default function SidebarUser() {
   const { user } = useAuth();
   return (
     <SidebarFooter className="relative h-14 shrink-0 overflow-hidden border-t">
@@ -19,4 +19,4 @@ export default function SidebarUser(){
       </div>
     </SidebarFooter>
   );
-};
+}

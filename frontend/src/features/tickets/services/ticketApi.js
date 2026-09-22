@@ -1,10 +1,6 @@
 import { apiRequest } from "@/services/apiService";
 
-export async function createTicket({
-  title,
-  description,
-  category,
-}) {
+export async function createTicket({ title, description, category }) {
   return apiRequest("tickets", {
     method: "POST",
     body: { title, description, category },
@@ -32,12 +28,32 @@ export async function getTickets({
   };
 
   const cleanParams = Object.entries(rawParams).filter(
-    ([, value]) => value !== undefined && value !== null && value !== ""
+    ([, value]) => value !== undefined && value !== null && value !== "",
   );
 
   const queryParams = new URLSearchParams(cleanParams).toString();
 
   return apiRequest(`tickets?${queryParams}`, {
     method: "GET",
+    cache: "no-store",
+  });
+}
+
+export async function getStoryLine(ticketId) {
+  return apiRequest(`tickets/${ticketId}/timeline`, {
+    method: "GET",
+  });
+}
+
+export async function getMessage(ticketId) {
+  return apiRequest(`tickets/${ticketId}/messages`, {
+    method: "GET",
+  });
+}
+
+export async function sendMessage(ticketId, message) {
+  return apiRequest(`tickets/${ticketId}/messages`, {
+    method: "POST",
+    body: { message },
   });
 }

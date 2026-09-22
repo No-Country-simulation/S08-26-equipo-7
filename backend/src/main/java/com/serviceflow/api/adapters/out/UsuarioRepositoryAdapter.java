@@ -57,6 +57,11 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
         return jpaRepository.findAll().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public java.util.List<Usuario> findByRole(com.serviceflow.api.domain.RolUsuario role) {
+        return jpaRepository.findByRolName(role.name()).stream().map(this::toDomain).toList();
+    }
+
     private Usuario toDomain(UsuarioEntity entity) {
         return new Usuario(
                 entity.getId(),

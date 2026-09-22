@@ -21,7 +21,7 @@ export default function TicketsPage() {
     }));
   };
   return (
-    <div className="space-y-4 w-4/5 mx-auto">
+    <div className="mx-auto w-4/5 space-y-4">
       <InfoBanner
         title="Listado Centralizado de Solicitudes"
         paragraph="Filtre, examine y supervise cada requerimiento interno de la compañía."

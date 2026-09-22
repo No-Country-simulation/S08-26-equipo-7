@@ -1,4 +1,4 @@
-﻿{
+{
     "info":  {
                  "name":  "ServiceFlow API",
                  "description":  "API de ServiceFlow - GestiÃ³n de tickets, SLA, base de conocimiento y auth con JWT + CSRF.\n\n## Setup\n1. Correr la request `Auth \u003e GET /auth/csrf` primero: guarda la variable `csrfToken` para todos los POST.\n2. Correr `POST /auth/login`: postman guarda la cookie `access_token` automÃ¡ticamente.\n3. Los POST que modifican datos ya incluyen el header `X-XSRF-TOKEN: {{csrfToken}}`.\n\nBase URL por defecto: http://localhost:8080/api/v1 (editable en la variable `baseUrl`).",
@@ -538,7 +538,9 @@
                                                                      }
                                                                  ]
                                                   }
-                                  }
+                                  },
+                                  {"name":"GET /tickets/{id}/messages","request":{"method":"GET","url":"{{baseUrl}}/tickets/{{ticketId}}/messages","description":"Hilo de mensajes del ticket (mas antiguo a mas reciente).","header":[{"key":"X-XSRF-TOKEN","value":"{{csrfToken}}"}]}},
+                                  {"name":"POST /tickets/{id}/messages","request":{"url":"{{baseUrl}}/tickets/{{ticketId}}/messages","method":"POST","body":{"raw":"{ \"message\": \"Necesario para desarrollo de interfaces\" }","options":{"raw":{"language":"json"}},"mode":"raw"},"header":[{"key":"Content-Type","value":"application/json"},{"key":"X-XSRF-TOKEN","value":"{{csrfToken}}"}]}}
                               ]
                  },
                  {
@@ -664,6 +666,7 @@
                                                   }
                                   }
                               ]
-                 }
+                 },
+                 {"name":"Notificaciones","item":[{"name":"GET /notifications","request":{"method":"GET","url":"{{baseUrl}}/notifications","header":[{"key":"X-XSRF-TOKEN","value":"{{csrfToken}}"}]}},{"name":"GET /notifications/unread-count","request":{"method":"GET","url":"{{baseUrl}}/notifications/unread-count","header":[{"key":"X-XSRF-TOKEN","value":"{{csrfToken}}"}]}},{"name":"POST /notifications/{id}/read","request":{"method":"POST","url":"{{baseUrl}}/notifications/{{notificationId}}/read","header":[{"key":"X-XSRF-TOKEN","value":"{{csrfToken}}"}]}},{"name":"POST /notifications/read-all","request":{"method":"POST","url":"{{baseUrl}}/notifications/read-all","header":[{"key":"X-XSRF-TOKEN","value":"{{csrfToken}}"}]}}]}
              ]
 }

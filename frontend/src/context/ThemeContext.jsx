@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
 
-import { applyTheme, getPreferredTheme, THEME_STORAGE_KEY } from '@/lib/theme';
+import { applyTheme, getPreferredTheme, THEME_STORAGE_KEY } from "@/lib/theme";
 
 const ThemeContext = createContext(null);
 
@@ -22,7 +22,8 @@ export function ThemeProvider({ children }) {
     };
 
     mediaQuery.addEventListener("change", handleSystemThemeChange);
-    return () => mediaQuery.removeEventListener("change", handleSystemThemeChange);
+    return () =>
+      mediaQuery.removeEventListener("change", handleSystemThemeChange);
   }, []);
 
   const toggleTheme = () => {

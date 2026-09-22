@@ -1,4 +1,4 @@
-import { Inbox } from "lucide-react";
+import { CircleX, Inbox } from "lucide-react";
 
 import {
   Pagination,
@@ -9,18 +9,26 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import TableSkeleton from "@/features/skeleton/TableSkeleton";
 import TableManager from "@/features/tickets/components/table/TableManager";
-import TableSkeleton from "@/features/tickets/components/table/TableSkeleton";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
 export default function Table({ filters, offset = 0, onOffsetChange }) {
-  const { tickets, total = 0, offset: responseOffset = 0, limit = 10, loading, error } = useTickets({
+  const {
+    tickets,
+    total = 0,
+    offset: responseOffset = 0,
+    limit = 10,
+    loading,
+    error,
+  } = useTickets({
     ...filters,
     offset,
   });
 
   const totalPages = Math.ceil(total / limit) || 1;
-  const currentPage = Math.min(Math.floor(responseOffset / limit) + 1, totalPages);
+  const pageOffset = loading ? offset : responseOffset;
+  const currentPage = Math.min(Math.floor(pageOffset / limit) + 1, totalPages);
   const hasActiveFilters = Object.values(filters || {}).some(Boolean);
 
   const getPageNumbers = () => {
@@ -29,14 +37,29 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
     }
 
     if (currentPage <= 3) {
-      return [1, 2, 3, 4, 'ellipsis', totalPages];
+      return [1, 2, 3, 4, "ellipsis", totalPages];
     }
 
     if (currentPage >= totalPages - 2) {
-      return [1, 'ellipsis', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      return [
+        1,
+        "ellipsis",
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
     }
 
-    return [1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages];
+    return [
+      1,
+      "ellipsis",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "ellipsis",
+      totalPages,
+    ];
   };
 
   const pages = getPageNumbers();
@@ -50,17 +73,26 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
   };
 
   return (
-    <div className="py-4 bg-card rounded-lg my-4 border border-border shadow-md">
+    <div className="bg-card border-border my-4 rounded-lg border py-4 shadow-md">
       {loading && <TableSkeleton />}
-      {!loading && error && (
-        <p className="p-6 text-center text-destructive" role="alert">
-          No se pudieron cargar los Tickets. Inténtalo de nuevo.
-        </p>
+      {error && tickets.length === 0 && (
+        <div
+          className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
+          role="status"
+        >
+          <CircleX className="text-destructive mb-4 size-10" />
+          <p className="text-destructive p-6 text-center" role="alert">
+            No se pudieron cargar las solicitudes recientes.
+          </p>
+        </div>
       )}
       {!loading && !error && tickets.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-4 text-center text-muted-foreground" role="status">
-          <div className="w-16 h-16 mb-4 bg-foreground/10 rounded-lg flex items-center justify-center ">
-            <Inbox className=" size-10" />
+        <div
+          className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
+          role="status"
+        >
+          <div className="bg-foreground/10 mb-4 flex h-16 w-16 items-center justify-center rounded-lg">
+            <Inbox className="size-10" />
           </div>
           <p className="text-2xl font-bold">Resultados no encontrados</p>
           <p className="text-xs">
@@ -70,11 +102,11 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
           </p>
         </div>
       )}
-      {!loading && !error && tickets.length > 0 && (
+      {!loading && tickets.length > 0 && (
         <TableManager tickets={tickets} resume={false} />
       )}
 
-      {!loading && !error && (
+      {!error && (
         <Pagination className="mt-4">
           <PaginationContent>
             <PaginationItem>
@@ -85,12 +117,18 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
                   goToPage(currentPage - 1);
                 }}
                 aria-disabled={currentPage === 1}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : undefined}
+                className={
+                  currentPage === 1
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
               />
             </PaginationItem>
 
             {pages.map((page, index) => (
-              <PaginationItem key={page === "ellipsis" ? `ellipsis-${index}` : page}>
+              <PaginationItem
+                key={page === "ellipsis" ? `ellipsis-${index}` : page}
+              >
                 {page === "ellipsis" ? (
                   <PaginationEllipsis />
                 ) : (
@@ -116,7 +154,11 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
                   goToPage(currentPage + 1);
                 }}
                 aria-disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
               />
             </PaginationItem>
           </PaginationContent>
