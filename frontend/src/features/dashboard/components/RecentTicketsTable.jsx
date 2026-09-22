@@ -1,8 +1,8 @@
 import { ArrowRight, CircleX, Inbox } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import TableSkeleton from "@/features/skeleton/TableSkeleton";
 import TableManager from "@/features/tickets/components/table/TableManager";
-import TableSkeleton from "@/features/tickets/components/table/TableSkeleton";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
 export default function RecentTicketsTable() {

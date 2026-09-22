@@ -1,5 +1,5 @@
 import { Check, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Progress } from "@/components/ui/progress";
 import {
@@ -11,35 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import ControlPanelSkeleton from "@/features/skeleton/ControlPanelSkeleton";
 import Remaining from "@/features/tickets/components/sla/Remaining";
 import { useProgress } from "@/features/tickets/hooks/useProgress";
-import { getStatus } from "@/features/tickets/services/statusApi";
 import { formatTicketDate } from "@/lib/utils";
 
-async function fetchStatus() {
-  const status = await getStatus();
-  return status;
-}
-
-export default function ControlPanel({ ticket }) {
-  const [options, setOptions] = useState([]);
-  const [loadingOptions, setLoadingOptions] = useState(true);
+export default function ControlPanel({ ticket, options = [], loadingOptions = false }) {
   const [valueOption, setValueOption] = useState(ticket.grupoEstado);
-  useEffect(() => {
-    fetchStatus()
-      .then(setOptions)
-      .finally(() => setLoadingOptions(false));
-  }, []);
+
   const isResolved =
     ticket.resolvedAt !== null &&
     ticket.resolvedAt !== undefined &&
     String(ticket.resolvedAt).trim() !== "";
+
   const progress = useProgress(
     ticket.createdAt,
     ticket.slaDueAt,
     ticket.resolvedAt,
   );
+
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
       <div className="border-border border-b text-sm font-semibold sm:text-lg">
@@ -49,14 +39,7 @@ export default function ControlPanel({ ticket }) {
         Estado de atención
       </p>
       {loadingOptions ? (
-        <div
-          className="border-border flex h-12 w-full items-center rounded-md border p-4"
-          role="status"
-          aria-label="Cargando estados"
-        >
-          <span className="sr-only">Cargando estados...</span>
-          <Skeleton className="bg-muted-foreground/10 h-4 w-36" />
-        </div>
+        <ControlPanelSkeleton />
       ) : (
         <Select
           value={valueOption}
