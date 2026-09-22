@@ -1,33 +1,10 @@
-import { useLocation, useParams } from "react-router-dom";
-
-// Importamos los componentes puros de UI (tontos)
+// Importamos únicamente la vista principal de la feature
 import DetailView from "@/features/tickets/components/detail/DetailView";
-import { useTicketDetails } from "@/features/tickets/hooks/useTicketDetails";
 
 export default function TicketDetailPage() {
-  const { id } = useParams();
-  const { state } = useLocation();
-  const { ticket, loading, error } = useTicketDetails(id, state?.ticket);
-
-  if (loading) {
-    return (
-      <div className="mx-auto w-4/5 space-y-4">
-        <DetailView loading />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="p-6 text-red-500">Error: {error}</div>;
-  }
-
-  if (!ticket) {
-    return <div className="p-6">Ticket no encontrado.</div>;
-  }
-
   return (
     <div className="mx-auto w-4/5 space-y-4">
-      <DetailView ticket={ticket} />
+      <DetailView />
     </div>
   );
 }
