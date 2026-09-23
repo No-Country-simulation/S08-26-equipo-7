@@ -2,7 +2,7 @@
 
 ## GET /tickets/stats/monthly
 
-Estadísticas para gráficas del admin. `month` opcional en formato `YYYY-MM` (default: mes actual).
+Estadísticas para gráficas del admin. `month` opcional en formato `YYYY-MM` (default: mes actual). Si quien llama es `SUPERVISOR` con área asignada, todo viene filtrado por su área (incluye `area` en la respuesta; `null` = general).
 
 ```json
 // respuesta 200
@@ -19,7 +19,7 @@ Estadísticas para gráficas del admin. `month` opcional en formato `YYYY-MM` (d
 
 ## GET /tickets/stats/summary
 
-Resumen del dashboard del admin — tickets activos, próximos a vencer, vencidos y cumplimiento de SLA. **Solo ADMIN y SUPERVISOR** (403 para otros roles). `month` opcional en formato `YYYY-MM` (default: mes actual). Los campos con sufijo `PrevMonth` y los `*Delta` comparan contra el mes anterior.
+Resumen del dashboard del admin — tickets activos, próximos a vencer, vencidos y cumplimiento de SLA. **Solo ADMIN y SUPERVISOR** (403 para otros roles). Si quien llama es `SUPERVISOR` con área asignada, todo viene filtrado por su área (el `ADMIN` ve todo). La respuesta incluye `area` (`null` = general). `month` opcional en formato `YYYY-MM` (default: mes actual). Los campos con sufijo `PrevMonth` y los `*Delta` comparan contra el mes anterior.
 
 ```json
 // respuesta 200
