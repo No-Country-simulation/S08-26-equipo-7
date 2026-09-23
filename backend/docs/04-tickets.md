@@ -10,10 +10,9 @@ Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fi
 |---|---|
 | `PENDIENTE` | `SUBMITTED`, `CATEGORIZED`, `PRIORITIZED` |
 | `EN_PROCESO` | `ASSIGNED`, `IN_PROGRESS` |
-| `EN_APROBACION` | `PENDING_APPROVAL`, `APPROVED` |
+| `EN_APROBACION` | `APPROVED` |
 | `EXPIRADO` | `ESCALATED` |
-| `RESUELTO` | `RESOLVED` |
-| `CERRADO` | `CLOSED` |
+| `RESUELTO` | `RESOLVED`, `CLOSED` |
 
 ## Campos del ticket (respuesta)
 
