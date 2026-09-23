@@ -288,6 +288,27 @@ public class TicketService {
         return saved;
     }
 
+    public Ticket reject(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL).contains(ticket.getStatus())) {
+            throw new InvalidTransitionException("Ticket must be assigned before rejection");
+        }
+        if (!ticket.isRequiresApproval()) {
+            throw new InvalidTransitionException("This ticket does not require approval");
+        }
+        ticket.setStatus(EstadoTicket.ASSIGNED);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REJECTED", "Ticket rechazado, devuelto al agente", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_RECHAZADO",
+                "Tu ticket " + saved.getCodigo() + " fue rechazado");
+        if (saved.getAssignedTo() != null) {
+            notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_RECHAZADO",
+                    "El ticket " + saved.getCodigo() + " fue rechazado, revisar y corregir");
+        }
+        return saved;
+    }
+
     public Ticket start(UUID id, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
