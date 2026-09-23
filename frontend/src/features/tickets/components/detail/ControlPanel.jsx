@@ -22,10 +22,18 @@ import {
 } from "@/features/tickets/services/ticketApi";
 import { formatTicketDate } from "@/lib/utils";
 
-export default function ControlPanel({ ticket, options = [], loadingOptions = false, onRefresh }) {
-  const [valueOption, setValueOption] = useState(ticket.grupoEstado);
-  const [loadingAction, setLoadingAction] = useState(null);
+export default function ControlPanel({
+  ticket,
+  options = [],
+  loadingOptions = false,
+  onRefresh,
+}) {
 
+  const [loadingAction, setLoadingAction] = useState(null);
+  const [localStatus, setLocalStatus] = useState(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const currentStatus = localStatus ?? ticket.grupoEstado;
+  
   const isResolved =
     ticket.resolvedAt !== null &&
     ticket.resolvedAt !== undefined &&
@@ -65,6 +73,24 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
     }
   };
 
+  const handleStatusChange = async (newStatus) => {
+    if (newStatus === ticket.grupoEstado || isUpdatingStatus) return;
+
+    try {
+      setIsUpdatingStatus(true);
+      setLocalStatus(newStatus);
+      
+      toast.success("Estado actualizado con éxito");
+      if (onRefresh) await onRefresh();
+    } catch (error) {
+      toast.error("Error al actualizar el estado: " + error.message);
+      setLocalStatus(ticket.grupoEstado);
+    } finally {
+      setIsUpdatingStatus(false);
+      setLocalStatus(null);
+    }
+  };
+
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
       <div className="border-border border-b text-sm font-semibold sm:text-lg">
@@ -77,8 +103,9 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
         <ControlPanelSkeleton />
       ) : (
         <Select
-          value={valueOption}
-          onValueChange={(value) => setValueOption(value)}
+          value={currentStatus}
+          onValueChange={handleStatusChange}
+          disabled={isUpdatingStatus || Boolean(loadingAction)}
         >
           <SelectTrigger className="border-border w-full border p-2 sm:p-4">
             <SelectValue placeholder="Seleccione un estado" />
@@ -124,7 +151,11 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
             Requiere Aprovación:
           </p>
           <p className="text-xs font-semibold sm:text-sm">
-            {ticket.requiresApproval ? (ticket.status === "PENDING_APPROVAL" ? "Sí" : "Aprobado") : "No"}
+            {ticket.requiresApproval
+              ? ticket.status === "PENDING_APPROVAL"
+                ? "Sí"
+                : "Aprobado"
+              : "No"}
           </p>
         </div>
         <div className="border-border mb-2 flex justify-between border-b pb-2">
@@ -136,7 +167,7 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
           </p>
         </div>
       </div>
-      {ticket.requiresApproval && ticket.status !== "APPROVED" && (
+      {ticket.requiresApproval && ticket.status === "PENDING_APPROVAL" && (
         <div className="mb-2 pb-2">
           <p className="text-muted-foreground/70 text-xs font-semibold sm:text-sm">
             Aprovar Solicitud?
@@ -144,7 +175,7 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
             <Button
               disabled={Boolean(loadingAction)}
-              className="bg-success text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm hover:bg-success/80 disabled:opacity-50"
+              className="bg-success text-primary-foreground hover:bg-success/80 flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-50 sm:text-sm"
               onClick={handleApprove}
             >
               {loadingAction === "APPROVE" ? (
@@ -156,7 +187,7 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
             </Button>
             <Button
               disabled={Boolean(loadingAction)}
-              className="bg-destructive text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm hover:bg-destructive/80 disabled:opacity-50"
+              className="bg-destructive text-primary-foreground hover:bg-destructive/80 flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-50 sm:text-sm"
               onClick={handleReject}
             >
               {loadingAction === "REJECT" ? (
