@@ -1,6 +1,8 @@
 import { Check, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Select,
@@ -14,6 +16,10 @@ import {
 import ControlPanelSkeleton from "@/features/skeleton/ControlPanelSkeleton";
 import Remaining from "@/features/tickets/components/sla/Remaining";
 import { useProgress } from "@/features/tickets/hooks/useProgress";
+import {
+  approveTicket,
+  rejectTicket,
+} from "@/features/tickets/services/ticketApi";
 import { formatTicketDate } from "@/lib/utils";
 
 export default function ControlPanel({ ticket, options = [], loadingOptions = false }) {
@@ -29,6 +35,26 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
     ticket.slaDueAt,
     ticket.resolvedAt,
   );
+  
+
+  const handleApprove = async () => {
+    try {
+      await approveTicket(ticket.id);
+      toast.success("Ticket aprobado con éxito");
+    } catch (error) {
+      toast.error("Error al aprobar el ticket: " + error.message);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await rejectTicket(ticket.id);
+      toast.success("Ticket rechazado con éxito");
+    } catch (error) {
+      toast.error("Error al rechazar el ticket: " + error.message);
+    }
+  };
+
 
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
@@ -81,7 +107,7 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
             Agente Asignado:
           </p>
           <p className="text-xs font-semibold sm:text-sm">
-            {ticket.assignedAgent ? ticket.assignedAgent : "No asignado"}
+            {ticket.assignedToName ? ticket.assignedToName : "No asignado"}
           </p>
         </div>
         <div className="border-border mb-2 flex justify-between border-b pb-2">
@@ -101,20 +127,26 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
           </p>
         </div>
       </div>
-      {ticket.requiresApproval && (
+      {ticket.requiresApproval && ticket.status !== "APPROVED" &&  (
         <div className="mb-2 pb-2">
           <p className="text-muted-foreground/70 text-xs font-semibold sm:text-sm">
             Aprovar Solicitud?
           </p>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-            <button className="bg-success text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm">
+            <Button
+              className="bg-success text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm"
+              onClick={handleApprove}
+            >
               <Check size="14" className="mr-2" />
               Aprobar
-            </button>
-            <button className="bg-destructive text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm">
+            </Button>
+            <Button
+              className="bg-destructive text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm"
+              onClick={handleReject}
+            >
               <X size="16" className="mr-2" />
               Rechazar
-            </button>
+            </Button>
           </div>
         </div>
       )}

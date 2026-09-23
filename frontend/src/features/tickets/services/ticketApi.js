@@ -57,3 +57,15 @@ export async function sendMessage(ticketId, message) {
     body: { message },
   });
 }
+
+export async function approveTicket(ticketId) {
+  return apiRequest(`tickets/${ticketId}/approve`, {
+    method: "POST",
+  });
+}
+
+export async function rejectTicket(ticketId) {
+  return apiRequest(`tickets/${ticketId}/reject`, {
+    method: "POST",
+  });
+}
