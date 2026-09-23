@@ -47,6 +47,17 @@ public class ArticuloController {
         return usuarioRepository.findByEmail(user.email()).map(Usuario::getId).orElse(null);
     }
 
+    private int tiempoLecturaMin(UUID id) {
+        try {
+            Articulo articulo = articuloService.findById(id);
+            String contenido = articulo.getContenido();
+            int palabras = contenido != null && !contenido.isBlank() ? contenido.trim().split("\\s+").length : 0;
+            return Math.max(1, (int) Math.ceil(palabras / 200.0));
+        } catch (ArticuloNotFoundException e) {
+            return 1;
+        }
+    }
+
     @GetMapping
     public ResponseEntity<?> listActive() {
         List<ArticuloResponse> response = articuloService.listActive().stream()
@@ -89,6 +100,7 @@ public class ArticuloController {
                     "megusta", megusta,
                     "nomegusta", nomegusta,
                     "satisfaccion", Math.round(satisfaccion * 100.0) / 100.0,
+                    "tiempoLecturaMin", tiempoLecturaMin(id),
                     "miVoto", request.megusta()
             ));
         } catch (ArticuloNotFoundException e) {
@@ -106,10 +118,15 @@ public class ArticuloController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuario no autenticado"));
             }
             Optional<ArticuloVoto> voto = articuloService.obtenerVotoUsuario(id, usuarioId);
-            return ResponseEntity.ok(Map.of(
-                    "articuloId", id.toString(),
-                    "megusta", voto.map(ArticuloVoto::getMegusta).orElse(null)
-            ));
+            long megusta = articuloService.contarMegusta(id);
+            long nomegusta = articuloService.contarNoMegusta(id);
+            double satisfaccion = megusta + nomegusta > 0 ? (megusta * 100.0) / (megusta + nomegusta) : 0.0;
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("articuloId", id.toString());
+            body.put("megusta", voto.map(ArticuloVoto::getMegusta).orElse(null));
+            body.put("satisfaccion", Math.round(satisfaccion * 100.0) / 100.0);
+            body.put("tiempoLecturaMin", tiempoLecturaMin(id));
+            return ResponseEntity.ok(body);
         } catch (ArticuloNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
@@ -126,13 +143,14 @@ public class ArticuloController {
             long megusta = articuloService.contarMegusta(id);
             long nomegusta = articuloService.contarNoMegusta(id);
             double satisfaccion = megusta + nomegusta > 0 ? (megusta * 100.0) / (megusta + nomegusta) : 0.0;
-            return ResponseEntity.ok(Map.of(
-                    "id", id.toString(),
-                    "megusta", megusta,
-                    "nomegusta", nomegusta,
-                    "satisfaccion", Math.round(satisfaccion * 100.0) / 100.0,
-                    "miVoto", null
-            ));
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("id", id.toString());
+            body.put("megusta", megusta);
+            body.put("nomegusta", nomegusta);
+            body.put("satisfaccion", Math.round(satisfaccion * 100.0) / 100.0);
+            body.put("tiempoLecturaMin", tiempoLecturaMin(id));
+            body.put("miVoto", null);
+            return ResponseEntity.ok(body);
         } catch (ArticuloNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }

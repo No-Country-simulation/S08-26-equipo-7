@@ -51,7 +51,7 @@ Incrementa en 1 las `visualizaciones` del artículo. **Público** y sin CSRF (es
 
 ## POST /knowledge/{id}/votar
 
-Registra un voto de satisfacción (útil / no útil) en el artículo. **Público** y sin CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado:
+Registra un voto de satisfacción (útil / no útil) en el artículo. **Público** y sin CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado (incluye `satisfaccion`, `tiempoLecturaMin` y `miVoto`):
 
 ```json
 // respuesta 200
