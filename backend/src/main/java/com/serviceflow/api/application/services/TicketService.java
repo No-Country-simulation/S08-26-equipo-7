@@ -279,14 +279,15 @@ public class TicketService {
         if (!ticket.isRequiresApproval()) {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
-        ticket.setStatus(EstadoTicket.APPROVED);
+        ticket.setStatus(EstadoTicket.IN_PROGRESS);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "APPROVED", "Ticket aprobado", actorEmail);
+        registrarEvento(saved, "STARTED", "Trabajo iniciado automáticamente tras aprobación", actorEmail);
         notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_APROBADO",
-                "Tu ticket " + saved.getCodigo() + " fue aprobado");
+                "Tu ticket " + saved.getCodigo() + " fue aprobado y está en proceso");
         if (saved.getAssignedTo() != null) {
             notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_APROBADO",
-                    "El ticket " + saved.getCodigo() + " fue aprobado, ya podés arrancar");
+                    "El ticket " + saved.getCodigo() + " fue aprobado y pasó a en proceso");
         }
         return saved;
     }
