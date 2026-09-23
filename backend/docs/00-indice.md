@@ -61,6 +61,11 @@ Todas las respuestas son JSON. Los errores siguen el formato `{"error": "mensaje
 |---|---|
 | [08-notificaciones-y-mensajes.md](08-notificaciones-y-mensajes.md) | Notificaciones in-app (`GET /notifications`, marcar leídas), mensajes/comentarios del ticket (`GET/POST /tickets/{id}/messages`) |
 
+### 🛡️ Panel de Administración (solo ADMIN)
+| Archivo | Contenido |
+|---|---|
+| [09-panel-admin.md](09-panel-admin.md) | Todo lo solo-admin en un lugar: usuarios (crear, áreas, buscador agentes, contraseñas), recover-password, acciones de tickets, categorías, conocimiento, usuarios demo |
+
 ### 👥 Usuarios y Categorías
 | Archivo | Contenido |
 |---|---|

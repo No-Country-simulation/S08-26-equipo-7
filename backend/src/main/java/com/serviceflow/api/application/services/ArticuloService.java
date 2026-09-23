@@ -5,6 +5,7 @@ import com.serviceflow.api.application.ports.ArticuloVotoRepositoryPort;
 import com.serviceflow.api.domain.Articulo;
 import com.serviceflow.api.domain.ArticuloVoto;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -115,9 +116,16 @@ public class ArticuloService {
     }
 
     // --- Votos de usuario ---
+    @Transactional
     public ArticuloVoto votar(UUID articuloId, UUID usuarioId, Boolean megusta) {
         if (megusta == null) {
             throw new IllegalArgumentException("megusta es requerido (true/false)");
+        }
+        Optional<ArticuloVoto> existente = articuloVotoRepository.findByArticuloIdAndUsuarioId(articuloId, usuarioId);
+        if (existente.isPresent()) {
+            ArticuloVoto v = existente.get();
+            return articuloVotoRepository.save(new ArticuloVoto(
+                    v.getId(), articuloId, usuarioId, megusta, v.getCreadoEn(), LocalDateTime.now()));
         }
         ArticuloVoto nuevo = new ArticuloVoto(
                 null, articuloId, usuarioId, megusta, null, null
@@ -137,6 +145,7 @@ public class ArticuloService {
         return articuloVotoRepository.countNoMegusta(articuloId);
     }
 
+    @Transactional
     public void quitarVoto(UUID articuloId, UUID usuarioId) {
         articuloVotoRepository.deleteByArticuloIdAndUsuarioId(articuloId, usuarioId);
     }
