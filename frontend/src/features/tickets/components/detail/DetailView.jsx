@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import DetailViewSkeleton from "@/features/skeleton/DetailViewSkeleton";
 import { useTicketDetails } from "@/features/tickets/hooks/useTicketDetails";
-import { getStatus } from "@/features/tickets/services/statusApi"; // 👈 Importamos el servicio de estados
 import {
   getMessage,
   getStoryLine,
@@ -25,17 +24,8 @@ export default function DetailView() {
   const [timeline, setTimeline] = useState([]);
   const [message, setMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [loadingStatusOptions, setLoadingStatusOptions] = useState(true);
   const { user } = useAuth();
   const currentUserEmail = user?.email;
-
-  useEffect(() => {
-    getStatus()
-      .then(setStatusOptions)
-      .catch((err) => console.error("Error al cargar estados:", err))
-      .finally(() => setLoadingStatusOptions(false));
-  }, []);
 
   const { error: pollingError, refresh } = usePolling({
     fetchData: async () => {
@@ -114,8 +104,6 @@ export default function DetailView() {
       </div>
       <ControlPanel
         ticket={ticket}
-        options={statusOptions}
-        loadingOptions={loadingStatusOptions}
         onRefresh={refreshTicket}
       />
     </div>

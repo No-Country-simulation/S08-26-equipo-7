@@ -4,16 +4,6 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import ControlPanelSkeleton from "@/features/skeleton/ControlPanelSkeleton";
 import Remaining from "@/features/tickets/components/sla/Remaining";
 import { useProgress } from "@/features/tickets/hooks/useProgress";
 import {
@@ -24,15 +14,9 @@ import { formatTicketDate } from "@/lib/utils";
 
 export default function ControlPanel({
   ticket,
-  options = [],
-  loadingOptions = false,
   onRefresh,
 }) {
-
   const [loadingAction, setLoadingAction] = useState(null);
-  const [localStatus, setLocalStatus] = useState(null);
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const currentStatus = localStatus ?? ticket.grupoEstado;
   
   const isResolved =
     ticket.resolvedAt !== null &&
@@ -73,55 +57,12 @@ export default function ControlPanel({
     }
   };
 
-  const handleStatusChange = async (newStatus) => {
-    if (newStatus === ticket.grupoEstado || isUpdatingStatus) return;
-
-    try {
-      setIsUpdatingStatus(true);
-      setLocalStatus(newStatus);
-      
-      toast.success("Estado actualizado con éxito");
-      if (onRefresh) await onRefresh();
-    } catch (error) {
-      toast.error("Error al actualizar el estado: " + error.message);
-      setLocalStatus(ticket.grupoEstado);
-    } finally {
-      setIsUpdatingStatus(false);
-      setLocalStatus(null);
-    }
-  };
-
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
       <div className="border-border border-b text-sm font-semibold sm:text-lg">
         Panel de Control & SLA
       </div>
-      <p className="text-muted-foreground/70 mt-4 mb-2 text-xs font-semibold sm:text-sm">
-        Estado de atención
-      </p>
-      {loadingOptions ? (
-        <ControlPanelSkeleton />
-      ) : (
-        <Select
-          value={currentStatus}
-          onValueChange={handleStatusChange}
-          disabled={isUpdatingStatus || Boolean(loadingAction)}
-        >
-          <SelectTrigger className="border-border w-full border p-2 sm:p-4">
-            <SelectValue placeholder="Seleccione un estado" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Estado de atención</SelectLabel>
-              {options.map((option) => (
-                <SelectItem key={option.name} value={option.name}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      )}
+
       <div className="bg-ring mt-4 rounded-lg p-4">
         <div className="mb-2 flex justify-between">
           <p className="text-muted-foreground text-xs sm:text-sm">
@@ -137,6 +78,7 @@ export default function ControlPanel({
           className="bg-foreground/15 h-2 w-full"
         />
       </div>
+
       <div className="mt-4">
         <div className="border-border mb-2 flex justify-between border-b pb-2">
           <p className="text-muted-foreground/70 text-xs sm:text-sm">
@@ -167,6 +109,7 @@ export default function ControlPanel({
           </p>
         </div>
       </div>
+
       {ticket.requiresApproval && ticket.status === "PENDING_APPROVAL" && (
         <div className="mb-2 pb-2">
           <p className="text-muted-foreground/70 text-xs font-semibold sm:text-sm">
