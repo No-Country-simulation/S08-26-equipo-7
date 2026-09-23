@@ -10,14 +10,20 @@ public class Usuario {
     private final String email;
     private final String passwordHash;
     private final RolUsuario role;
+    private final String area;
     private final LocalDateTime createdAt;
 
     public Usuario(UUID id, String name, String email, String passwordHash, RolUsuario role, LocalDateTime createdAt) {
+        this(id, name, email, passwordHash, role, null, createdAt);
+    }
+
+    public Usuario(UUID id, String name, String email, String passwordHash, RolUsuario role, String area, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
+        this.area = area;
         this.createdAt = createdAt;
     }
 
@@ -39,6 +45,10 @@ public class Usuario {
 
     public RolUsuario getRole() {
         return role;
+    }
+
+    public String getArea() {
+        return area;
     }
 
     public LocalDateTime getCreatedAt() {

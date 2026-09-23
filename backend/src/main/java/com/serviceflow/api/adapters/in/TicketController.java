@@ -164,6 +164,7 @@ public class TicketController {
             case EN_APROBACION -> "En aprobación";
             case EXPIRADO -> "Expirado";
             case RESUELTO -> "Resuelto";
+            case CERRADO -> "Cerrado";
         };
     }
 
@@ -227,6 +228,27 @@ public class TicketController {
     @PostMapping("/{id}/assign")
     public ResponseEntity<?> assign(@PathVariable UUID id, @RequestParam String assignedTo, Authentication auth) {
         return safeTransition(() -> ticketService.assign(id, UUID.fromString(assignedTo), role(auth), email(auth)));
+    }
+
+    @PostMapping("/{id}/reassign")
+    public ResponseEntity<?> reassign(@PathVariable UUID id, @RequestParam String assignedTo, Authentication auth) {
+        return safeTransition(() -> ticketService.reassign(id, UUID.fromString(assignedTo), role(auth), email(auth)));
+    }
+
+    @PostMapping("/{id}/set-status")
+    public ResponseEntity<?> setStatus(@PathVariable UUID id, @RequestParam String status, Authentication auth) {
+        try {
+            com.serviceflow.api.domain.EstadoTicket nuevo =
+                    com.serviceflow.api.domain.EstadoTicket.valueOf(status.toUpperCase());
+            return safeTransition(() -> ticketService.setStatus(id, nuevo, role(auth), email(auth)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Invalid status: " + status));
+        }
+    }
+
+    @PostMapping("/{id}/reopen")
+    public ResponseEntity<?> reopen(@PathVariable UUID id, Authentication auth) {
+        return safeTransition(() -> ticketService.reopen(id, role(auth), email(auth)));
     }
 
     @PostMapping("/{id}/approve")

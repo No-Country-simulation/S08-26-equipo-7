@@ -1,11 +1,18 @@
 package com.serviceflow.api.adapters.in;
 
 import com.serviceflow.api.adapters.in.dto.ArticuloResponse;
+import com.serviceflow.api.application.ports.UsuarioRepositoryPort;
 import com.serviceflow.api.application.services.ArticuloNotFoundException;
 import com.serviceflow.api.application.services.ArticuloService;
 import com.serviceflow.api.domain.Articulo;
+import com.serviceflow.api.domain.ArticuloVoto;
+import com.serviceflow.api.domain.Usuario;
+import com.serviceflow.api.infrastructure.security.UsuarioAutenticado;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -23,9 +31,31 @@ import java.util.UUID;
 public class ArticuloController {
 
     private final ArticuloService articuloService;
+    private final UsuarioRepositoryPort usuarioRepository;
 
-    public ArticuloController(ArticuloService articuloService) {
+    public ArticuloController(ArticuloService articuloService, UsuarioRepositoryPort usuarioRepository) {
         this.articuloService = articuloService;
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    private UUID getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null) {
+            return null;
+        }
+        UsuarioAutenticado user = (UsuarioAutenticado) auth.getPrincipal();
+        return usuarioRepository.findByEmail(user.email()).map(Usuario::getId).orElse(null);
+    }
+
+    private int tiempoLecturaMin(UUID id) {
+        try {
+            Articulo articulo = articuloService.findById(id);
+            String contenido = articulo.getContenido();
+            int palabras = contenido != null && !contenido.isBlank() ? contenido.trim().split("\\s+").length : 0;
+            return Math.max(1, (int) Math.ceil(palabras / 200.0));
+        } catch (ArticuloNotFoundException e) {
+            return 1;
+        }
     }
 
     @GetMapping
@@ -57,16 +87,70 @@ public class ArticuloController {
     @PostMapping("/{id}/votar")
     public ResponseEntity<?> votar(@PathVariable UUID id, @RequestBody VotarRequest request) {
         try {
-            Articulo updated = articuloService.registrarVoto(id, request.megusta());
-            double satisfaccion = articuloService.calcularSatisfaccion(updated);
-            int tiempoLectura = articuloService.calcularTiempoLecturaMin(updated);
+            UUID usuarioId = getCurrentUserId();
+            if (usuarioId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuario no autenticado"));
+            }
+            ArticuloVoto voto = articuloService.votar(id, usuarioId, request.megusta());
+            long megusta = articuloService.contarMegusta(id);
+            long nomegusta = articuloService.contarNoMegusta(id);
+            double satisfaccion = megusta + nomegusta > 0 ? (megusta * 100.0) / (megusta + nomegusta) : 0.0;
             return ResponseEntity.ok(Map.of(
                     "id", id.toString(),
-                    "megusta", updated.getMegusta(),
-                    "nomegusta", updated.getNomegusta(),
+                    "megusta", megusta,
+                    "nomegusta", nomegusta,
                     "satisfaccion", Math.round(satisfaccion * 100.0) / 100.0,
-                    "tiempoLecturaMin", tiempoLectura
+                    "tiempoLecturaMin", tiempoLecturaMin(id),
+                    "miVoto", request.megusta()
             ));
+        } catch (ArticuloNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}/mi-voto")
+    public ResponseEntity<?> miVoto(@PathVariable UUID id) {
+        try {
+            UUID usuarioId = getCurrentUserId();
+            if (usuarioId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuario no autenticado"));
+            }
+            Optional<ArticuloVoto> voto = articuloService.obtenerVotoUsuario(id, usuarioId);
+            long megusta = articuloService.contarMegusta(id);
+            long nomegusta = articuloService.contarNoMegusta(id);
+            double satisfaccion = megusta + nomegusta > 0 ? (megusta * 100.0) / (megusta + nomegusta) : 0.0;
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("articuloId", id.toString());
+            body.put("megusta", voto.map(ArticuloVoto::getMegusta).orElse(null));
+            body.put("satisfaccion", Math.round(satisfaccion * 100.0) / 100.0);
+            body.put("tiempoLecturaMin", tiempoLecturaMin(id));
+            return ResponseEntity.ok(body);
+        } catch (ArticuloNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}/votar")
+    public ResponseEntity<?> quitarVoto(@PathVariable UUID id) {
+        try {
+            UUID usuarioId = getCurrentUserId();
+            if (usuarioId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuario no autenticado"));
+            }
+            articuloService.quitarVoto(id, usuarioId);
+            long megusta = articuloService.contarMegusta(id);
+            long nomegusta = articuloService.contarNoMegusta(id);
+            double satisfaccion = megusta + nomegusta > 0 ? (megusta * 100.0) / (megusta + nomegusta) : 0.0;
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("id", id.toString());
+            body.put("megusta", megusta);
+            body.put("nomegusta", nomegusta);
+            body.put("satisfaccion", Math.round(satisfaccion * 100.0) / 100.0);
+            body.put("tiempoLecturaMin", tiempoLecturaMin(id));
+            body.put("miVoto", null);
+            return ResponseEntity.ok(body);
         } catch (ArticuloNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }

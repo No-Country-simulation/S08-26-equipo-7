@@ -126,7 +126,13 @@ public class TicketService {
         if (agentes.isEmpty()) {
             return ticket;
         }
-        Usuario agente = agenteConMenosCarga(agentes);
+        // Por área del ticket (categoría); si no hay agentes de esa área, cae al general
+        List<Usuario> delArea = ticket.getCategory() != null
+                ? agentes.stream()
+                        .filter(a -> a.getArea() != null && a.getArea().equalsIgnoreCase(ticket.getCategory()))
+                        .toList()
+                : List.of();
+        Usuario agente = agenteConMenosCarga(delArea.isEmpty() ? agentes : delArea);
         ticket.setAssignedTo(agente.getId());
         ticket.setStatus(EstadoTicket.ASSIGNED);
         Ticket saved = ticketRepository.save(ticket);
@@ -228,15 +234,16 @@ public class TicketService {
     }
 
     public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole, String actorEmail) {
-        requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        requireRole(actorRole, RolUsuario.ADMIN);
         Categoria category = resolveCategory(categoryCode);
         Ticket ticket = findById(id);
-        requireStatus(ticket, EstadoTicket.SUBMITTED);
+        if (ticket.getStatus() == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Cannot change the category of a closed ticket");
+        }
         ticket.setCategory(category.getCode());
         ticket.setRequiresApproval(category.isRequiresApproval());
-        ticket.setStatus(EstadoTicket.CATEGORIZED);
         Ticket saved = ticketRepository.save(ticket);
-        registrarEvento(saved, "CATEGORIZED", "Categoría asignada: " + category.getCode(), actorEmail);
+        registrarEvento(saved, "CATEGORIZED", "Categoría cambiada a: " + category.getCode(), actorEmail);
         return saved;
     }
 
@@ -270,8 +277,81 @@ public class TicketService {
         return saved;
     }
 
-    public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
+    public Ticket reassign(UUID id, UUID assignedTo, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        if (ticket.getStatus() == EstadoTicket.RESOLVED || ticket.getStatus() == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Cannot reassign a resolved or closed ticket");
+        }
+        Usuario nuevo = usuarioRepository.findById(assignedTo)
+                .orElseThrow(() -> new InvalidTransitionException("Assignee not found: " + assignedTo));
+        ticket.setAssignedTo(assignedTo);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REASSIGNED", "Reasignado al agente " + nuevo.getName(), actorEmail);
+        notificacionService.notificar(assignedTo, saved.getId(), "TICKET_ASIGNADO",
+                "Se te reasignó el ticket " + saved.getCodigo() + ": " + saved.getTitle());
+        return saved;
+    }
+
+    public Ticket setStatus(UUID id, EstadoTicket nuevoEstado, RolUsuario actorRole, String actorEmail) {
+        Ticket ticket = findById(id);
+        if (ticket.getStatus() == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Cannot change the status of a closed ticket");
+        }
+        if (nuevoEstado == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Use reject or close to close a ticket");
+        }
+        switch (actorRole) {
+            case ADMIN -> {
+                if (!EnumSet.of(EstadoTicket.SUBMITTED, EstadoTicket.CATEGORIZED, EstadoTicket.PRIORITIZED,
+                        EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL, EstadoTicket.APPROVED,
+                        EstadoTicket.IN_PROGRESS, EstadoTicket.ESCALATED, EstadoTicket.RESOLVED).contains(nuevoEstado)) {
+                    throw new InvalidTransitionException("Invalid target status: " + nuevoEstado);
+                }
+            }
+            case SUPERVISOR -> {
+                if (!EnumSet.of(EstadoTicket.PENDING_APPROVAL, EstadoTicket.APPROVED,
+                        EstadoTicket.RESOLVED).contains(nuevoEstado)) {
+                    throw new InvalidTransitionException("Supervisors can only set approval or resolved states");
+                }
+            }
+            case AGENT -> {
+                if (nuevoEstado != EstadoTicket.RESOLVED) {
+                    throw new InvalidTransitionException("Agents can only resolve tickets");
+                }
+            }
+            default -> throw new UnauthorizedActionException("Requesters cannot change ticket status");
+        }
+        if (nuevoEstado == EstadoTicket.RESOLVED && ticket.getResolvedAt() == null) {
+            ticket.setResolvedAt(LocalDateTime.now());
+        }
+        ticket.setStatus(nuevoEstado);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "STATUS_CHANGED", "Estado cambiado a " + nuevoEstado, actorEmail);
+        return saved;
+    }
+
+    public Ticket reopen(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        requireStatus(ticket, EstadoTicket.CLOSED);
+        ticket.setStatus(EstadoTicket.ASSIGNED);
+        ticket.setResolvedAt(null);
+        ticket.setClosedAt(null);
+        ticket.setSlaDueAt(LocalDateTime.now().plus(SLA_BY_PRIORITY.get(ticket.getPriority())));
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REOPENED", "Ticket reabierto con SLA reiniciado", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_REABIERTO",
+                "Tu ticket " + saved.getCodigo() + " fue reabierto");
+        if (saved.getAssignedTo() != null) {
+            notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_REABIERTO",
+                    "El ticket " + saved.getCodigo() + " fue reabierto");
+        }
+        return saved;
+    }
+
+    public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL).contains(ticket.getStatus())) {
             throw new InvalidTransitionException("Ticket must be assigned before approval");
@@ -301,14 +381,14 @@ public class TicketService {
         if (!ticket.isRequiresApproval()) {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
-        ticket.setStatus(EstadoTicket.ASSIGNED);
+        ticket.setStatus(EstadoTicket.CLOSED);
         Ticket saved = ticketRepository.save(ticket);
-        registrarEvento(saved, "REJECTED", "Ticket rechazado, devuelto al agente", actorEmail);
+        registrarEvento(saved, "REJECTED", "Ticket rechazado por falta de autorización, cerrado", actorEmail);
         notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_RECHAZADO",
-                "Tu ticket " + saved.getCodigo() + " fue rechazado");
+                "Tu ticket " + saved.getCodigo() + " fue rechazado, creá uno nuevo si corresponde");
         if (saved.getAssignedTo() != null) {
             notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_RECHAZADO",
-                    "El ticket " + saved.getCodigo() + " fue rechazado, revisar y corregir");
+                    "El ticket " + saved.getCodigo() + " fue rechazado y cerrado");
         }
         return saved;
     }
