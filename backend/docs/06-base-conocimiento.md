@@ -92,19 +92,19 @@ Quita el voto del usuario. Requiere login (cualquier rol) y CSRF. Devuelve el re
 Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF.
 
 ```json
-// body
-{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT" }
+// body (layoutConfig opcional: layout del editor de bloques, se guarda tal cual)
+{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] } }
 ```
 
-`201` con el artículo creado.
+`201` con el artículo creado (incluye `layoutConfig`, `{}` si no se mandó).
 
 ## PUT /knowledge/{id}
 
-Edita un artículo (títulos, descripción, contenido, categoría o `activo`). **Solo ADMIN**. Requiere CSRF.
+Edita un artículo (títulos, descripción, contenido, categoría, `layoutConfig` o `activo`). **Solo ADMIN**. Requiere CSRF.
 
 ```json
-// body (todos opcionales, parcialmente)
-{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "activo": false }
+// body (todos opcionales, parcialmente; layoutConfig reemplaza si se manda, `{}` lo limpia)
+{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "activo": false }
 ```
 
 `200` con el artículo actualizado. `404` si no existe.
