@@ -283,19 +283,19 @@ public class TicketController {
     }
 
     @GetMapping("/stats/monthly")
-    public ResponseEntity<?> monthly(@RequestParam(required = false) String month) {
+    public ResponseEntity<?> monthly(@RequestParam(required = false) String month, Authentication auth) {
         LocalDateTime input = month != null
                 ? LocalDate.parse(month + "-01").atStartOfDay()
                 : LocalDateTime.now();
-        return ResponseEntity.ok(ticketService.monthlyStats(input));
+        return ResponseEntity.ok(ticketService.monthlyStats(input, email(auth)));
     }
 
     @GetMapping("/stats/summary")
-    public ResponseEntity<?> summary(@RequestParam(required = false) String month) {
+    public ResponseEntity<?> summary(@RequestParam(required = false) String month, Authentication auth) {
         LocalDateTime input = month != null
                 ? LocalDate.parse(month + "-01").atStartOfDay()
                 : LocalDateTime.now();
-        return ResponseEntity.ok(ticketService.summaryStats(input));
+        return ResponseEntity.ok(ticketService.summaryStats(input, email(auth)));
     }
 
     private RolUsuario role(Authentication auth) {

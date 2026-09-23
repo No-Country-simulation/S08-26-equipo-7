@@ -511,11 +511,18 @@ public class TicketService {
     }
 
     public Map<String, Object> monthlyStats(LocalDateTime yearMonth) {
+        return monthlyStats(yearMonth, null);
+    }
+
+    public Map<String, Object> monthlyStats(LocalDateTime yearMonth, String requesterEmail) {
         LocalDateTime start = yearMonth.withDayOfMonth(1).toLocalDate().atStartOfDay();
         LocalDateTime end = start.plusMonths(1);
+        String area = areaScope(requesterEmail);
 
-        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
-        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
+        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
+        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
 
         long resolvedOnTime = resolved.stream()
                 .filter(t -> t.getSlaDueAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
@@ -527,32 +534,39 @@ public class TicketService {
                 .average()
                 .orElse(0.0);
 
-        return Map.of(
-                "created", created.size(),
-                "resolved", resolved.size(),
-                "resolvedOnTime", resolvedOnTime,
-                "resolvedLate", resolved.size() - resolvedOnTime,
-                "avgResolutionHours", Math.round(avgResolutionHours * 10.0) / 10.0,
-                "byStatus", statusBreakdown(),
-                "byCategory", categoryBreakdown()
-        );
+        Map<String, Object> monthly = new java.util.HashMap<>();
+        monthly.put("created", created.size());
+        monthly.put("resolved", resolved.size());
+        monthly.put("resolvedOnTime", resolvedOnTime);
+        monthly.put("resolvedLate", resolved.size() - resolvedOnTime);
+        monthly.put("avgResolutionHours", Math.round(avgResolutionHours * 10.0) / 10.0);
+        monthly.put("byStatus", area != null ? statusBreakdown(area) : statusBreakdown());
+        monthly.put("byCategory", area != null ? categoryBreakdown(area) : categoryBreakdown());
+        monthly.put("area", area);
+        return monthly;
     }
 
     public Map<String, Object> summaryStats(LocalDateTime month) {
+        return summaryStats(month, null);
+    }
+
+    public Map<String, Object> summaryStats(LocalDateTime month, String requesterEmail) {
         LocalDateTime start = month.withDayOfMonth(1).toLocalDate().atStartOfDay();
         LocalDateTime end = start.plusMonths(1);
         LocalDateTime prevStart = start.minusMonths(1);
         LocalDateTime prevEnd = start;
         LocalDateTime now = LocalDateTime.now();
+        String area = areaScope(requesterEmail);
 
-        List<Ticket> all = ticketRepository.findAll();
+        List<Ticket> all = ticketRepository.findAll().stream()
+                .filter(t -> enArea(t, area)).toList();
 
         List<Ticket> active = all.stream()
                 .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
                 .toList();
 
         long activeTickets = active.size();
-        long activePrev = activeCountAt(prevEnd);
+        long activePrev = activeCountAt(prevEnd, area);
 
         long nearSlaExpiry = active.stream()
                 .filter(t -> t.getSlaDueAt() != null)
@@ -563,8 +577,10 @@ public class TicketService {
                 .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(now))
                 .count();
 
-        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
-        List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd);
+        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
+        List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd).stream()
+                .filter(t -> enArea(t, area)).toList();
 
         // SLA Compliance CORREGIDO: denominador = tickets evaluables (resueltos + vencidos activos)
         long resolvedOnTime = resolved.stream()
@@ -573,21 +589,24 @@ public class TicketService {
 
         // Tickets evaluables en el periodo = resueltos en el mes + activos vencidos (overdue) en el mes
         long evaluables = resolved.size() + overdueSla;
-        long evaluablesPrev = resolvedPrev.size() + countOverdueAt(prevEnd);
+        long evaluablesPrev = resolvedPrev.size() + countOverdueAt(prevEnd, area);
 
         long resolvedOnTimePrev = resolvedPrev.stream()
                 .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
                 .count();
 
         double compliance = evaluables == 0 ? 0.0 : round2(resolvedOnTime * 100.0 / evaluables);
-        long overduePrev = countOverdueAt(prevEnd);
+        long overduePrev = countOverdueAt(prevEnd, area);
         long evaluablesPrevTotal = resolvedPrev.size() + overduePrev;
         double compliancePrev = evaluablesPrevTotal == 0 ? 0.0 : round2(resolvedOnTimePrev * 100.0 / evaluablesPrevTotal);
 
-        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
-        List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd);
+        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
+        List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd).stream()
+                .filter(t -> enArea(t, area)).toList();
 
         Map<String, Object> result = new java.util.HashMap<>();
+        result.put("area", area);
         result.put("month", start.toLocalDate().getYear() + "-" + String.format("%02d", start.toLocalDate().getMonthValue()));
         result.put("activeTickets", activeTickets);
         result.put("activePrevMonth", activePrev);
@@ -606,18 +625,43 @@ public class TicketService {
     }
 
     private long countOverdueAt(LocalDateTime until) {
+        return countOverdueAt(until, null);
+    }
+
+    private long countOverdueAt(LocalDateTime until, String area) {
         return ticketRepository.findAll().stream()
+                .filter(t -> enArea(t, area))
                 .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(until))
                 .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
                 .count();
     }
 
     private long activeCountAt(LocalDateTime until) {
+        return activeCountAt(until, null);
+    }
+
+    private long activeCountAt(LocalDateTime until, String area) {
         return ticketRepository.findAll().stream()
+                .filter(t -> enArea(t, area))
                 .filter(t -> t.getCreatedAt() != null && !t.getCreatedAt().isAfter(until))
                 .filter(t -> t.getResolvedAt() == null || t.getResolvedAt().isAfter(until))
                 .filter(t -> t.getClosedAt() == null || t.getClosedAt().isAfter(until))
                 .count();
+    }
+
+    private String areaScope(String email) {
+        if (email == null) {
+            return null;
+        }
+        return usuarioRepository.findByEmail(email)
+                .filter(u -> u.getRole() == RolUsuario.SUPERVISOR)
+                .map(Usuario::getArea)
+                .filter(a -> a != null && !a.isBlank())
+                .orElse(null);
+    }
+
+    private boolean enArea(Ticket t, String area) {
+        return area == null || (t.getCategory() != null && t.getCategory().equalsIgnoreCase(area));
     }
 
     private double round2(double value) {
@@ -625,23 +669,43 @@ public class TicketService {
     }
 
     private Map<String, Long> statusBreakdown() {
-        return Map.of(
-                "SUBMITTED", ticketRepository.countByStatus(EstadoTicket.SUBMITTED.name()),
-                "CATEGORIZED", ticketRepository.countByStatus(EstadoTicket.CATEGORIZED.name()),
-                "PRIORITIZED", ticketRepository.countByStatus(EstadoTicket.PRIORITIZED.name()),
-                "ASSIGNED", ticketRepository.countByStatus(EstadoTicket.ASSIGNED.name()),
-                "APPROVED", ticketRepository.countByStatus(EstadoTicket.APPROVED.name()),
-                "IN_PROGRESS", ticketRepository.countByStatus(EstadoTicket.IN_PROGRESS.name()),
-                "ESCALATED", ticketRepository.countByStatus(EstadoTicket.ESCALATED.name()),
-                "RESOLVED", ticketRepository.countByStatus(EstadoTicket.RESOLVED.name()),
-                "CLOSED", ticketRepository.countByStatus(EstadoTicket.CLOSED.name())
-        );
+        return statusBreakdown(null);
+    }
+
+    private Map<String, Long> statusBreakdown(String area) {
+        if (area == null) {
+            return Map.of(
+                    "SUBMITTED", ticketRepository.countByStatus(EstadoTicket.SUBMITTED.name()),
+                    "CATEGORIZED", ticketRepository.countByStatus(EstadoTicket.CATEGORIZED.name()),
+                    "PRIORITIZED", ticketRepository.countByStatus(EstadoTicket.PRIORITIZED.name()),
+                    "ASSIGNED", ticketRepository.countByStatus(EstadoTicket.ASSIGNED.name()),
+                    "PENDING_APPROVAL", ticketRepository.countByStatus(EstadoTicket.PENDING_APPROVAL.name()),
+                    "APPROVED", ticketRepository.countByStatus(EstadoTicket.APPROVED.name()),
+                    "IN_PROGRESS", ticketRepository.countByStatus(EstadoTicket.IN_PROGRESS.name()),
+                    "ESCALATED", ticketRepository.countByStatus(EstadoTicket.ESCALATED.name()),
+                    "RESOLVED", ticketRepository.countByStatus(EstadoTicket.RESOLVED.name()),
+                    "CLOSED", ticketRepository.countByStatus(EstadoTicket.CLOSED.name())
+            );
+        }
+        List<Ticket> scoped = ticketRepository.findAll().stream().filter(t -> enArea(t, area)).toList();
+        Map<String, Long> result = new java.util.HashMap<>();
+        for (EstadoTicket e : EstadoTicket.values()) {
+            result.put(e.name(), scoped.stream().filter(t -> t.getStatus() == e).count());
+        }
+        return result;
     }
 
     private Map<String, Long> categoryBreakdown() {
+        return categoryBreakdown(null);
+    }
+
+    private Map<String, Long> categoryBreakdown(String area) {
         List<Categoria> categories = categoriaRepository.findAll();
         Map<String, Long> result = new java.util.HashMap<>();
         for (Categoria category : categories) {
+            if (area != null && !category.getCode().equalsIgnoreCase(area)) {
+                continue;
+            }
             result.put(category.getCode(), ticketRepository.countByCategory(category.getCode()));
         }
         return result;
