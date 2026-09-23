@@ -2,6 +2,16 @@
 
 Todos los endpoints requieren **solo ADMIN**.
 
+## Usuarios demo (para probar el login)
+
+| Email | Password | Rol |
+|---|---|---|
+| `admin@serviceflow.com` | `admin123` | ADMIN |
+| `agente@serviceflow.com` | `agente123` | AGENT |
+| `solicitante@serviceflow.com` | `solicitante123` | REQUESTER |
+| `supervisor@serviceflow.com` | `supervisor123` | SUPERVISOR |
+| `ana.agent@demo.com` (y demás `@demo.com`) | `demo123` | varios |
+
 ## POST /users
 
 Crea un usuario.
