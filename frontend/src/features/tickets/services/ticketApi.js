@@ -69,3 +69,33 @@ export async function rejectTicket(ticketId) {
     method: "POST",
   });
 }
+
+export async function getAgents({ search = "", area = "" } = {}) {
+  const queryParams = new URLSearchParams({ 
+    search: search.trim(), 
+    area 
+  }).toString();
+  
+  return apiRequest(`users/agents?${queryParams}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+}
+
+export async function reassignTicket(ticketId, agentId) {
+  return apiRequest(`tickets/${ticketId}/reassign?assignedTo=${agentId}`, {
+    method: "POST",
+  });
+}
+
+export async function reopenTicket(ticketId) {
+  return apiRequest(`/tickets/${ticketId}/reopen`, {
+    method: "POST",
+  });
+}
+
+export async function resolveTicket(ticketId) {
+  return apiRequest(`/tickets/${ticketId}/resolve`, {
+    method: "POST",
+  });
+}
