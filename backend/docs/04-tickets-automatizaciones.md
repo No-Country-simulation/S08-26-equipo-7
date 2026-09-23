@@ -6,8 +6,8 @@ Al **crear** un ticket el backend automatiza lo máximo posible (el ticket no de
 
 1. **Auto-clasifica** (`CATEGORIZED`) con la categoría enviada.
 2. **Auto-prioriza** (`PRIORITIZED`) con la prioridad por defecto de la categoría (`prioridad_defecto`) y calcula el SLA.
-3. **Auto-asigna** (`ASSIGNED`) al agente (`role=AGENT`) **con menos tickets activos**. Si no hay agentes, queda en `PRIORITIZED`.
-4. Si la categoría **requiere aprobación**, deja el ticket en `ASSIGNED`, registra `APPROVAL_REQUIRED` ("Requiere autorización gerencial obligatoria") y notifica a supervisores/admin.
+3. **Auto-asigna** (`ASSIGNED`) al agente (`role=AGENT`) **del área del ticket con menos tickets activos**. Si no hay agentes de esa área, cae al general. Si no hay agentes, queda en `PRIORITIZED`.
+4. Si la categoría **requiere aprobación**, pasa el ticket a `PENDING_APPROVAL` (grupo `EN_APROBACION`), registra `APPROVAL_REQUIRED` ("Requiere autorización gerencial obligatoria") y notifica a supervisores/admin.
 5. Notifica al agente asignado (`TICKET_ASIGNADO`).
 
 Cada paso queda en la línea de tiempo con `actorNombre = "Sistema"`.

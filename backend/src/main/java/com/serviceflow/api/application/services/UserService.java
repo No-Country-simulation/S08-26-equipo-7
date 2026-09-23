@@ -27,6 +27,10 @@ public class UserService {
     }
 
     public Usuario create(String name, String email, String role, String password) {
+        return create(name, email, role, password, null);
+    }
+
+    public Usuario create(String name, String email, String role, String password, String area) {
         validateName(name);
         validateEmail(email);
         validateRole(role);
@@ -42,9 +46,29 @@ public class UserService {
                 email.toLowerCase(),
                 passwordEncoder.encode(password),
                 RolUsuario.valueOf(role),
+                area != null && !area.isBlank() ? area.trim().toUpperCase() : null,
                 LocalDateTime.now()
         );
         return usuarioRepository.save(usuario);
+    }
+
+    public Usuario changePassword(String email, String currentPassword, String newPassword) {
+        Usuario usuario = usuarioRepository.findByEmail(email.toLowerCase())
+                .orElseThrow(() -> new ValidationException("User not found"));
+        if (currentPassword == null || !passwordEncoder.matches(currentPassword, usuario.getPasswordHash())) {
+            throw new ValidationException("Current password is incorrect");
+        }
+        validatePassword(newPassword);
+        Usuario actualizado = new Usuario(
+                usuario.getId(),
+                usuario.getName(),
+                usuario.getEmail(),
+                passwordEncoder.encode(newPassword),
+                usuario.getRole(),
+                usuario.getArea(),
+                usuario.getCreatedAt()
+        );
+        return usuarioRepository.save(actualizado);
     }
 
     public List<Usuario> listAll() {

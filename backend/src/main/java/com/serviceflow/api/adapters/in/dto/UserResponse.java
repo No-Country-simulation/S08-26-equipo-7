@@ -10,6 +10,7 @@ public record UserResponse(
         String name,
         String email,
         String role,
+        String area,
         LocalDateTime createdAt
 ) {
     public static UserResponse from(Usuario usuario) {
@@ -18,6 +19,7 @@ public record UserResponse(
                 usuario.getName(),
                 usuario.getEmail(),
                 usuario.getRole().name(),
+                usuario.getArea(),
                 usuario.getCreatedAt()
         );
     }
