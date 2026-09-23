@@ -2,7 +2,7 @@
 
 Ciclo de vida de un ticket:
 
-`SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (APPROVED si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
+`SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (PENDING_APPROVAL → IN_PROGRESS directo al aprobar, si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
 
 Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fija para la UI):
 
