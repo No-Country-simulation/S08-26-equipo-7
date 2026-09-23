@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { apiRequest } from "@/services/apiService";
 
@@ -6,29 +6,46 @@ export const useTicketDetails = (id, initialTicket = null) => {
   const [fetchedTicket, setFetchedTicket] = useState(null);
   const [loadingRequest, setLoadingRequest] = useState(!initialTicket);
   const [error, setError] = useState(null);
-
   const ticket = initialTicket ?? fetchedTicket;
   const loading = initialTicket ? false : loadingRequest;
 
-  useEffect(() => {
-    if (!id || initialTicket) return;
+  const refresh = useCallback(async () => {
+    if (!id) return;
 
-    const fetchTicket = async () => {
+    try {
+      setError(null);
+      const data = await apiRequest(`/tickets/${id}`);
+      setFetchedTicket(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [id]);
+  useEffect(() => {
+    if (initialTicket || !id) return;
+    let isMounted = true;
+    const loadInitialTicket = async () => {
       try {
         setLoadingRequest(true);
         setError(null);
-
         const data = await apiRequest(`/tickets/${id}`);
-        setFetchedTicket(data);
+        if (isMounted) {
+          setFetchedTicket(data);
+        }
       } catch (err) {
-        setError(err.message);
+        if (isMounted) {
+          setError(err.message);
+        }
       } finally {
-        setLoadingRequest(false);
+        if (isMounted) {
+          setLoadingRequest(false);
+        }
       }
     };
-
-    fetchTicket();
+    loadInitialTicket();
+    return () => {
+      isMounted = false;
+    };
   }, [id, initialTicket]);
 
-  return { ticket, loading, error };
+  return { ticket, loading, error, refresh };
 };

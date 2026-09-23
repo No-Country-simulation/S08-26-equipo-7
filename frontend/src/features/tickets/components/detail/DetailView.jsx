@@ -21,7 +21,7 @@ const STORYLINE_INTERVAL = 10_000;
 
 export default function DetailView() {
   const { id } = useParams();
-  const { ticket, loading, error: ticketError } = useTicketDetails(id);
+  const { ticket, loading, error: ticketError, refresh: refreshTicket } = useTicketDetails(id);
   const [timeline, setTimeline] = useState([]);
   const [message, setMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,7 +83,7 @@ export default function DetailView() {
   }
 
   if (ticketError) {
-    return <div className="p-6 text-red-500">Error: {ticketError}</div>;
+    return <div className="p-6 text-destructive">Error: {ticketError}</div>;
   }
 
   if (!ticket) {
@@ -116,6 +116,7 @@ export default function DetailView() {
         ticket={ticket}
         options={statusOptions}
         loadingOptions={loadingStatusOptions}
+        onRefresh={refreshTicket}
       />
     </div>
   );

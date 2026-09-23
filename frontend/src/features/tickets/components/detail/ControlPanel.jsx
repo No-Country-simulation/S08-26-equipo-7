@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,8 +22,9 @@ import {
 } from "@/features/tickets/services/ticketApi";
 import { formatTicketDate } from "@/lib/utils";
 
-export default function ControlPanel({ ticket, options = [], loadingOptions = false }) {
+export default function ControlPanel({ ticket, options = [], loadingOptions = false, onRefresh }) {
   const [valueOption, setValueOption] = useState(ticket.grupoEstado);
+  const [loadingAction, setLoadingAction] = useState(null);
 
   const isResolved =
     ticket.resolvedAt !== null &&
@@ -35,26 +36,34 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
     ticket.slaDueAt,
     ticket.resolvedAt,
   );
-  
 
   const handleApprove = async () => {
+    if (loadingAction) return;
     try {
+      setLoadingAction("APPROVE");
       await approveTicket(ticket.id);
       toast.success("Ticket aprobado con éxito");
+      if (onRefresh) await onRefresh();
     } catch (error) {
       toast.error("Error al aprobar el ticket: " + error.message);
+    } finally {
+      setLoadingAction(null);
     }
   };
 
   const handleReject = async () => {
+    if (loadingAction) return;
     try {
+      setLoadingAction("REJECT");
       await rejectTicket(ticket.id);
       toast.success("Ticket rechazado con éxito");
+      if (onRefresh) await onRefresh();
     } catch (error) {
       toast.error("Error al rechazar el ticket: " + error.message);
+    } finally {
+      setLoadingAction(null);
     }
   };
-
 
   return (
     <div className="bg-card border-border order-3 h-fit self-start rounded-lg border p-4 shadow-md lg:col-span-2 lg:col-start-4 lg:row-start-2 2xl:col-span-1 2xl:col-start-4">
@@ -115,7 +124,7 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
             Requiere Aprovación:
           </p>
           <p className="text-xs font-semibold sm:text-sm">
-            {ticket.requiresApproval ? "Sí" : "No"}
+            {ticket.requiresApproval ? (ticket.status === "PENDING_APPROVAL" ? "Sí" : "Aprobado") : "No"}
           </p>
         </div>
         <div className="border-border mb-2 flex justify-between border-b pb-2">
@@ -127,24 +136,34 @@ export default function ControlPanel({ ticket, options = [], loadingOptions = fa
           </p>
         </div>
       </div>
-      {ticket.requiresApproval && ticket.status !== "APPROVED" &&  (
+      {ticket.requiresApproval && ticket.status !== "APPROVED" && (
         <div className="mb-2 pb-2">
           <p className="text-muted-foreground/70 text-xs font-semibold sm:text-sm">
             Aprovar Solicitud?
           </p>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
             <Button
-              className="bg-success text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm"
+              disabled={Boolean(loadingAction)}
+              className="bg-success text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm hover:bg-success/80 disabled:opacity-50"
               onClick={handleApprove}
             >
-              <Check size="14" className="mr-2" />
+              {loadingAction === "APPROVE" ? (
+                <Loader2 size="14" className="mr-2 animate-spin" />
+              ) : (
+                <Check size="14" className="mr-2" />
+              )}
               Aprobar
             </Button>
             <Button
-              className="bg-destructive text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm"
+              disabled={Boolean(loadingAction)}
+              className="bg-destructive text-primary-foreground flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold sm:text-sm hover:bg-destructive/80 disabled:opacity-50"
               onClick={handleReject}
             >
-              <X size="16" className="mr-2" />
+              {loadingAction === "REJECT" ? (
+                <Loader2 size="16" className="mr-2 animate-spin" />
+              ) : (
+                <X size="16" className="mr-2" />
+              )}
               Rechazar
             </Button>
           </div>
