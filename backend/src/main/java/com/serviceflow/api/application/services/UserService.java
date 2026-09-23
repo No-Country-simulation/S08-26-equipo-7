@@ -52,6 +52,22 @@ public class UserService {
         return usuarioRepository.save(usuario);
     }
 
+    public Usuario adminChangePassword(UUID userId, String newPassword) {
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException("User not found"));
+        validatePassword(newPassword);
+        Usuario actualizado = new Usuario(
+                usuario.getId(),
+                usuario.getName(),
+                usuario.getEmail(),
+                passwordEncoder.encode(newPassword),
+                usuario.getRole(),
+                usuario.getArea(),
+                usuario.getCreatedAt()
+        );
+        return usuarioRepository.save(actualizado);
+    }
+
     public Usuario changePassword(String email, String currentPassword, String newPassword) {
         Usuario usuario = usuarioRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new ValidationException("User not found"));

@@ -79,6 +79,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").authenticated()
                         .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/agents").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/me/password").authenticated()
                         .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/tickets/stats/summary").hasAnyRole("ADMIN", "SUPERVISOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/knowledge", "/api/v1/knowledge/**").permitAll()

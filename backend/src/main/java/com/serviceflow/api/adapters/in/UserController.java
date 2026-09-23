@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,6 +100,25 @@ public class UserController {
     public record CreateUserRequest(String name, String email, String role, String password, String area) {
     }
 
+    @PostMapping("/{id}/password")
+    public ResponseEntity<?> adminChangePassword(
+            @PathVariable java.util.UUID id,
+            @RequestBody AdminPasswordRequest request,
+            Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Authentication required"));
+        }
+        try {
+            userService.adminChangePassword(id, request.newPassword());
+            return ResponseEntity.ok(Map.of("message", "Password updated"));
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     public record ChangePasswordRequest(String currentPassword, String newPassword) {
+    }
+
+    public record AdminPasswordRequest(String newPassword) {
     }
 }
