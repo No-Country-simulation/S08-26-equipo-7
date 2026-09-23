@@ -85,6 +85,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/tickets/stats/summary").hasAnyRole("ADMIN", "SUPERVISOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/knowledge", "/api/v1/knowledge/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/knowledge/*/view").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/knowledge/*/votar").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/knowledge/*/votar").authenticated()
                         .requestMatchers("/api/v1/knowledge/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
