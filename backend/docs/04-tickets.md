@@ -30,6 +30,7 @@ Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fi
 | `grupoEstado` | Grupo del estado para la UI: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO` o `RESUELTO` |
 | `requiresApproval` | Viene de la categoría (automático) |
 | `assignedTo` | UUID del agente asignado (o `null`) |
+| `assignedToName` | Nombre del agente asignado (o `null`) |
 | `slaDueAt` | Fecha tope según prioridad |
 | `resolvedAt` / `closedAt` | Fechas de resolución/cierre (o `null`) |
 | `createdAt` / `updatedAt` | Fecha de creación y de última actualización |

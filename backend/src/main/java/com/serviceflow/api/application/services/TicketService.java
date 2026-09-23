@@ -203,7 +203,10 @@ public class TicketService {
         String createdByName = usuarioRepository.findByEmail(ticket.getEmail())
                 .map(Usuario::getName)
                 .orElse(null);
-        return TicketResponse.from(ticket, createdByName);
+        String assignedToName = ticket.getAssignedTo() != null
+                ? usuarioRepository.findById(ticket.getAssignedTo()).map(Usuario::getName).orElse(null)
+                : null;
+        return TicketResponse.from(ticket, createdByName, assignedToName);
     }
 
     public List<Ticket> findAll() {
