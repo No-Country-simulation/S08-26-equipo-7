@@ -203,7 +203,10 @@ public class TicketService {
         String createdByName = usuarioRepository.findByEmail(ticket.getEmail())
                 .map(Usuario::getName)
                 .orElse(null);
-        return TicketResponse.from(ticket, createdByName);
+        String assignedToName = ticket.getAssignedTo() != null
+                ? usuarioRepository.findById(ticket.getAssignedTo()).map(Usuario::getName).orElse(null)
+                : null;
+        return TicketResponse.from(ticket, createdByName, assignedToName);
     }
 
     public List<Ticket> findAll() {
@@ -276,14 +279,36 @@ public class TicketService {
         if (!ticket.isRequiresApproval()) {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
-        ticket.setStatus(EstadoTicket.APPROVED);
+        ticket.setStatus(EstadoTicket.IN_PROGRESS);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "APPROVED", "Ticket aprobado", actorEmail);
+        registrarEvento(saved, "STARTED", "Trabajo iniciado automáticamente tras aprobación", actorEmail);
         notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_APROBADO",
-                "Tu ticket " + saved.getCodigo() + " fue aprobado");
+                "Tu ticket " + saved.getCodigo() + " fue aprobado y está en proceso");
         if (saved.getAssignedTo() != null) {
             notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_APROBADO",
-                    "El ticket " + saved.getCodigo() + " fue aprobado, ya podés arrancar");
+                    "El ticket " + saved.getCodigo() + " fue aprobado y pasó a en proceso");
+        }
+        return saved;
+    }
+
+    public Ticket reject(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL).contains(ticket.getStatus())) {
+            throw new InvalidTransitionException("Ticket must be assigned before rejection");
+        }
+        if (!ticket.isRequiresApproval()) {
+            throw new InvalidTransitionException("This ticket does not require approval");
+        }
+        ticket.setStatus(EstadoTicket.ASSIGNED);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REJECTED", "Ticket rechazado, devuelto al agente", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_RECHAZADO",
+                "Tu ticket " + saved.getCodigo() + " fue rechazado");
+        if (saved.getAssignedTo() != null) {
+            notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_RECHAZADO",
+                    "El ticket " + saved.getCodigo() + " fue rechazado, revisar y corregir");
         }
         return saved;
     }

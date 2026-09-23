@@ -1,6 +1,9 @@
 # Tickets
 
-Ciclo de vida de un ticket: `SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (APPROVED si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
+
+Ciclo de vida de un ticket:
+
+`SUBMITTED → CATEGORIZED → PRIORITIZED → ASSIGNED → (PENDING_APPROVAL → IN_PROGRESS directo al aprobar, si requiere aprobación) → IN_PROGRESS → (ESCALATED) → RESOLVED → CLOSED`
 
 Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fija para la UI):
 
@@ -28,6 +31,7 @@ Los estados se agrupan en **`grupoEstado`** (hardcodeado en el backend, lista fi
 | `grupoEstado` | Grupo del estado para la UI: `PENDIENTE`, `EN_PROCESO`, `EN_APROBACION`, `EXPIRADO` o `RESUELTO` |
 | `requiresApproval` | Viene de la categoría (automático) |
 | `assignedTo` | UUID del agente asignado (o `null`) |
+| `assignedToName` | Nombre del agente asignado (o `null`) |
 | `slaDueAt` | Fecha tope según prioridad |
 | `resolvedAt` / `closedAt` | Fechas de resolución/cierre (o `null`) |
 | `createdAt` / `updatedAt` | Fecha de creación y de última actualización |

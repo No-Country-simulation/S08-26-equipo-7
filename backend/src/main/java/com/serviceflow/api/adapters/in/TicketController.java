@@ -234,6 +234,11 @@ public class TicketController {
         return safeTransition(() -> ticketService.approve(id, role(auth), email(auth)));
     }
 
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<?> reject(@PathVariable UUID id, Authentication auth) {
+        return safeTransition(() -> ticketService.reject(id, role(auth), email(auth)));
+    }
+
     @PostMapping("/{id}/start")
     public ResponseEntity<?> start(@PathVariable UUID id, Authentication auth) {
         return safeTransition(() -> ticketService.start(id, role(auth), email(auth)));
