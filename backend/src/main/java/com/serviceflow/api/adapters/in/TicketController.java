@@ -164,6 +164,7 @@ public class TicketController {
             case EN_APROBACION -> "En aprobación";
             case EXPIRADO -> "Expirado";
             case RESUELTO -> "Resuelto";
+            case CERRADO -> "Cerrado";
         };
     }
 

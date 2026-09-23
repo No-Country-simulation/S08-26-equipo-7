@@ -24,7 +24,7 @@ public enum EstadoTicket {
             APPROVED,     GrupoEstado.EN_APROBACION,
             ESCALATED,    GrupoEstado.EXPIRADO,
             RESOLVED,     GrupoEstado.RESUELTO,
-            CLOSED,       GrupoEstado.RESUELTO
+            CLOSED,       GrupoEstado.CERRADO
     );
 
     public GrupoEstado getGrupo() {

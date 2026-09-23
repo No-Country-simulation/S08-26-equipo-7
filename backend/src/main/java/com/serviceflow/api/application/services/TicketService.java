@@ -301,14 +301,14 @@ public class TicketService {
         if (!ticket.isRequiresApproval()) {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
-        ticket.setStatus(EstadoTicket.ASSIGNED);
+        ticket.setStatus(EstadoTicket.CLOSED);
         Ticket saved = ticketRepository.save(ticket);
-        registrarEvento(saved, "REJECTED", "Ticket rechazado, devuelto al agente", actorEmail);
+        registrarEvento(saved, "REJECTED", "Ticket rechazado por falta de autorización, cerrado", actorEmail);
         notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_RECHAZADO",
-                "Tu ticket " + saved.getCodigo() + " fue rechazado");
+                "Tu ticket " + saved.getCodigo() + " fue rechazado, creá uno nuevo si corresponde");
         if (saved.getAssignedTo() != null) {
             notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_RECHAZADO",
-                    "El ticket " + saved.getCodigo() + " fue rechazado, revisar y corregir");
+                    "El ticket " + saved.getCodigo() + " fue rechazado y cerrado");
         }
         return saved;
     }
