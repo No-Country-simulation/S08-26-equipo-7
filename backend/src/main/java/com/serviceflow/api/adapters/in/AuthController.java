@@ -67,7 +67,13 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
         UsuarioAutenticado usuario = (UsuarioAutenticado) authentication.getPrincipal();
-        return ResponseEntity.ok(Map.of("email", usuario.email(), "nombre", usuario.name(), "rol", usuario.role()));
+        String area = authService.areaDe(usuario.email());
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("email", usuario.email());
+        body.put("nombre", usuario.name());
+        body.put("rol", usuario.role());
+        body.put("area", area);
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/csrf")

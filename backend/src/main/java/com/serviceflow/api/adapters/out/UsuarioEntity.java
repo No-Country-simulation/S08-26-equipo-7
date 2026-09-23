@@ -31,6 +31,9 @@ public class UsuarioEntity {
     @JoinColumn(name = "rol_id", nullable = false)
     private RolEntity rol;
 
+    @Column(length = 50)
+    private String area;
+
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime createdAt;
 
@@ -38,11 +41,16 @@ public class UsuarioEntity {
     }
 
     public UsuarioEntity(UUID id, String name, String email, String passwordHash, RolEntity rol, LocalDateTime createdAt) {
+        this(id, name, email, passwordHash, rol, null, createdAt);
+    }
+
+    public UsuarioEntity(UUID id, String name, String email, String passwordHash, RolEntity rol, String area, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.rol = rol;
+        this.area = area;
         this.createdAt = createdAt;
     }
 
@@ -60,6 +68,9 @@ public class UsuarioEntity {
 
     public RolEntity getRol() { return rol; }
     public void setRol(RolEntity rol) { this.rol = rol; }
+
+    public String getArea() { return area; }
+    public void setArea(String area) { this.area = area; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

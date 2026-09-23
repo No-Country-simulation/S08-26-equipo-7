@@ -126,7 +126,13 @@ public class TicketService {
         if (agentes.isEmpty()) {
             return ticket;
         }
-        Usuario agente = agenteConMenosCarga(agentes);
+        // Por área del ticket (categoría); si no hay agentes de esa área, cae al general
+        List<Usuario> delArea = ticket.getCategory() != null
+                ? agentes.stream()
+                        .filter(a -> a.getArea() != null && a.getArea().equalsIgnoreCase(ticket.getCategory()))
+                        .toList()
+                : List.of();
+        Usuario agente = agenteConMenosCarga(delArea.isEmpty() ? agentes : delArea);
         ticket.setAssignedTo(agente.getId());
         ticket.setStatus(EstadoTicket.ASSIGNED);
         Ticket saved = ticketRepository.save(ticket);
@@ -203,7 +209,10 @@ public class TicketService {
         String createdByName = usuarioRepository.findByEmail(ticket.getEmail())
                 .map(Usuario::getName)
                 .orElse(null);
-        return TicketResponse.from(ticket, createdByName);
+        String assignedToName = ticket.getAssignedTo() != null
+                ? usuarioRepository.findById(ticket.getAssignedTo()).map(Usuario::getName).orElse(null)
+                : null;
+        return TicketResponse.from(ticket, createdByName, assignedToName);
     }
 
     public List<Ticket> findAll() {
@@ -225,15 +234,16 @@ public class TicketService {
     }
 
     public Ticket categorize(UUID id, String categoryCode, RolUsuario actorRole, String actorEmail) {
-        requireRole(actorRole, RolUsuario.AGENT, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        requireRole(actorRole, RolUsuario.ADMIN);
         Categoria category = resolveCategory(categoryCode);
         Ticket ticket = findById(id);
-        requireStatus(ticket, EstadoTicket.SUBMITTED);
+        if (ticket.getStatus() == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Cannot change the category of a closed ticket");
+        }
         ticket.setCategory(category.getCode());
         ticket.setRequiresApproval(category.isRequiresApproval());
-        ticket.setStatus(EstadoTicket.CATEGORIZED);
         Ticket saved = ticketRepository.save(ticket);
-        registrarEvento(saved, "CATEGORIZED", "Categoría asignada: " + category.getCode(), actorEmail);
+        registrarEvento(saved, "CATEGORIZED", "Categoría cambiada a: " + category.getCode(), actorEmail);
         return saved;
     }
 
@@ -267,8 +277,81 @@ public class TicketService {
         return saved;
     }
 
-    public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
+    public Ticket reassign(UUID id, UUID assignedTo, RolUsuario actorRole, String actorEmail) {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        if (ticket.getStatus() == EstadoTicket.RESOLVED || ticket.getStatus() == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Cannot reassign a resolved or closed ticket");
+        }
+        Usuario nuevo = usuarioRepository.findById(assignedTo)
+                .orElseThrow(() -> new InvalidTransitionException("Assignee not found: " + assignedTo));
+        ticket.setAssignedTo(assignedTo);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REASSIGNED", "Reasignado al agente " + nuevo.getName(), actorEmail);
+        notificacionService.notificar(assignedTo, saved.getId(), "TICKET_ASIGNADO",
+                "Se te reasignó el ticket " + saved.getCodigo() + ": " + saved.getTitle());
+        return saved;
+    }
+
+    public Ticket setStatus(UUID id, EstadoTicket nuevoEstado, RolUsuario actorRole, String actorEmail) {
+        Ticket ticket = findById(id);
+        if (ticket.getStatus() == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Cannot change the status of a closed ticket");
+        }
+        if (nuevoEstado == EstadoTicket.CLOSED) {
+            throw new InvalidTransitionException("Use reject or close to close a ticket");
+        }
+        switch (actorRole) {
+            case ADMIN -> {
+                if (!EnumSet.of(EstadoTicket.SUBMITTED, EstadoTicket.CATEGORIZED, EstadoTicket.PRIORITIZED,
+                        EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL, EstadoTicket.APPROVED,
+                        EstadoTicket.IN_PROGRESS, EstadoTicket.ESCALATED, EstadoTicket.RESOLVED).contains(nuevoEstado)) {
+                    throw new InvalidTransitionException("Invalid target status: " + nuevoEstado);
+                }
+            }
+            case SUPERVISOR -> {
+                if (!EnumSet.of(EstadoTicket.PENDING_APPROVAL, EstadoTicket.APPROVED,
+                        EstadoTicket.RESOLVED).contains(nuevoEstado)) {
+                    throw new InvalidTransitionException("Supervisors can only set approval or resolved states");
+                }
+            }
+            case AGENT -> {
+                if (nuevoEstado != EstadoTicket.RESOLVED) {
+                    throw new InvalidTransitionException("Agents can only resolve tickets");
+                }
+            }
+            default -> throw new UnauthorizedActionException("Requesters cannot change ticket status");
+        }
+        if (nuevoEstado == EstadoTicket.RESOLVED && ticket.getResolvedAt() == null) {
+            ticket.setResolvedAt(LocalDateTime.now());
+        }
+        ticket.setStatus(nuevoEstado);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "STATUS_CHANGED", "Estado cambiado a " + nuevoEstado, actorEmail);
+        return saved;
+    }
+
+    public Ticket reopen(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        requireStatus(ticket, EstadoTicket.CLOSED);
+        ticket.setStatus(EstadoTicket.ASSIGNED);
+        ticket.setResolvedAt(null);
+        ticket.setClosedAt(null);
+        ticket.setSlaDueAt(LocalDateTime.now().plus(SLA_BY_PRIORITY.get(ticket.getPriority())));
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REOPENED", "Ticket reabierto con SLA reiniciado", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_REABIERTO",
+                "Tu ticket " + saved.getCodigo() + " fue reabierto");
+        if (saved.getAssignedTo() != null) {
+            notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_REABIERTO",
+                    "El ticket " + saved.getCodigo() + " fue reabierto");
+        }
+        return saved;
+    }
+
+    public Ticket approve(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL).contains(ticket.getStatus())) {
             throw new InvalidTransitionException("Ticket must be assigned before approval");
@@ -276,14 +359,36 @@ public class TicketService {
         if (!ticket.isRequiresApproval()) {
             throw new InvalidTransitionException("This ticket does not require approval");
         }
-        ticket.setStatus(EstadoTicket.APPROVED);
+        ticket.setStatus(EstadoTicket.IN_PROGRESS);
         Ticket saved = ticketRepository.save(ticket);
         registrarEvento(saved, "APPROVED", "Ticket aprobado", actorEmail);
+        registrarEvento(saved, "STARTED", "Trabajo iniciado automáticamente tras aprobación", actorEmail);
         notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_APROBADO",
-                "Tu ticket " + saved.getCodigo() + " fue aprobado");
+                "Tu ticket " + saved.getCodigo() + " fue aprobado y está en proceso");
         if (saved.getAssignedTo() != null) {
             notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_APROBADO",
-                    "El ticket " + saved.getCodigo() + " fue aprobado, ya podés arrancar");
+                    "El ticket " + saved.getCodigo() + " fue aprobado y pasó a en proceso");
+        }
+        return saved;
+    }
+
+    public Ticket reject(UUID id, RolUsuario actorRole, String actorEmail) {
+        requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
+        Ticket ticket = findById(id);
+        if (!EnumSet.of(EstadoTicket.ASSIGNED, EstadoTicket.PENDING_APPROVAL).contains(ticket.getStatus())) {
+            throw new InvalidTransitionException("Ticket must be assigned before rejection");
+        }
+        if (!ticket.isRequiresApproval()) {
+            throw new InvalidTransitionException("This ticket does not require approval");
+        }
+        ticket.setStatus(EstadoTicket.CLOSED);
+        Ticket saved = ticketRepository.save(ticket);
+        registrarEvento(saved, "REJECTED", "Ticket rechazado por falta de autorización, cerrado", actorEmail);
+        notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_RECHAZADO",
+                "Tu ticket " + saved.getCodigo() + " fue rechazado, creá uno nuevo si corresponde");
+        if (saved.getAssignedTo() != null) {
+            notificacionService.notificar(saved.getAssignedTo(), saved.getId(), "TICKET_RECHAZADO",
+                    "El ticket " + saved.getCodigo() + " fue rechazado y cerrado");
         }
         return saved;
     }
@@ -406,11 +511,18 @@ public class TicketService {
     }
 
     public Map<String, Object> monthlyStats(LocalDateTime yearMonth) {
+        return monthlyStats(yearMonth, null);
+    }
+
+    public Map<String, Object> monthlyStats(LocalDateTime yearMonth, String requesterEmail) {
         LocalDateTime start = yearMonth.withDayOfMonth(1).toLocalDate().atStartOfDay();
         LocalDateTime end = start.plusMonths(1);
+        String area = areaScope(requesterEmail);
 
-        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
-        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
+        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
+        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
 
         long resolvedOnTime = resolved.stream()
                 .filter(t -> t.getSlaDueAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
@@ -422,32 +534,39 @@ public class TicketService {
                 .average()
                 .orElse(0.0);
 
-        return Map.of(
-                "created", created.size(),
-                "resolved", resolved.size(),
-                "resolvedOnTime", resolvedOnTime,
-                "resolvedLate", resolved.size() - resolvedOnTime,
-                "avgResolutionHours", Math.round(avgResolutionHours * 10.0) / 10.0,
-                "byStatus", statusBreakdown(),
-                "byCategory", categoryBreakdown()
-        );
+        Map<String, Object> monthly = new java.util.HashMap<>();
+        monthly.put("created", created.size());
+        monthly.put("resolved", resolved.size());
+        monthly.put("resolvedOnTime", resolvedOnTime);
+        monthly.put("resolvedLate", resolved.size() - resolvedOnTime);
+        monthly.put("avgResolutionHours", Math.round(avgResolutionHours * 10.0) / 10.0);
+        monthly.put("byStatus", area != null ? statusBreakdown(area) : statusBreakdown());
+        monthly.put("byCategory", area != null ? categoryBreakdown(area) : categoryBreakdown());
+        monthly.put("area", area);
+        return monthly;
     }
 
     public Map<String, Object> summaryStats(LocalDateTime month) {
+        return summaryStats(month, null);
+    }
+
+    public Map<String, Object> summaryStats(LocalDateTime month, String requesterEmail) {
         LocalDateTime start = month.withDayOfMonth(1).toLocalDate().atStartOfDay();
         LocalDateTime end = start.plusMonths(1);
         LocalDateTime prevStart = start.minusMonths(1);
         LocalDateTime prevEnd = start;
         LocalDateTime now = LocalDateTime.now();
+        String area = areaScope(requesterEmail);
 
-        List<Ticket> all = ticketRepository.findAll();
+        List<Ticket> all = ticketRepository.findAll().stream()
+                .filter(t -> enArea(t, area)).toList();
 
         List<Ticket> active = all.stream()
                 .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
                 .toList();
 
         long activeTickets = active.size();
-        long activePrev = activeCountAt(prevEnd);
+        long activePrev = activeCountAt(prevEnd, area);
 
         long nearSlaExpiry = active.stream()
                 .filter(t -> t.getSlaDueAt() != null)
@@ -458,23 +577,36 @@ public class TicketService {
                 .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(now))
                 .count();
 
-        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end);
-        List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd);
+        List<Ticket> resolved = ticketRepository.findByResolvedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
+        List<Ticket> resolvedPrev = ticketRepository.findByResolvedAtBetween(prevStart, prevEnd).stream()
+                .filter(t -> enArea(t, area)).toList();
 
+        // SLA Compliance CORREGIDO: denominador = tickets evaluables (resueltos + vencidos activos)
         long resolvedOnTime = resolved.stream()
                 .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
                 .count();
+
+        // Tickets evaluables en el periodo = resueltos en el mes + activos vencidos (overdue) en el mes
+        long evaluables = resolved.size() + overdueSla;
+        long evaluablesPrev = resolvedPrev.size() + countOverdueAt(prevEnd, area);
+
         long resolvedOnTimePrev = resolvedPrev.stream()
                 .filter(t -> t.getSlaDueAt() != null && t.getResolvedAt() != null && !t.getResolvedAt().isAfter(t.getSlaDueAt()))
                 .count();
 
-        double compliance = resolved.isEmpty() ? 0.0 : round2(resolvedOnTime * 100.0 / resolved.size());
-        double compliancePrev = resolvedPrev.isEmpty() ? 0.0 : round2(resolvedOnTimePrev * 100.0 / resolvedPrev.size());
+        double compliance = evaluables == 0 ? 0.0 : round2(resolvedOnTime * 100.0 / evaluables);
+        long overduePrev = countOverdueAt(prevEnd, area);
+        long evaluablesPrevTotal = resolvedPrev.size() + overduePrev;
+        double compliancePrev = evaluablesPrevTotal == 0 ? 0.0 : round2(resolvedOnTimePrev * 100.0 / evaluablesPrevTotal);
 
-        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end);
-        List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd);
+        List<Ticket> created = ticketRepository.findByCreatedAtBetween(start, end).stream()
+                .filter(t -> enArea(t, area)).toList();
+        List<Ticket> createdPrev = ticketRepository.findByCreatedAtBetween(prevStart, prevEnd).stream()
+                .filter(t -> enArea(t, area)).toList();
 
         Map<String, Object> result = new java.util.HashMap<>();
+        result.put("area", area);
         result.put("month", start.toLocalDate().getYear() + "-" + String.format("%02d", start.toLocalDate().getMonthValue()));
         result.put("activeTickets", activeTickets);
         result.put("activePrevMonth", activePrev);
@@ -492,12 +624,44 @@ public class TicketService {
         return result;
     }
 
-    private long activeCountAt(LocalDateTime until) {
+    private long countOverdueAt(LocalDateTime until) {
+        return countOverdueAt(until, null);
+    }
+
+    private long countOverdueAt(LocalDateTime until, String area) {
         return ticketRepository.findAll().stream()
+                .filter(t -> enArea(t, area))
+                .filter(t -> t.getSlaDueAt() != null && t.getSlaDueAt().isBefore(until))
+                .filter(t -> t.getStatus() != EstadoTicket.RESOLVED && t.getStatus() != EstadoTicket.CLOSED)
+                .count();
+    }
+
+    private long activeCountAt(LocalDateTime until) {
+        return activeCountAt(until, null);
+    }
+
+    private long activeCountAt(LocalDateTime until, String area) {
+        return ticketRepository.findAll().stream()
+                .filter(t -> enArea(t, area))
                 .filter(t -> t.getCreatedAt() != null && !t.getCreatedAt().isAfter(until))
                 .filter(t -> t.getResolvedAt() == null || t.getResolvedAt().isAfter(until))
                 .filter(t -> t.getClosedAt() == null || t.getClosedAt().isAfter(until))
                 .count();
+    }
+
+    private String areaScope(String email) {
+        if (email == null) {
+            return null;
+        }
+        return usuarioRepository.findByEmail(email)
+                .filter(u -> u.getRole() == RolUsuario.SUPERVISOR)
+                .map(Usuario::getArea)
+                .filter(a -> a != null && !a.isBlank())
+                .orElse(null);
+    }
+
+    private boolean enArea(Ticket t, String area) {
+        return area == null || (t.getCategory() != null && t.getCategory().equalsIgnoreCase(area));
     }
 
     private double round2(double value) {
@@ -505,23 +669,43 @@ public class TicketService {
     }
 
     private Map<String, Long> statusBreakdown() {
-        return Map.of(
-                "SUBMITTED", ticketRepository.countByStatus(EstadoTicket.SUBMITTED.name()),
-                "CATEGORIZED", ticketRepository.countByStatus(EstadoTicket.CATEGORIZED.name()),
-                "PRIORITIZED", ticketRepository.countByStatus(EstadoTicket.PRIORITIZED.name()),
-                "ASSIGNED", ticketRepository.countByStatus(EstadoTicket.ASSIGNED.name()),
-                "APPROVED", ticketRepository.countByStatus(EstadoTicket.APPROVED.name()),
-                "IN_PROGRESS", ticketRepository.countByStatus(EstadoTicket.IN_PROGRESS.name()),
-                "ESCALATED", ticketRepository.countByStatus(EstadoTicket.ESCALATED.name()),
-                "RESOLVED", ticketRepository.countByStatus(EstadoTicket.RESOLVED.name()),
-                "CLOSED", ticketRepository.countByStatus(EstadoTicket.CLOSED.name())
-        );
+        return statusBreakdown(null);
+    }
+
+    private Map<String, Long> statusBreakdown(String area) {
+        if (area == null) {
+            return Map.of(
+                    "SUBMITTED", ticketRepository.countByStatus(EstadoTicket.SUBMITTED.name()),
+                    "CATEGORIZED", ticketRepository.countByStatus(EstadoTicket.CATEGORIZED.name()),
+                    "PRIORITIZED", ticketRepository.countByStatus(EstadoTicket.PRIORITIZED.name()),
+                    "ASSIGNED", ticketRepository.countByStatus(EstadoTicket.ASSIGNED.name()),
+                    "PENDING_APPROVAL", ticketRepository.countByStatus(EstadoTicket.PENDING_APPROVAL.name()),
+                    "APPROVED", ticketRepository.countByStatus(EstadoTicket.APPROVED.name()),
+                    "IN_PROGRESS", ticketRepository.countByStatus(EstadoTicket.IN_PROGRESS.name()),
+                    "ESCALATED", ticketRepository.countByStatus(EstadoTicket.ESCALATED.name()),
+                    "RESOLVED", ticketRepository.countByStatus(EstadoTicket.RESOLVED.name()),
+                    "CLOSED", ticketRepository.countByStatus(EstadoTicket.CLOSED.name())
+            );
+        }
+        List<Ticket> scoped = ticketRepository.findAll().stream().filter(t -> enArea(t, area)).toList();
+        Map<String, Long> result = new java.util.HashMap<>();
+        for (EstadoTicket e : EstadoTicket.values()) {
+            result.put(e.name(), scoped.stream().filter(t -> t.getStatus() == e).count());
+        }
+        return result;
     }
 
     private Map<String, Long> categoryBreakdown() {
+        return categoryBreakdown(null);
+    }
+
+    private Map<String, Long> categoryBreakdown(String area) {
         List<Categoria> categories = categoriaRepository.findAll();
         Map<String, Long> result = new java.util.HashMap<>();
         for (Categoria category : categories) {
+            if (area != null && !category.getCode().equalsIgnoreCase(area)) {
+                continue;
+            }
             result.put(category.getCode(), ticketRepository.countByCategory(category.getCode()));
         }
         return result;

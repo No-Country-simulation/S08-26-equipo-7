@@ -31,6 +31,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
                 usuario.getEmail(),
                 usuario.getPasswordHash(),
                 rol,
+                usuario.getArea(),
                 createdAt
         );
         UsuarioEntity saved = jpaRepository.save(entity);
@@ -69,6 +70,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
                 entity.getEmail(),
                 entity.getPasswordHash(),
                 com.serviceflow.api.domain.RolUsuario.valueOf(entity.getRol().getName()),
+                entity.getArea(),
                 entity.getCreatedAt()
         );
     }

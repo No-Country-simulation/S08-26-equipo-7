@@ -69,6 +69,13 @@ public class AuthService {
         });
     }
 
+    public String areaDe(String email) {
+        if (email == null) {
+            return null;
+        }
+        return usuarioRepository.findByEmail(email).map(Usuario::getArea).orElse(null);
+    }
+
     public record LoginResult(String token, String nombre, String rol) {
     }
 }

@@ -18,6 +18,7 @@ public record TicketResponse(
         String grupoEstado,
         boolean requiresApproval,
         UUID assignedTo,
+        String assignedToName,
         LocalDateTime slaDueAt,
         LocalDateTime resolvedAt,
         LocalDateTime closedAt,
@@ -29,6 +30,10 @@ public record TicketResponse(
     }
 
     public static TicketResponse from(Ticket ticket, String createdByName) {
+        return from(ticket, createdByName, null);
+    }
+
+    public static TicketResponse from(Ticket ticket, String createdByName, String assignedToName) {
         return new TicketResponse(
                 ticket.getId(),
                 ticket.getCodigo(),
@@ -42,6 +47,7 @@ public record TicketResponse(
                 ticket.getStatus().getGrupo().name(),
                 ticket.isRequiresApproval(),
                 ticket.getAssignedTo(),
+                assignedToName,
                 ticket.getSlaDueAt(),
                 ticket.getResolvedAt(),
                 ticket.getClosedAt(),

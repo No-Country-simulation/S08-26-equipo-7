@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { formatTicketDate } from "@/lib/utils";
 
 export default function ActivityFeed({
@@ -10,8 +9,6 @@ export default function ActivityFeed({
   onSendMessage,
   isSubmitting,
 }) {
-  const { user } = useAuth();
-  console.log(user);
   return (
     <div className="bg-card border-border order-4 rounded-lg border shadow-md">
       <div className="bg-muted-foreground/5 w-full rounded-t-lg px-2">

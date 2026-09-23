@@ -5,5 +5,6 @@ public enum GrupoEstado {
     EN_PROCESO,
     EN_APROBACION,
     EXPIRADO,
-    RESUELTO;
+    RESUELTO,
+    CERRADO;
 }

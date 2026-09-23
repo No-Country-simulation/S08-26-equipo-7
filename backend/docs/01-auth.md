@@ -13,7 +13,7 @@ Inicia sesión y setea la cookie `access_token` (HttpOnly).
 
 ```json
 // respuesta 200
-{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN" }
+{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN", "area": null }
 ```
 
 - `400` si falta algún campo
@@ -24,8 +24,8 @@ Inicia sesión y setea la cookie `access_token` (HttpOnly).
 Devuelve el token CSRF y setea la cookie `XSRF-TOKEN` (público). **Llamar antes del primer POST** para no recibir un 403 en la primera escritura.
 
 ```json
-// respuesta 200
-{ "token": "a654aa5c-5e7e-40a8-af97-52ce98fd981c" }
+// respuesta 200 (`area` solo viene con valor en SUPERVISOR/AGENT que la tengan asignada)
+{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN", "area": null }
 ```
 
 Uso: el mismo valor del body va como header `X-XSRF-TOKEN` en los POST siguientes.
@@ -50,7 +50,7 @@ Devuelve la sesión actual (requiere cookie `access_token`).
 
 ```json
 // respuesta 200
-{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN" }
+{ "email": "admin@serviceflow.com", "nombre": "Alejandro", "rol": "ADMIN", "area": null }
 ```
 
 - `401` si no hay token
