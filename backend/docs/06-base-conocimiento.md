@@ -51,7 +51,7 @@ Incrementa en 1 las `visualizaciones` del artículo. **Público** y sin CSRF (es
 
 ## POST /knowledge/{id}/votar
 
-Registra un voto de satisfacción (útil / no útil) en el artículo. **Público** y sin CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado:
+Registra un voto de satisfacción (útil / no útil) en el artículo. **Público** y sin CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado (incluye `satisfaccion`, `tiempoLecturaMin` y `miVoto`):
 
 ```json
 // respuesta 200
@@ -60,11 +60,32 @@ Registra un voto de satisfacción (útil / no útil) en el artículo. **Público
   "megusta": 42,
   "nomegusta": 3,
   "satisfaccion": 93.33,
-  "tiempoLecturaMin": 5
+  "tiempoLecturaMin": 5,
+  "miVoto": true
 }
 ```
 
 - `404` si el artículo no existe.
+
+## GET /knowledge/{id}/mi-voto
+
+Devuelve el voto del usuario autenticado + resumen (`satisfaccion`, `tiempoLecturaMin`).
+
+```json
+// respuesta 200
+{
+  "articuloId": "11111111-...",
+  "megusta": true,
+  "satisfaccion": 93.33,
+  "tiempoLecturaMin": 5
+}
+```
+
+- `megusta` es `null` si el usuario no votó. `401` si no está autenticado.
+
+## DELETE /knowledge/{id}/votar
+
+Quita el voto del usuario. Devuelve el resumen actualizado (`satisfaccion`, `tiempoLecturaMin`, `miVoto: null`). `401` si no está autenticado.
 
 ## POST /knowledge
 
