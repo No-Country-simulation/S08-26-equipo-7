@@ -3,6 +3,7 @@ package com.serviceflow.api.adapters.in.dto;
 import com.serviceflow.api.domain.Articulo;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public record ArticuloResponse(
@@ -11,6 +12,7 @@ public record ArticuloResponse(
         String descripcion,
         String contenido,
         String categoria,
+        Map<String, Object> layoutConfig,
         long visualizaciones,
         long megusta,
         long nomegusta,
@@ -32,6 +34,7 @@ public record ArticuloResponse(
                 articulo.getDescripcion(),
                 articulo.getContenido(),
                 articulo.getCategoria(),
+                articulo.getLayoutConfig() != null ? articulo.getLayoutConfig() : Map.of(),
                 articulo.getVisualizaciones(),
                 megusta,
                 nomegusta,
