@@ -17,7 +17,7 @@ export default function CardKnowl({ info }) {
           <div className="text-muted-foreground/50 flex items-center justify-between space-x-4 text-xs font-semibold">
             <span className="flex space-x-1">
               <Clock size="14" />
-              <span>4 min lectura</span>
+              <span>{info.tiempoLecturaMin} min lectura</span>
             </span>
 
             <div className="flex space-x-1">
@@ -35,7 +35,7 @@ export default function CardKnowl({ info }) {
           <div className="flex items-center space-x-1">
             <ThumbsUp className="text-success" size="14" />
             <p className="text-muted-foreground/70 text-xs font-bold">
-              99% de efectividad en solución
+              {info.satisfaccion}% de efectividad en solución
             </p>
           </div>
           <div className="flex items-center space-x-1">
