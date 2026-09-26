@@ -67,16 +67,19 @@ public class TicketController {
 
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(required = false) Boolean active,
-                                  @RequestParam(required = false) String status,
-                                  @RequestParam(required = false) String group,
-                                  @RequestParam(required = false) String category,
-                                  @RequestParam(required = false) String priority,
-                                  @RequestParam(required = false) String search,
-                                  @RequestParam(required = false) String q,
-                                  @RequestParam(required = false) String sort,
-                                  @RequestParam(required = false) Integer limit,
-                                  @RequestParam(required = false) Integer offset) {
-        List<Ticket> all = ticketService.findAllWithNames().stream()
+                                   @RequestParam(required = false) String status,
+                                   @RequestParam(required = false) String group,
+                                   @RequestParam(required = false) String category,
+                                   @RequestParam(required = false) String priority,
+                                   @RequestParam(required = false) String search,
+                                   @RequestParam(required = false) String q,
+                                   @RequestParam(required = false) String sort,
+                                   @RequestParam(required = false) Integer limit,
+                                   @RequestParam(required = false) Integer offset,
+                                   Authentication auth) {
+        List<TicketService.TicketSearchData> allData =
+                ticketService.findAllWithNamesScoped(email(auth), role(auth));
+        List<Ticket> all = allData.stream()
                 .map(TicketService.TicketSearchData::ticket)
                 .toList();
         boolean onlyActive = active != null
@@ -102,7 +105,6 @@ public class TicketController {
         String term = search != null ? search : q;
         if (term != null && !term.isBlank()) {
             String needle = term.trim().toLowerCase();
-            List<TicketService.TicketSearchData> allData = ticketService.findAllWithNames();
             java.util.Set<UUID> matches = allData.stream()
                     .filter(d -> matches(d, needle))
                     .map(d -> d.ticket().getId())

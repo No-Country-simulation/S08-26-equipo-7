@@ -156,6 +156,8 @@ Lista tickets con filtros opcionales por query string:
 GET /tickets?status=IN_PROGRESS&category=HARDWARE&priority=HIGH
 ```
 
+**Alcance por rol** (según el token, sin parámetros extra): `REQUESTER` solo los que creó, `AGENT` solo los asignados, `SUPERVISOR` solo los de su área (sin área ve todo), `ADMIN` ve todo.
+
 **Por defecto devuelve solo los tickets ACTIVOS** (todo menos `RESOLVED` y `CLOSED`), para que el listado no se llene de resueltos. Para traer todos se pasa `active=false`:
 
 ```

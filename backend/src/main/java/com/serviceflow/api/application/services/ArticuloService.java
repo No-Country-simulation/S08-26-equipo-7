@@ -34,11 +34,16 @@ public class ArticuloService {
     }
 
     public Articulo create(String titulo, String descripcion, String contenido, String categoria) {
+        return create(titulo, descripcion, contenido, categoria, null);
+    }
+
+    public Articulo create(String titulo, String descripcion, String contenido, String categoria,
+                           java.util.Map<String, Object> layoutConfig) {
         if (titulo == null || titulo.isBlank() || categoria == null || categoria.isBlank()) {
             throw new IllegalArgumentException("titulo and categoria are required");
         }
         return articuloRepository.save(new Articulo(
-                null, titulo, descripcion, contenido, categoria,
+                null, titulo, descripcion, contenido, categoria, layoutConfig,
                 0L, 0L, 0L,
                 true, null, null
         ));
@@ -46,6 +51,12 @@ public class ArticuloService {
 
     public Articulo update(UUID id, String titulo, String descripcion, String contenido,
                            String categoria, Boolean activo) {
+        return update(id, titulo, descripcion, contenido, categoria, activo, null);
+    }
+
+    public Articulo update(UUID id, String titulo, String descripcion, String contenido,
+                           String categoria, Boolean activo,
+                           java.util.Map<String, Object> layoutConfig) {
         Articulo existing = articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
         return articuloRepository.save(new Articulo(
@@ -54,6 +65,7 @@ public class ArticuloService {
                 descripcion != null ? descripcion : existing.getDescripcion(),
                 contenido != null ? contenido : existing.getContenido(),
                 categoria != null && !categoria.isBlank() ? categoria : existing.getCategoria(),
+                layoutConfig != null ? layoutConfig : existing.getLayoutConfig(),
                 existing.getVisualizaciones(),
                 existing.getMegusta(),
                 existing.getNomegusta(),

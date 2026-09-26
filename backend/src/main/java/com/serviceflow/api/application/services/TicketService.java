@@ -222,6 +222,28 @@ public class TicketService {
     public record TicketSearchData(Ticket ticket, String createdByName, String assignedToName) {
     }
 
+    public List<TicketSearchData> findAllWithNamesScoped(String email, RolUsuario role) {
+        List<TicketSearchData> all = findAllWithNames();
+        if (role == RolUsuario.ADMIN) {
+            return all;
+        }
+        if (role == RolUsuario.REQUESTER) {
+            return all.stream().filter(d -> email.equalsIgnoreCase(d.ticket().getEmail())).toList();
+        }
+        if (role == RolUsuario.AGENT) {
+            UUID id = usuarioRepository.findByEmail(email).map(Usuario::getId).orElse(null);
+            if (id == null) {
+                return List.of();
+            }
+            return all.stream().filter(d -> id.equals(d.ticket().getAssignedTo())).toList();
+        }
+        String area = usuarioRepository.findByEmail(email).map(Usuario::getArea).orElse(null);
+        if (area == null || area.isBlank()) {
+            return all;
+        }
+        return all.stream().filter(d -> area.equalsIgnoreCase(d.ticket().getCategory())).toList();
+    }
+
     public List<TicketSearchData> findAllWithNames() {
         return ticketRepository.findAll().stream()
                 .map(t -> new TicketSearchData(
@@ -335,12 +357,16 @@ public class TicketService {
         requireRole(actorRole, RolUsuario.SUPERVISOR, RolUsuario.ADMIN);
         Ticket ticket = findById(id);
         requireStatus(ticket, EstadoTicket.CLOSED);
-        ticket.setStatus(EstadoTicket.ASSIGNED);
+        ticket.setStatus(ticket.isRequiresApproval() ? EstadoTicket.PENDING_APPROVAL : EstadoTicket.ASSIGNED);
         ticket.setResolvedAt(null);
         ticket.setClosedAt(null);
         ticket.setSlaDueAt(LocalDateTime.now().plus(SLA_BY_PRIORITY.get(ticket.getPriority())));
         Ticket saved = ticketRepository.save(ticket);
-        registrarEvento(saved, "REOPENED", "Ticket reabierto con SLA reiniciado", actorEmail);
+        registrarEvento(saved, "REOPENED",
+                ticket.isRequiresApproval()
+                        ? "Ticket reabierto, requiere aprobación de nuevo"
+                        : "Ticket reabierto con SLA reiniciado",
+                actorEmail);
         notificacionService.notificarPorEmail(saved.getEmail(), saved.getId(), "TICKET_REABIERTO",
                 "Tu ticket " + saved.getCodigo() + " fue reabierto");
         if (saved.getAssignedTo() != null) {
