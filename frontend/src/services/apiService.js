@@ -25,7 +25,8 @@ function getCookie(name) {
 }
 
 function requiresCsrf(method) {
-  return method === "POST";
+  // Incluye todos los métodos que alteran datos en el servidor
+  return ["POST", "PUT", "PATCH", "DELETE"].includes(method);
 }
 
 async function ensureCsrfToken() {
@@ -40,12 +41,20 @@ async function ensureCsrfToken() {
     })
       .then(async (response) => {
         const data = await response.json().catch(() => null);
+        // Captura el token ya sea de la cookie que llegó o del JSON del backend ({ token: "..." })
         const csrfToken = getCookie("XSRF-TOKEN") || data?.token;
 
         if (!response.ok || !csrfToken) {
           throw new Error(
             "No se pudo obtener el token de seguridad del servidor.",
           );
+        }
+
+        // Respaldo defensivo: si el token vino por JSON, lo seteamos en las cookies locales del navegador
+        try {
+          document.cookie = `XSRF-TOKEN=${csrfToken}; path=/; samesite=lax`;
+        } catch (e) {
+          console.warn("No se pudo escribir la cookie CSRF localmente", e);
         }
 
         return csrfToken;
