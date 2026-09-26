@@ -17,7 +17,8 @@ services:
       retries: 10
 
   api:
-    build: ./backend
+    build:
+      context: ./backend
     restart: unless-stopped
     environment:
       DB_URL: jdbc:postgresql://db:5432/serviceflow_db
