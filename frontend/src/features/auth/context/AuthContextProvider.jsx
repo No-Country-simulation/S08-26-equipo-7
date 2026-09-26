@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import { AuthContext } from "@/features/auth/context/authContext";
 import { getCurrentUser, logout } from "@/features/auth/services/authService";
-
-import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -23,27 +23,29 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  const loginContext = (userData) => {
+  const loginContext = useCallback((userData) => {
     setUser(userData);
-  };
+  }, []);
 
-  const logoutContext = async () => {
+  const logoutContext = useCallback(async () => {
     try {
-      // 1. Llamamos a la API para limpiar la cookie HttpOnly en el backend
       await logout();
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      toast.error("Error al cerrar sesión:", error);
     } finally {
-      // 2. Independientemente de si la API falló o no, limpiamos el usuario localmente
       setUser(null);
     }
-  };
+  }, []);
 
-  return (
-    <AuthContext.Provider
-      value={{ user, loading, loginContext, logoutContext }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      loginContext,
+      logoutContext,
+    }),
+    [user, loading, loginContext, logoutContext],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
