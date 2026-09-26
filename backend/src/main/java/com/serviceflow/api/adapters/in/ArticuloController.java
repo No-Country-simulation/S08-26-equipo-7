@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -59,7 +60,17 @@ public class ArticuloController {
     }
 
     @GetMapping
-    public ResponseEntity<?> listActive() {
+    public ResponseEntity<?> listActive(@RequestParam(required = false) Boolean active) {
+        if (active != null && !active) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UsuarioAutenticado user)
+                    || !"ADMIN".equals(user.role())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Forbidden: insufficient role"));
+            }
+            List<ArticuloResponse> response = articuloService.listInactive().stream()
+                    .map(ArticuloResponse::from).toList();
+            return ResponseEntity.ok(response);
+        }
         List<ArticuloResponse> response = articuloService.listActive().stream()
                 .map(ArticuloResponse::from).toList();
         return ResponseEntity.ok(response);

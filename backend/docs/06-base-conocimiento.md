@@ -23,6 +23,10 @@ Artículos para la sección "Base de Conocimiento & Auto-Servicio": tarjetas con
 
 Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por más reciente. **Público** (sin login).
 
+```
+GET /knowledge?active=false   // solo desactivados, SOLO ADMIN (403 para otros roles)
+```
+
 ```json
 [
   {
