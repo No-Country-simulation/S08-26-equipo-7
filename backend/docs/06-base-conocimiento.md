@@ -101,8 +101,9 @@ Quita el voto del usuario. Requiere login (cualquier rol) y CSRF. Devuelve el re
 Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF.
 
 ```json
-// body (layoutConfig opcional: layout del editor de bloques, se guarda tal cual)
-{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] } }
+// body (layoutConfig opcional: layout del editor de bloques, se guarda tal cual;
+// tiempoLecturaMin opcional: si se manda se guarda, si no se calcula del contenido)
+{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "tiempoLecturaMin": 5 }
 ```
 
 `201` con el artículo creado (incluye `layoutConfig`, `{}` si no se mandó).
@@ -112,8 +113,9 @@ Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF.
 Edita un artículo (títulos, descripción, contenido, categoría, `layoutConfig` o `activo`). **Solo ADMIN**. Requiere CSRF.
 
 ```json
-// body (todos opcionales, parcialmente; layoutConfig reemplaza si se manda, `{}` lo limpia)
-{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "activo": false }
+// body (todos opcionales, parcialmente; layoutConfig reemplaza si se manda, `{}` lo limpia;
+// tiempoLecturaMin reemplaza si se manda con valor > 0)
+{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "tiempoLecturaMin": 3, "activo": false }
 ```
 
 `200` con el artículo actualizado. `404` si no existe.

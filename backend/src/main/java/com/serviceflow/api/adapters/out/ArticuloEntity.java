@@ -34,6 +34,9 @@ public class ArticuloEntity {
     @Column(name = "layout_config", columnDefinition = "jsonb", nullable = false)
     private Map<String, Object> layoutConfig;
 
+    @Column(name = "tiempo_lectura_min")
+    private Integer tiempoLecturaMin;
+
     @Column(nullable = false)
     private long visualizaciones;
 
@@ -66,12 +69,21 @@ public class ArticuloEntity {
                           Map<String, Object> layoutConfig,
                           long visualizaciones, long megusta, long nomegusta,
                           boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this(id, titulo, descripcion, contenido, categoria, layoutConfig, null,
+                visualizaciones, megusta, nomegusta, activo, createdAt, updatedAt);
+    }
+
+    public ArticuloEntity(UUID id, String titulo, String descripcion, String contenido, String categoria,
+                          Map<String, Object> layoutConfig, Integer tiempoLecturaMin,
+                          long visualizaciones, long megusta, long nomegusta,
+                          boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.contenido = contenido;
         this.categoria = categoria;
         this.layoutConfig = layoutConfig != null ? layoutConfig : new java.util.HashMap<>();
+        this.tiempoLecturaMin = tiempoLecturaMin;
         this.visualizaciones = visualizaciones;
         this.megusta = megusta;
         this.nomegusta = nomegusta;
@@ -97,6 +109,9 @@ public class ArticuloEntity {
 
     public Map<String, Object> getLayoutConfig() { return layoutConfig; }
     public void setLayoutConfig(Map<String, Object> layoutConfig) { this.layoutConfig = layoutConfig; }
+
+    public Integer getTiempoLecturaMin() { return tiempoLecturaMin; }
+    public void setTiempoLecturaMin(Integer tiempoLecturaMin) { this.tiempoLecturaMin = tiempoLecturaMin; }
 
     public long getVisualizaciones() { return visualizaciones; }
     public void setVisualizaciones(long visualizaciones) { this.visualizaciones = visualizaciones; }
