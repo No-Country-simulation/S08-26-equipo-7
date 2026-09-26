@@ -34,7 +34,7 @@ export default function RightColumn({
           <Button
             variant="unstyled"
             onClick={() => setActiveWizardColumn("right")}
-            className="w-full py-5 border-2 border-dashed hover:border-primary/40 border-primary/20 text-primary rounded-2xl text-sm font-bold transition-all cursor-pointer text-center"
+            className="w-full mb-4 text-xs py-5 border-2 border-dashed hover:border-primary/40 border-primary/20 text-primary rounded-2xl sm:text-sm font-bold transition-all cursor-pointer text-center"
           >
             <Plus /> Añadir bloque en Col. Derecha
           </Button>

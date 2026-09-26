@@ -105,7 +105,7 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
           />
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex items-center justify-end gap-2 pt-2 flex-wrap">
           <Button
             size="sm"
             onClick={onClose}

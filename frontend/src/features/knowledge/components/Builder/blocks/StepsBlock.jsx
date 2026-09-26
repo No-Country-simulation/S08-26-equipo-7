@@ -22,7 +22,7 @@ export default function StepsBlock({ block, colKey, isEditing, onDelete, onUpdat
 
       <div>
         {/* Cabecera del bloque */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 w-full">
           <h3 className="font-bold text-sm text-primary flex items-center gap-2">
             <ListOrdered size={16} /> 
             {isEditing ? (
@@ -30,7 +30,7 @@ export default function StepsBlock({ block, colKey, isEditing, onDelete, onUpdat
                 type="text"
                 value={block.title}
                 onChange={(e) => onUpdate(colKey, block.id, 'title', e.target.value)}
-                className="h-8 text-xs font-bold w-auto"
+                className="h-8 text-xs font-bold w-full"
               />
             ) : (
               block.title

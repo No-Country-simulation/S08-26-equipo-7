@@ -20,8 +20,8 @@ export default function WarningBlock({ block, colKey, isEditing, onDelete, onUpd
         </div>
       )}
 
-      <div className="bg-warning/10 border border-warning/30 p-4 rounded-lg">
-        <h4 className="font-bold text-xs text-warning/80 mb-1 flex items-center gap-2">
+      <div className="bg-warning/30 border border-warning p-4 rounded-lg">
+        <h4 className="font-bold text-xs text-warning mb-1 flex items-center gap-2">
           <AlertTriangle size={18} /> 
           {isEditing ? (
             <Input

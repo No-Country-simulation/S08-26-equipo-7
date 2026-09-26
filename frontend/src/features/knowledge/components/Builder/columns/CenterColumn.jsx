@@ -54,9 +54,9 @@ export default function CenterColumn({
           <Button
             variant="unstyled"
             onClick={() => setActiveWizardColumn('center')}
-            className="w-full py-5 border-2 border-dashed hover:border-primary/40 border-primary/20 text-primary rounded-2xl text-sm font-bold transition-all cursor-pointer text-center"
+            className="w-full py-5 text-xs  border-2 border-dashed hover:border-primary/40 border-primary/20 text-primary rounded-2xl sm:text-sm font-bold transition-all cursor-pointer text-center"
           >
-            <Plus /> Añadir bloque en Columna Central
+            <Plus /> Añadir bloque en Col. Central
           </Button>
         )
       )}
