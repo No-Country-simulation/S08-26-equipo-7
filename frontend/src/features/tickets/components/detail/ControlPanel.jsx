@@ -18,7 +18,7 @@ import { formatTicketDate } from "@/lib/utils";
 
 export default function ControlPanel({ ticket, onRefresh }) {
   const [loadingAction, setLoadingAction] = useState(null);
-  const { user } = useAuth();
+  const { isAdmin, isSupervisor } = useAuth();
 
   const {
     isEditingAssignee,
@@ -133,7 +133,7 @@ export default function ControlPanel({ ticket, onRefresh }) {
                 <p className="text-xs font-semibold sm:text-sm">
                   {assignedName ? assignedName : "No asignado"}
                 </p>
-                {(user.rol === "ADMIN" || user.rol === "SUPERVISOR") && (
+                {(isAdmin || isSupervisor) && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -224,7 +224,7 @@ export default function ControlPanel({ ticket, onRefresh }) {
             </p>
 
             {ticket.requiresApproval &&
-              ticket.status === "PENDING_APPROVAL" && user.rol === "ADMIN" && (
+              ticket.status === "PENDING_APPROVAL" && isAdmin && (
               <div className="flex items-center gap-1.5">
                 <Button
                   disabled={Boolean(loadingAction)}
@@ -285,7 +285,7 @@ export default function ControlPanel({ ticket, onRefresh }) {
             )}
           </Button>
         ) : (
-          (user?.rol === "ADMIN" || user?.rol === "SUPERVISOR") && (
+          (isAdmin || isSupervisor) && (
             <Button
               disabled={Boolean(loadingAction)}
               className="bg-destructive hover:bg-destructive/80 w-full cursor-pointer py-4 disabled:opacity-50"
