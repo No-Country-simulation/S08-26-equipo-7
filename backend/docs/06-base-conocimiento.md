@@ -30,7 +30,12 @@ Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por
     "titulo": "Cómo conectar y configurar la VPN corporativa GlobalProtect",
     "descripcion": "Guía paso a paso para autenticación multifactor...",
     "categoria": "IT",
+    "layoutConfig": { "blocks": [...] },
     "visualizaciones": 1402,
+    "megusta": 42,
+    "nomegusta": 3,
+    "satisfaccion": 93.33,
+    "tiempoLecturaMin": 5,
     "activo": true
   }
 ]
@@ -38,7 +43,7 @@ Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por
 
 ## GET /knowledge/{id}
 
-Trae un artículo por ID (con su `contenido`). **Público**. `404` si no existe.
+Trae un artículo por ID (con su `contenido` y `layoutConfig`). **Público**. `404` si no existe.
 
 ## POST /knowledge/{id}/view
 
