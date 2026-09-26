@@ -18,7 +18,7 @@ export async function getKnowledgeById(id) {
 export async function createKnowledge(data) {
   return apiRequest("/knowledge", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
