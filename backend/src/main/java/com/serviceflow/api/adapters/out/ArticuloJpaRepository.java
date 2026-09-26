@@ -8,4 +8,6 @@ import java.util.UUID;
 public interface ArticuloJpaRepository extends JpaRepository<ArticuloEntity, UUID> {
 
     List<ArticuloEntity> findByActivoTrueOrderByUpdatedAtDesc();
+
+    List<ArticuloEntity> findByActivoFalseOrderByUpdatedAtDesc();
 }

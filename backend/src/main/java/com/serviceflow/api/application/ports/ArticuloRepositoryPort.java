@@ -13,4 +13,6 @@ public interface ArticuloRepositoryPort {
     Optional<Articulo> findById(UUID id);
 
     List<Articulo> findAllActive();
+
+    List<Articulo> findAllInactive();
 }

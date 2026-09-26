@@ -49,6 +49,11 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
         return jpaRepository.findByActivoTrueOrderByUpdatedAtDesc().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public List<Articulo> findAllInactive() {
+        return jpaRepository.findByActivoFalseOrderByUpdatedAtDesc().stream().map(this::toDomain).toList();
+    }
+
     private Articulo toDomain(ArticuloEntity entity) {
         return new Articulo(
                 entity.getId(),

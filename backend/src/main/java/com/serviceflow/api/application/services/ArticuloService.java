@@ -28,6 +28,10 @@ public class ArticuloService {
         return articuloRepository.findAllActive();
     }
 
+    public List<Articulo> listInactive() {
+        return articuloRepository.findAllInactive();
+    }
+
     public Articulo findById(UUID id) {
         return articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
