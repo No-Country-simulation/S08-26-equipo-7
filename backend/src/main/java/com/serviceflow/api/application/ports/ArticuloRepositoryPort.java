@@ -17,4 +17,6 @@ public interface ArticuloRepositoryPort {
     List<Articulo> findAllInactive();
 
     void deleteById(UUID id);
+
+    void incrementarVisualizaciones(UUID id);
 }
