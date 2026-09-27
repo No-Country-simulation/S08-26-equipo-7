@@ -4,8 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +29,10 @@ public class ArticuloEntity {
 
     @Column(nullable = false, length = 50)
     private String categoria;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "layout_config", columnDefinition = "jsonb", nullable = false)
+    private Map<String, Object> layoutConfig;
 
     @Column(nullable = false)
     private long visualizaciones;
@@ -51,11 +58,20 @@ public class ArticuloEntity {
     public ArticuloEntity(UUID id, String titulo, String descripcion, String contenido, String categoria,
                           long visualizaciones, long megusta, long nomegusta,
                           boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this(id, titulo, descripcion, contenido, categoria, null,
+                visualizaciones, megusta, nomegusta, activo, createdAt, updatedAt);
+    }
+
+    public ArticuloEntity(UUID id, String titulo, String descripcion, String contenido, String categoria,
+                          Map<String, Object> layoutConfig,
+                          long visualizaciones, long megusta, long nomegusta,
+                          boolean activo, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.contenido = contenido;
         this.categoria = categoria;
+        this.layoutConfig = layoutConfig != null ? layoutConfig : new java.util.HashMap<>();
         this.visualizaciones = visualizaciones;
         this.megusta = megusta;
         this.nomegusta = nomegusta;
@@ -78,6 +94,9 @@ public class ArticuloEntity {
 
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
+
+    public Map<String, Object> getLayoutConfig() { return layoutConfig; }
+    public void setLayoutConfig(Map<String, Object> layoutConfig) { this.layoutConfig = layoutConfig; }
 
     public long getVisualizaciones() { return visualizaciones; }
     public void setVisualizaciones(long visualizaciones) { this.visualizaciones = visualizaciones; }

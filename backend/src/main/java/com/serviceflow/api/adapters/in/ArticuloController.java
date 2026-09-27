@@ -163,7 +163,8 @@ public class ArticuloController {
     public ResponseEntity<?> create(@RequestBody CreateArticleRequest request) {
         try {
             Articulo created = articuloService.create(
-                    request.titulo(), request.descripcion(), request.contenido(), request.categoria()
+                    request.titulo(), request.descripcion(), request.contenido(), request.categoria(),
+                    request.layoutConfig()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(ArticuloResponse.from(created));
         } catch (IllegalArgumentException e) {
@@ -176,7 +177,7 @@ public class ArticuloController {
         try {
             Articulo updated = articuloService.update(
                     id, request.titulo(), request.descripcion(), request.contenido(),
-                    request.categoria(), request.activo()
+                    request.categoria(), request.activo(), request.layoutConfig()
             );
             return ResponseEntity.ok(ArticuloResponse.from(updated));
         } catch (ArticuloNotFoundException e) {
@@ -184,10 +185,12 @@ public class ArticuloController {
         }
     }
 
-    public record CreateArticleRequest(String titulo, String descripcion, String contenido, String categoria) {
+    public record CreateArticleRequest(String titulo, String descripcion, String contenido, String categoria,
+                                       java.util.Map<String, Object> layoutConfig) {
     }
 
     public record UpdateArticleRequest(String titulo, String descripcion, String contenido,
-                                       String categoria, Boolean activo) {
+                                       String categoria, Boolean activo,
+                                       java.util.Map<String, Object> layoutConfig) {
     }
 }

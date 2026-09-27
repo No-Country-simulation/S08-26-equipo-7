@@ -25,7 +25,7 @@ function getCookie(name) {
 }
 
 function requiresCsrf(method) {
-  return method === "POST";
+  return ["POST", "PUT", "PATCH", "DELETE"].includes(method);
 }
 
 async function ensureCsrfToken() {
@@ -48,6 +48,12 @@ async function ensureCsrfToken() {
           );
         }
 
+        try {
+          document.cookie = `XSRF-TOKEN=${csrfToken}; path=/; samesite=lax`;
+        } catch (e) {
+          console.warn("No se pudo escribir la cookie CSRF localmente", e);
+        }
+
         return csrfToken;
       })
       .finally(() => {
@@ -62,7 +68,7 @@ export function initializeCsrfToken() {
   return ensureCsrfToken();
 }
 
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint, options = {}, isRetry = false) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
   const needsCsrf = requiresCsrf(method);
@@ -73,6 +79,7 @@ export async function apiRequest(endpoint, options = {}) {
 
     // TEMPORAL: elimina esta línea para desactivar completamente el delay simulado.
     await waitForApiDelay();
+    
     response = await fetch(buildUrl(endpoint), {
       ...requestOptions,
       credentials: "include",
@@ -83,10 +90,21 @@ export async function apiRequest(endpoint, options = {}) {
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-  } catch {
+  } catch (error) {
     throw new Error(
-      "No se pudo conectar con el servidor. Comprueba que la API esté encendida y que el origen del frontend esté permitido.",
+      "No se pudo conectar con el servidor. Comprueba que la API esté encendida y que el origen del frontend esté permitido." + error.message,
     );
+  }
+
+  if (response.status === 403 && needsCsrf && !isRetry) {
+    console.warn("Token CSRF rechazado o caducado. Forzando renovación y reintento...");
+    try {
+      document.cookie = "XSRF-TOKEN=; Max-Age=0; path=/;";
+    } catch (e) {
+      console.warn("No se pudo limpiar la cookie CSRF localmente", e);
+    }
+    csrfTokenPromise = null;
+    return apiRequest(endpoint, options, true);
   }
 
   const data = await response.json().catch(() => null);

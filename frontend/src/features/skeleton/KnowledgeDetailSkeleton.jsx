@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function KnowledgeDetailSkeleton() {
   return (
     <div
-      className="bg-card border-border space-y-4 rounded-lg border p-6 shadow-md"
+      className="bg-card border-border space-y-4 my-4 rounded-lg border p-6 shadow-md"
       role="status"
       aria-label="Cargando artículo"
     >

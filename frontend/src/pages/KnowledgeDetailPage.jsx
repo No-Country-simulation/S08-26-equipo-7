@@ -1,4 +1,4 @@
-import KnowledgeDetail from "@/features/knowledge/KnowledgeDetail";
+import KnowledgeDetail from "@/features/knowledge/components/KnowledgeDetail";
 
 export default function KnowledgeDetailPage() {
   return (

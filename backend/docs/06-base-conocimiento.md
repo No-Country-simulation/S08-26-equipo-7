@@ -30,7 +30,12 @@ Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por
     "titulo": "Cómo conectar y configurar la VPN corporativa GlobalProtect",
     "descripcion": "Guía paso a paso para autenticación multifactor...",
     "categoria": "IT",
+    "layoutConfig": { "blocks": [...] },
     "visualizaciones": 1402,
+    "megusta": 42,
+    "nomegusta": 3,
+    "satisfaccion": 93.33,
+    "tiempoLecturaMin": 5,
     "activo": true
   }
 ]
@@ -38,7 +43,7 @@ Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por
 
 ## GET /knowledge/{id}
 
-Trae un artículo por ID (con su `contenido`). **Público**. `404` si no existe.
+Trae un artículo por ID (con su `contenido` y `layoutConfig`). **Público**. `404` si no existe.
 
 ## POST /knowledge/{id}/view
 
@@ -92,19 +97,19 @@ Quita el voto del usuario. Requiere login (cualquier rol) y CSRF. Devuelve el re
 Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF.
 
 ```json
-// body
-{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT" }
+// body (layoutConfig opcional: layout del editor de bloques, se guarda tal cual)
+{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] } }
 ```
 
-`201` con el artículo creado.
+`201` con el artículo creado (incluye `layoutConfig`, `{}` si no se mandó).
 
 ## PUT /knowledge/{id}
 
-Edita un artículo (títulos, descripción, contenido, categoría o `activo`). **Solo ADMIN**. Requiere CSRF.
+Edita un artículo (títulos, descripción, contenido, categoría, `layoutConfig` o `activo`). **Solo ADMIN**. Requiere CSRF.
 
 ```json
-// body (todos opcionales, parcialmente)
-{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "activo": false }
+// body (todos opcionales, parcialmente; layoutConfig reemplaza si se manda, `{}` lo limpia)
+{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "activo": false }
 ```
 
 `200` con el artículo actualizado. `404` si no existe.
