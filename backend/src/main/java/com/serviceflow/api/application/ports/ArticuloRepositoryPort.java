@@ -15,4 +15,6 @@ public interface ArticuloRepositoryPort {
     List<Articulo> findAllActive();
 
     List<Articulo> findAllInactive();
+
+    void deleteById(UUID id);
 }

@@ -119,3 +119,7 @@ Edita un artículo (títulos, descripción, contenido, categoría, `layoutConfig
 ```
 
 `200` con el artículo actualizado. `404` si no existe.
+
+## DELETE /knowledge/{id}
+
+Elimina un artículo (y sus votos en cascada). **Solo ADMIN**. Requiere CSRF. `404` si no existe.

@@ -55,6 +55,11 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
         return jpaRepository.findByActivoFalseOrderByUpdatedAtDesc().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
+
     private Articulo toDomain(ArticuloEntity entity) {
         return new Articulo(
                 entity.getId(),

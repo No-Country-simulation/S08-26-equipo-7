@@ -91,6 +91,12 @@ public class ArticuloService {
         ));
     }
 
+    public void delete(UUID id) {
+        articuloRepository.findById(id)
+                .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
+        articuloRepository.deleteById(id);
+    }
+
     public long registerView(UUID id) {
         Articulo existing = articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
@@ -150,15 +156,19 @@ public class ArticuloService {
             throw new IllegalArgumentException("megusta es requerido (true/false)");
         }
         Optional<ArticuloVoto> existente = articuloVotoRepository.findByArticuloIdAndUsuarioId(articuloId, usuarioId);
+        ArticuloVoto guardado;
         if (existente.isPresent()) {
             ArticuloVoto v = existente.get();
-            return articuloVotoRepository.save(new ArticuloVoto(
+            guardado = articuloVotoRepository.save(new ArticuloVoto(
                     v.getId(), articuloId, usuarioId, megusta, v.getCreadoEn(), LocalDateTime.now()));
+        } else {
+            ArticuloVoto nuevo = new ArticuloVoto(
+                    null, articuloId, usuarioId, megusta, null, null
+            );
+            guardado = articuloVotoRepository.save(nuevo);
         }
-        ArticuloVoto nuevo = new ArticuloVoto(
-                null, articuloId, usuarioId, megusta, null, null
-        );
-        return articuloVotoRepository.save(nuevo);
+        sincronizarContadores(articuloId);
+        return guardado;
     }
 
     public Optional<ArticuloVoto> obtenerVotoUsuario(UUID articuloId, UUID usuarioId) {
@@ -176,5 +186,21 @@ public class ArticuloService {
     @Transactional
     public void quitarVoto(UUID articuloId, UUID usuarioId) {
         articuloVotoRepository.deleteByArticuloIdAndUsuarioId(articuloId, usuarioId);
+        sincronizarContadores(articuloId);
+    }
+
+    private void sincronizarContadores(UUID articuloId) {
+        Articulo a = articuloRepository.findById(articuloId).orElse(null);
+        if (a == null) {
+            return;
+        }
+        articuloRepository.save(new Articulo(
+                a.getId(), a.getTitulo(), a.getDescripcion(), a.getContenido(), a.getCategoria(),
+                a.getLayoutConfig(), a.getTiempoLecturaMinGuardado(),
+                a.getVisualizaciones(),
+                articuloVotoRepository.countMegusta(articuloId),
+                articuloVotoRepository.countNoMegusta(articuloId),
+                a.isActivo(), a.getCreatedAt(), LocalDateTime.now()
+        ));
     }
 }
