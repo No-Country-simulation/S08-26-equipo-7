@@ -164,6 +164,16 @@ public class ArticuloController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
+        try {
+            articuloService.delete(id);
+            return ResponseEntity.ok(Map.of("message", "Artículo eliminado"));
+        } catch (ArticuloNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     public record VotarRequest(boolean megusta) {
     }
 
