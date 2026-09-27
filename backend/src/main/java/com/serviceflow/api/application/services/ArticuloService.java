@@ -97,44 +97,14 @@ public class ArticuloService {
         articuloRepository.deleteById(id);
     }
 
+    @Transactional
     public long registerView(UUID id) {
-        Articulo existing = articuloRepository.findById(id)
+        articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
-        Articulo updated = articuloRepository.save(new Articulo(
-                existing.getId(),
-                existing.getTitulo(),
-                existing.getDescripcion(),
-                existing.getContenido(),
-                existing.getCategoria(),
-                existing.getVisualizaciones() + 1,
-                existing.getMegusta(),
-                existing.getNomegusta(),
-                existing.isActivo(),
-                existing.getCreatedAt(),
-                LocalDateTime.now()
-        ));
-        return updated.getVisualizaciones();
-    }
-
-    public Articulo registrarVoto(UUID id, boolean megusta) {
-        Articulo existing = articuloRepository.findById(id)
-                .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
-        long nuevoMegusta = existing.getMegusta() + (megusta ? 1 : 0);
-        long nuevoNomegusta = existing.getNomegusta() + (megusta ? 0 : 1);
-        Articulo updated = articuloRepository.save(new Articulo(
-                existing.getId(),
-                existing.getTitulo(),
-                existing.getDescripcion(),
-                existing.getContenido(),
-                existing.getCategoria(),
-                existing.getVisualizaciones(),
-                nuevoMegusta,
-                nuevoNomegusta,
-                existing.isActivo(),
-                existing.getCreatedAt(),
-                LocalDateTime.now()
-        ));
-        return updated;
+        articuloRepository.incrementarVisualizaciones(id);
+        return articuloRepository.findById(id)
+                .orElseThrow(() -> new ArticuloNotFoundException("Article not found"))
+                .getVisualizaciones();
     }
 
     public double calcularSatisfaccion(Articulo articulo) {

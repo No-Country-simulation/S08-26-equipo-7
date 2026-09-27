@@ -51,7 +51,7 @@ Trae un artículo por ID (con su `contenido` y `layoutConfig`). **Público**. `4
 
 ## POST /knowledge/{id}/view
 
-Incrementa en 1 las `visualizaciones` del artículo. **Público** y sin CSRF (es un contador de clics).
+Incrementa en 1 las `visualizaciones` del artículo con UPDATE atómico (no toca ningún otro campo ni `actualizadoEn`). **Público** y sin CSRF (es un contador de clics).
 
 ```json
 // respuesta 200

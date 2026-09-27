@@ -60,6 +60,11 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
         jpaRepository.deleteById(id);
     }
 
+    @Override
+    public void incrementarVisualizaciones(UUID id) {
+        jpaRepository.incrementarVisualizaciones(id);
+    }
+
     private Articulo toDomain(ArticuloEntity entity) {
         return new Articulo(
                 entity.getId(),
