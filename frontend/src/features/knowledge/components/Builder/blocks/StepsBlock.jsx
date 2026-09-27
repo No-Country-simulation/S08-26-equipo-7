@@ -1,36 +1,45 @@
-import { ListOrdered, Plus,Trash2 } from "lucide-react";
+import { ListOrdered, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useKnowledgeContext } from "@/features/knowledge/context/KnowledgeContext";
 
-export default function StepsBlock({ block, colKey, isEditing, onDelete, onUpdate }) {
+export default function StepsBlock({ block, colKey }) {
+  const { isEditing, handleDeleteBlock, handleUpdateBlockField } =
+    useKnowledgeContext();
+
   return (
-    <div className="bg-card border-border rounded-lg p-5 border shadow-sm group">
-      {/* Botón de eliminar bloque en modo edición */}
+    <div className="bg-card border-border group rounded-lg border p-5 shadow-sm">
       {isEditing && (
         <div className="flex justify-end pb-4">
           <button
             type="button"
-            onClick={() => onDelete(colKey, block.id)}
+            onClick={() => handleDeleteBlock(colKey, block.id)}
             className="text-muted-foreground hover:text-destructive cursor-pointer transition-colors"
             title="Eliminar bloque"
           >
-            <Trash2 size={14}  />
+            <Trash2 size={14} />
           </button>
         </div>
       )}
 
       <div>
-        {/* Cabecera del bloque */}
-        <div className="flex items-center justify-between mb-3 w-full">
-          <h3 className="font-bold text-sm text-primary flex items-center gap-2">
-            <ListOrdered size={16} /> 
+        <div className="mb-3 flex w-full items-center justify-between">
+          <h3 className="text-primary flex items-center gap-2 text-sm font-bold">
+            <ListOrdered size={16} />
             {isEditing ? (
               <Input
                 type="text"
                 value={block.title}
-                onChange={(e) => onUpdate(colKey, block.id, 'title', e.target.value)}
-                className="h-8 text-xs font-bold w-full"
+                onChange={(e) =>
+                  handleUpdateBlockField(
+                    colKey,
+                    block.id,
+                    "title",
+                    e.target.value,
+                  )
+                }
+                className="h-8 w-full text-xs font-bold"
               />
             ) : (
               block.title
@@ -38,27 +47,26 @@ export default function StepsBlock({ block, colKey, isEditing, onDelete, onUpdat
           </h3>
         </div>
 
-        {/* Lista de elementos / pasos */}
         <ol className="list-inside list-decimal space-y-2">
-          {block.items?.map((step, idx) => (
+          {block.items?.map((step, idx) =>
             isEditing ? (
-              <div key={idx} className="flex items-center gap-2 my-1">
+              <div key={idx} className="my-1 flex items-center gap-2">
                 <Input
                   type="text"
                   value={step}
                   onChange={(e) => {
                     const newItems = [...block.items];
                     newItems[idx] = e.target.value;
-                    onUpdate(colKey, block.id, 'items', newItems);
+                    handleUpdateBlockField(colKey, block.id, "items", newItems);
                   }}
-                  className="w-full text-xs h-8"
+                  className="h-8 w-full text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => {
                     const newItems = [...block.items];
                     newItems.splice(idx, 1);
-                    onUpdate(colKey, block.id, 'items', newItems);
+                    handleUpdateBlockField(colKey, block.id, "items", newItems);
                   }}
                   className="text-muted-foreground hover:text-destructive cursor-pointer transition-colors"
                   title="Eliminar paso"
@@ -67,20 +75,27 @@ export default function StepsBlock({ block, colKey, isEditing, onDelete, onUpdat
                 </button>
               </div>
             ) : (
-              <li key={idx} className="text-muted-foreground text-sm leading-relaxed">{step}</li>
-            )
-          ))}
+              <li
+                key={idx}
+                className="text-muted-foreground text-sm leading-relaxed"
+              >
+                {step}
+              </li>
+            ),
+          )}
         </ol>
 
-        {/* Botón para añadir un nuevo paso en edición */}
         {isEditing && (
           <Button
             variant="outline"
             size="sm"
-            className="mt-3 text-xs h-8"
+            className="mt-3 h-8 text-xs"
             onClick={() => {
-              const newItems = [...(block.items || []), "Nuevo paso descriptivo"];
-              onUpdate(colKey, block.id, 'items', newItems);
+              const newItems = [
+                ...(block.items || []),
+                "Nuevo paso descriptivo",
+              ];
+              handleUpdateBlockField(colKey, block.id, "items", newItems);
             }}
           >
             <Plus /> Añadir paso

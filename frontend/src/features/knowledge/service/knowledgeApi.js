@@ -34,3 +34,22 @@ export async function deleteKnowledge(id) {
     method: "DELETE",
   });
 }
+
+export async function voteKnowledge(id, megusta) {
+  return apiRequest(`/knowledge/${id}/votar`, {
+    method: "POST",
+    body: { megusta },
+  });
+}
+
+export async function getMyKnowledgeVote(id) {
+  return apiRequest(`/knowledge/${id}/mi-voto`, {
+    method: "GET",
+  });
+}
+
+export async function removeKnowledgeVote(id) {
+  return apiRequest(`/knowledge/${id}/votar`, {
+    method: "DELETE",
+  });
+}

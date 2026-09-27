@@ -1,28 +1,124 @@
-import { ThumbsDown,ThumbsUp } from "lucide-react";
+import { Loader2, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useKnowledgeContext } from "@/features/knowledge/context/KnowledgeContext";
+import {
+  removeKnowledgeVote,
+  voteKnowledge,
+} from "@/features/knowledge/service/knowledgeApi";
 import CreateDialog from "@/features/tickets/components/dialogs/CreateDialog";
 
-export default function KnowledgeFeedback({ megusta = 0, nomegusta = 0 }) {
+export default function KnowledgeFeedback() {
+  const { id: articleId } = useParams();
+  const { editForm, userVote } = useKnowledgeContext();
+  const [megusta, setMegusta] = useState(editForm?.megusta || 0);
+  const [nomegusta, setNomegusta] = useState(editForm?.nomegusta || 0);
+  const [miVoto, setMiVoto] = useState(userVote);
+  const [isLoading, setIsLoading] = useState(false);
+
   const totalVotes = megusta + nomegusta;
-  const satisfaccion = totalVotes > 0 ? Math.round((megusta / totalVotes) * 100) : 0;
+  const satisfaccion =
+    totalVotes > 0 ? Math.round((megusta / totalVotes) * 100) : 0;
+
+  const handleVote = async (nuevoVoto) => {
+    if (!articleId || articleId === "new") {
+      toast.error("Guarda el artículo antes de emitir votos.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      if (miVoto === nuevoVoto) {
+        const response = await removeKnowledgeVote(articleId);
+        setMiVoto(null);
+
+        if (response && typeof response.megusta === "number") {
+          setMegusta(response.megusta);
+          setNomegusta(response.nomegusta);
+        } else {
+          if (nuevoVoto === true) setMegusta((prev) => Math.max(0, prev - 1));
+          else setNomegusta((prev) => Math.max(0, prev - 1));
+        }
+
+        toast.success("Voto retirado", {
+          className: "bg-foreground! dark:bg-background! text-white!",
+        });
+      } else {
+        const response = await voteKnowledge(articleId, nuevoVoto);
+        setMiVoto(nuevoVoto);
+
+        if (response) {
+          setMegusta(response.megusta ?? megusta);
+          setNomegusta(response.nomegusta ?? nomegusta);
+        }
+
+        toast.success(
+          nuevoVoto
+            ? "¡Gracias por tu feedback positivo!"
+            : "Voto registrado. Ayúdanos creando un ticket.",
+          { className: "bg-foreground! dark:bg-background! text-white!" },
+        );
+      }
+    } catch (error) {
+      console.error("Error al procesar el voto:", error);
+      toast.error("No se pudo procesar tu voto. Inténtalo de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-card border-border rounded-lg border px-6 py-5 shadow-md flex flex-col sm:flex-row items-center justify-between space-y-2">
+    <div className="bg-card border-border flex flex-col items-center justify-between space-y-2 rounded-lg border px-6 py-5 shadow-md sm:flex-row">
       <div className="flex flex-col">
-        <p className="font-semibold text-sm">¿Resolvió su requerimiento?</p>
+        <p className="text-sm font-semibold">¿Resolvió su requerimiento?</p>
         <p className="text-muted-foreground/70 text-xs">
           {satisfaccion}% efectividad ({totalVotes} votos confirmados)
         </p>
       </div>
+
       <div className="flex space-x-2">
-        <Button variant="outline" size="sm" className="bg-muted cursor-pointer gap-1">
-          <ThumbsUp className="text-success" size={14} /> Sí
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isLoading}
+          onClick={() => handleVote(true)}
+          className={`cursor-pointer gap-1 transition-all ${
+            miVoto === true
+              ? "bg-success/20 text-success border-success hover:bg-success/30 font-bold"
+              : "bg-muted hover:bg-muted/80"
+          }`}
+        >
+          {isLoading ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <ThumbsUp className="text-success" size={14} />
+          )}
+          Sí
         </Button>
+
         <CreateDialog
           trigger={
-            <Button variant="outline" size="sm" className="bg-muted cursor-pointer gap-1">
-              <ThumbsDown className="text-destructive" size={14} /> Ticket
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isLoading}
+              onClick={() => handleVote(false)}
+              className={`cursor-pointer gap-1 transition-all ${
+                miVoto === false
+                  ? "bg-destructive/20 text-destructive border-destructive hover:bg-destructive/30 font-bold"
+                  : "bg-muted hover:bg-muted/80"
+              }`}
+            >
+              {isLoading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <ThumbsDown className="text-destructive" size={14} />
+              )}
+              Ticket
             </Button>
           }
         />

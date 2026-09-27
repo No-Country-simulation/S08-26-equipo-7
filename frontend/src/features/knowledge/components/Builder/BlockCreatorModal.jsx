@@ -10,8 +10,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useKnowledgeContext } from "@/features/knowledge/context/KnowledgeContext";
 
-export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
+export default function BlockCreatorModal({ columnKey }) {
+  const { setActiveWizardColumn, handleCreateBlockFromModal } = useKnowledgeContext();
+
   const [blockType, setBlockType] = useState("steps");
   const [title, setTitle] = useState("Nuevo Menú");
   const [detail, setDetail] = useState("");
@@ -32,7 +35,7 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    onCreate(columnKey, {
+    handleCreateBlockFromModal(columnKey, {
       type: blockType,
       title: title,
       initialContent: detail
@@ -41,7 +44,6 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
 
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-xl space-y-4 relative">
-      
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h4 className="font-bold text-sm text-primary flex items-center gap-2">
           <Sparkles size={16} className="text-primary" />
@@ -49,7 +51,7 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
         </h4>
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => setActiveWizardColumn(null)}
           className="text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X size={18} />
@@ -57,13 +59,10 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        
         <div>
           <label htmlFor="select-components" className="block text-[11px] font-bold text-muted-foreground uppercase mb-1">
             Tipo de Componente:
           </label>
-          
-          {/* Componente Select oficial de Shadcn UI */}
           <Select value={blockType} onValueChange={handleSelectType}>
             <SelectTrigger id="select-components" className="w-full text-xs h-9 border border-border">
               <SelectValue placeholder="Seleccione tipo" />
@@ -107,8 +106,9 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
 
         <div className="flex items-center justify-end gap-2 pt-2 flex-wrap">
           <Button
+            type="button"
             size="sm"
-            onClick={onClose}
+            onClick={() => setActiveWizardColumn(null)}
             className="rounded-lg text-xs font-semibold bg-destructive text-white py-4 hover:bg-destructive/90"
           >
             Cancelar
@@ -121,7 +121,6 @@ export default function BlockCreatorModal({ columnKey, onClose, onCreate }) {
             Crear y Añadir Bloque
           </Button>
         </div>
-
       </form>
     </div>
   );

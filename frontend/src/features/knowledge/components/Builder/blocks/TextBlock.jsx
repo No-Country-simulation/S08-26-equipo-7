@@ -2,16 +2,18 @@ import { Trash2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useKnowledgeContext } from "@/features/knowledge/context/KnowledgeContext";
 
-export default function TextBlock({ block, colKey, isEditing, onDelete, onUpdate }) {
+export default function TextBlock({ block, colKey }) {
+  const { isEditing, handleDeleteBlock, handleUpdateBlockField } = useKnowledgeContext();
+
   return (
     <div className="bg-card border-border rounded-lg p-5 border shadow-sm group">
-      {/* Botón de eliminar bloque en modo edición */}
       {isEditing && (
         <div className="flex justify-end pb-4">
           <button
             type="button"
-            onClick={() => onDelete(colKey, block.id)}
+            onClick={() => handleDeleteBlock(colKey, block.id)}
             className="text-muted-foreground hover:text-destructive cursor-pointer transition-colors"
             title="Eliminar bloque"
           >
@@ -20,15 +22,13 @@ export default function TextBlock({ block, colKey, isEditing, onDelete, onUpdate
         </div>
       )}
 
-      {/* Contenedor del bloque de texto */}
       <div className="space-y-3">
-        {/* Título opcional de la sección de texto */}
         <div className="flex items-center gap-2">
           {isEditing ? (
             <Input
               type="text"
               value={block.title || ""}
-              onChange={(e) => onUpdate(colKey, block.id, 'title', e.target.value)}
+              onChange={(e) => handleUpdateBlockField(colKey, block.id, 'title', e.target.value)}
               placeholder="Título del párrafo (Opcional)..."
               className="h-8 text-xs font-bold w-full"
             />
@@ -37,11 +37,10 @@ export default function TextBlock({ block, colKey, isEditing, onDelete, onUpdate
           )}
         </div>
 
-        {/* Contenido / Párrafo */}
         {isEditing ? (
           <Textarea
             value={block.content || ""}
-            onChange={(e) => onUpdate(colKey, block.id, 'content', e.target.value)}
+            onChange={(e) => handleUpdateBlockField(colKey, block.id, 'content', e.target.value)}
             className="w-full text-xs sm:text-sm resize-none bg-background leading-relaxed"
             rows={4}
             placeholder="Escribe el contenido del texto aquí..."

@@ -25,7 +25,6 @@ function getCookie(name) {
 }
 
 function requiresCsrf(method) {
-  // Incluye todos los métodos que alteran datos en el servidor
   return ["POST", "PUT", "PATCH", "DELETE"].includes(method);
 }
 
@@ -41,7 +40,6 @@ async function ensureCsrfToken() {
     })
       .then(async (response) => {
         const data = await response.json().catch(() => null);
-        // Captura el token ya sea de la cookie que llegó o del JSON del backend ({ token: "..." })
         const csrfToken = getCookie("XSRF-TOKEN") || data?.token;
 
         if (!response.ok || !csrfToken) {
@@ -50,7 +48,6 @@ async function ensureCsrfToken() {
           );
         }
 
-        // Respaldo defensivo: si el token vino por JSON, lo seteamos en las cookies locales del navegador
         try {
           document.cookie = `XSRF-TOKEN=${csrfToken}; path=/; samesite=lax`;
         } catch (e) {
@@ -71,7 +68,7 @@ export function initializeCsrfToken() {
   return ensureCsrfToken();
 }
 
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint, options = {}, isRetry = false) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
   const needsCsrf = requiresCsrf(method);
@@ -82,6 +79,7 @@ export async function apiRequest(endpoint, options = {}) {
 
     // TEMPORAL: elimina esta línea para desactivar completamente el delay simulado.
     await waitForApiDelay();
+    
     response = await fetch(buildUrl(endpoint), {
       ...requestOptions,
       credentials: "include",
@@ -92,10 +90,21 @@ export async function apiRequest(endpoint, options = {}) {
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-  } catch {
+  } catch (error) {
     throw new Error(
-      "No se pudo conectar con el servidor. Comprueba que la API esté encendida y que el origen del frontend esté permitido.",
+      "No se pudo conectar con el servidor. Comprueba que la API esté encendida y que el origen del frontend esté permitido." + error.message,
     );
+  }
+
+  if (response.status === 403 && needsCsrf && !isRetry) {
+    console.warn("Token CSRF rechazado o caducado. Forzando renovación y reintento...");
+    try {
+      document.cookie = "XSRF-TOKEN=; Max-Age=0; path=/;";
+    } catch (e) {
+      console.warn("No se pudo limpiar la cookie CSRF localmente", e);
+    }
+    csrfTokenPromise = null;
+    return apiRequest(endpoint, options, true);
   }
 
   const data = await response.json().catch(() => null);

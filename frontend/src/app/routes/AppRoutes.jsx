@@ -37,6 +37,7 @@ export default function AppRoutes() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/knowledge" element={<KnowledgePage />} />
+          <Route path="/knowledge/new" element={<KnowledgeDetailPage />} />
           <Route path="/knowledge/:id" element={<KnowledgeDetailPage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
         </Route>
