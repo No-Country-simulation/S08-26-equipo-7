@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -49,17 +50,24 @@ public class ArticuloController {
 
     private int tiempoLecturaMin(UUID id) {
         try {
-            Articulo articulo = articuloService.findById(id);
-            String contenido = articulo.getContenido();
-            int palabras = contenido != null && !contenido.isBlank() ? contenido.trim().split("\\s+").length : 0;
-            return Math.max(1, (int) Math.ceil(palabras / 200.0));
+            return articuloService.findById(id).tiempoLecturaMin();
         } catch (ArticuloNotFoundException e) {
             return 1;
         }
     }
 
     @GetMapping
-    public ResponseEntity<?> listActive() {
+    public ResponseEntity<?> listActive(@RequestParam(required = false) Boolean active) {
+        if (active != null && !active) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UsuarioAutenticado user)
+                    || !"ADMIN".equals(user.role())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Forbidden: insufficient role"));
+            }
+            List<ArticuloResponse> response = articuloService.listInactive().stream()
+                    .map(ArticuloResponse::from).toList();
+            return ResponseEntity.ok(response);
+        }
         List<ArticuloResponse> response = articuloService.listActive().stream()
                 .map(ArticuloResponse::from).toList();
         return ResponseEntity.ok(response);
@@ -156,6 +164,16 @@ public class ArticuloController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
+        try {
+            articuloService.delete(id);
+            return ResponseEntity.ok(Map.of("message", "Artículo eliminado"));
+        } catch (ArticuloNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     public record VotarRequest(boolean megusta) {
     }
 
@@ -164,7 +182,7 @@ public class ArticuloController {
         try {
             Articulo created = articuloService.create(
                     request.titulo(), request.descripcion(), request.contenido(), request.categoria(),
-                    request.layoutConfig()
+                    request.layoutConfig(), request.tiempoLecturaMin()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(ArticuloResponse.from(created));
         } catch (IllegalArgumentException e) {
@@ -177,7 +195,7 @@ public class ArticuloController {
         try {
             Articulo updated = articuloService.update(
                     id, request.titulo(), request.descripcion(), request.contenido(),
-                    request.categoria(), request.activo(), request.layoutConfig()
+                    request.categoria(), request.activo(), request.layoutConfig(), request.tiempoLecturaMin()
             );
             return ResponseEntity.ok(ArticuloResponse.from(updated));
         } catch (ArticuloNotFoundException e) {
@@ -186,11 +204,11 @@ public class ArticuloController {
     }
 
     public record CreateArticleRequest(String titulo, String descripcion, String contenido, String categoria,
-                                       java.util.Map<String, Object> layoutConfig) {
+                                       java.util.Map<String, Object> layoutConfig, Integer tiempoLecturaMin) {
     }
 
     public record UpdateArticleRequest(String titulo, String descripcion, String contenido,
                                        String categoria, Boolean activo,
-                                       java.util.Map<String, Object> layoutConfig) {
+                                       java.util.Map<String, Object> layoutConfig, Integer tiempoLecturaMin) {
     }
 }

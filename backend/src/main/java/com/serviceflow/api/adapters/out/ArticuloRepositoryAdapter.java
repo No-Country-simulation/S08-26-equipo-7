@@ -29,6 +29,7 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
                 articulo.getContenido(),
                 articulo.getCategoria(),
                 articulo.getLayoutConfig(),
+                articulo.getTiempoLecturaMinGuardado(),
                 articulo.getVisualizaciones(),
                 articulo.getMegusta(),
                 articulo.getNomegusta(),
@@ -49,6 +50,16 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
         return jpaRepository.findByActivoTrueOrderByUpdatedAtDesc().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public List<Articulo> findAllInactive() {
+        return jpaRepository.findByActivoFalseOrderByUpdatedAtDesc().stream().map(this::toDomain).toList();
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
+
     private Articulo toDomain(ArticuloEntity entity) {
         return new Articulo(
                 entity.getId(),
@@ -57,6 +68,7 @@ public class ArticuloRepositoryAdapter implements ArticuloRepositoryPort {
                 entity.getContenido(),
                 entity.getCategoria(),
                 entity.getLayoutConfig(),
+                entity.getTiempoLecturaMin(),
                 entity.getVisualizaciones(),
                 entity.getMegusta(),
                 entity.getNomegusta(),
