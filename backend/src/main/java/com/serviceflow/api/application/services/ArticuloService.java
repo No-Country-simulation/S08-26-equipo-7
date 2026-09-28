@@ -170,7 +170,7 @@ public class ArticuloService {
                 a.getVisualizaciones(),
                 articuloVotoRepository.countMegusta(articuloId),
                 articuloVotoRepository.countNoMegusta(articuloId),
-                a.isActivo(), a.getCreatedAt(), LocalDateTime.now()
+                a.isActivo(), a.getCreatedAt(), a.getUpdatedAt()
         ));
     }
 }
