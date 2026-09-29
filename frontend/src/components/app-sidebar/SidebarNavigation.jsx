@@ -2,7 +2,6 @@ import {
   BookOpen,
   FolderKanban,
   House,
-  LogOut,
   SquareCheckBig,
   Ticket,
   Users,
@@ -14,7 +13,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 
 import SidebarMenuItemLink from "./SidebarMenuItemLink";
 
@@ -52,7 +50,6 @@ const navigationItems = [
 ];
 
 export default function SidebarNavigation() {
-  const { logoutContext } = useAuth();
   const location = useLocation();
 
   return (
@@ -72,13 +69,6 @@ export default function SidebarNavigation() {
             </SidebarMenuItem>
           );
         })}
-        <SidebarMenuItem>
-          <SidebarMenuItemLink
-            icon={LogOut}
-            label="Cerrar sesión"
-            onClick={logoutContext}
-          />
-        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarContent>
   );

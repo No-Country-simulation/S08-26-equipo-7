@@ -10,7 +10,7 @@ export const useAuth = () => {
   }
 
   // Extraemos tanto el estado como las acciones del Provider
-  const { user, loading, loginContext, logoutContext } = context;
+  const { user, loading, logoutLoading, loginContext, logoutContext } = context;
 
   const isAdmin = user?.rol === "ADMIN";
   const isSupervisor = user?.rol === "SUPERVISOR";
@@ -20,6 +20,7 @@ export const useAuth = () => {
   return {
     user,
     loading,
+    logoutLoading,
     loginContext,
     logoutContext,
     isAdmin,
