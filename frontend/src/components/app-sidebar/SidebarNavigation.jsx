@@ -1,4 +1,12 @@
-import { BookOpen, House , LogOut, Ticket } from "lucide-react";
+import {
+  BookOpen,
+  FolderKanban,
+  House,
+  LogOut,
+  SquareCheckBig,
+  Ticket,
+  Users,
+} from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 import {
@@ -22,9 +30,24 @@ const navigationItems = [
     icon: Ticket,
   },
   {
-    label: "Base deConocimiento",
+    label: "Aprobaciones",
+    href: "/approvals",
+    icon: SquareCheckBig,
+  },
+  {
+    label: "Base de Conocimiento",
     href: "/knowledge",
     icon: BookOpen,
+  },
+  {
+    label: "Usuarios",
+    href: "/users",
+    icon: Users,
+  },
+  {
+    label: "Departamentos",
+    href: "/departments",
+    icon: FolderKanban,
   },
 ];
 

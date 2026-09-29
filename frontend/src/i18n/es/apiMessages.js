@@ -8,6 +8,7 @@ const API_MESSAGE_TRANSLATIONS = {
     "Demasiadas solicitudes. Inténtalo más tarde",
   "If the email exists, we will process the request":
     "Si el correo existe, procesaremos la solicitud",
+  "code and name are required": "El código y el nombre son obligatorios",
 };
 
 export function translateApiMessage(message, status) {
@@ -17,6 +18,10 @@ export function translateApiMessage(message, status) {
 
   if (API_MESSAGE_TRANSLATIONS[message]) {
     return API_MESSAGE_TRANSLATIONS[message];
+  }
+
+  if (message.startsWith("Category already exists:")) {
+    return "Ya existe un departamento con ese código";
   }
 
   if (message.startsWith("User not found with email:")) {
