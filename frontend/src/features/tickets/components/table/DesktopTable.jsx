@@ -1,5 +1,5 @@
-import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import {
   Table,
@@ -12,9 +12,11 @@ import {
 import PriorityBadge from "@/features/tickets/components/badges/PriorityBadge";
 import StatusBadge from "@/features/tickets/components/badges/StatusBadge";
 import Remaining from "@/features/tickets/components/sla/Remaining";
+import ActionCell from "@/features/tickets/components/table/ActionCell";
 import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 
-export default function DesktopTable({ tickets, resume }) {
+export default function DesktopTable({ tickets, resume, onApprove, onReject }) {
+  const location = useLocation();
   return (
     <Table>
       <TableHeader className="bg-muted-foreground/5">
@@ -51,15 +53,15 @@ export default function DesktopTable({ tickets, resume }) {
               <div className="flex flex-col">
                 <Link
                   to={`/tickets/${ticket.id}`}
-                  state={{ ticket }}
+                  state={{ ticket, from: location.pathname }}
                   className="text-primary focus-visible:ring-ring rounded-sm font-semibold underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {ticket.codigo}
                 </Link>
                 <Link
                   to={`/tickets/${ticket.id}`}
-                  state={{ ticket }}
-                  className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none whitespace-break-spaces"
+                  state={{ ticket, from: location.pathname }}
+                  className="focus-visible:ring-ring rounded-sm whitespace-break-spaces hover:underline focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {ticket.title}
                 </Link>
@@ -83,14 +85,11 @@ export default function DesktopTable({ tickets, resume }) {
               <StatusBadge status={ticket.grupoEstado} className="mt-1" />
             </TableCell>
             <TableCell className="flex justify-center">
-              {" "}
-              <Link
-                to={`/tickets/${ticket.id}`}
-                state={{ ticket }}
-                aria-label={`Ver detalles de ${ticket.codigo}`}
-              >
-                <ChevronRight aria-hidden="true" />
-              </Link>{" "}
+              <ActionCell
+                ticket={ticket}
+                onApprove={onApprove}
+                onReject={onReject}
+              />
             </TableCell>
           </TableRow>
         ))}

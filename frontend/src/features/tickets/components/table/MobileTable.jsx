@@ -1,13 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import PriorityBadge from "@/features/tickets/components/badges/PriorityBadge";
 import StatusBadge from "@/features/tickets/components/badges/StatusBadge";
 import Remaining from "@/features/tickets/components/sla/Remaining";
+import ActionCell from "@/features/tickets/components/table/ActionCell";
 import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 
-export default function MobileTable({ tickets, resume }) {
+export default function MobileTable({ tickets, resume, onApprove, onReject }) {
+  const location = useLocation();
   return (
     <Table>
       <TableBody className="border-border border">
@@ -21,14 +24,14 @@ export default function MobileTable({ tickets, resume }) {
                 <div className="flex flex-col">
                   <Link
                     to={`/tickets/${ticket.id}`}
-                    state={{ ticket }}
+                    state={{ ticket, from: location.pathname }}
                     className="text-primary focus-visible:ring-ring rounded-sm font-semibold underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
                   >
                     {ticket.codigo}
                   </Link>
                   <Link
                     to={`/tickets/${ticket.id}`}
-                    state={{ ticket }}
+                    state={{ ticket, from: location.pathname }}
                     className="focus-visible:ring-ring rounded-sm hover:underline focus-visible:ring-2 focus-visible:outline-none"
                   >
                     {ticket.title}
@@ -84,9 +87,12 @@ export default function MobileTable({ tickets, resume }) {
                 ACCIÓN
               </TableCell>
               <TableCell className="wrap-break-words text-primary border-border w-3/4 border-b-4 whitespace-normal">
-                <Link to={`/tickets/${ticket.id}`} state={{ ticket }}>
-                  Ver detalles
-                </Link>
+                <ActionCell
+                  ticket={ticket}
+                  onApprove={onApprove}
+                  onReject={onReject}
+                  mobileView={true}
+                />
               </TableCell>
             </TableRow>
           </React.Fragment>

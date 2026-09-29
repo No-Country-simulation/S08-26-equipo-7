@@ -13,7 +13,7 @@ import TableSkeleton from "@/features/skeleton/TableSkeleton";
 import TableManager from "@/features/tickets/components/table/TableManager";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
-export default function Table({ filters, offset = 0, onOffsetChange }) {
+export default function Table({ filters, offset = 0, onOffsetChange, onApprove, onReject }) {
   const {
     tickets,
     total = 0,
@@ -73,7 +73,7 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
   };
 
   return (
-    <div className="bg-card border-border my-4 rounded-lg border py-4 shadow-md">
+    <div className="bg-card border-border my-4 rounded-lg border pb-4 shadow-md">
       {loading && <TableSkeleton />}
       {error && tickets.length === 0 && (
         <div
@@ -103,7 +103,7 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
         </div>
       )}
       {!loading && tickets.length > 0 && (
-        <TableManager tickets={tickets} resume={false} />
+        <TableManager tickets={tickets} resume={false} onApprove={onApprove} onReject={onReject} />
       )}
 
       {!error && (
