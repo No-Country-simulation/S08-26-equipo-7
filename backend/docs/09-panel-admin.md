@@ -7,6 +7,7 @@ Todo lo que solo el `ADMIN` puede hacer, en un solo lugar. Todos requieren auten
 | Endpoint | Descripción |
 |---|---|
 | `POST /users` | Crear usuario. Body `{ "name", "email", "role", "password", "area" }` (`area` opcional; los `REQUESTER` no la necesitan) |
+| `PUT /users/{id}` | Editar usuario (todo opcional: `name`, `email`, `role`, `area`). Valida email único y rol |
 | `GET /users` | Listar todos (con `area`, nunca trae contraseña) |
 | `GET /users/agents?search=&area=` | Buscador de agentes para reasignar (autocompletar). `search` filtra por nombre/email, `area` por área. **ADMIN y SUPERVISOR** |
 | `POST /users/{id}/password` | El admin cambia la contraseña de cualquier usuario. Body `{ "newPassword" }` (mínimo 8) |
