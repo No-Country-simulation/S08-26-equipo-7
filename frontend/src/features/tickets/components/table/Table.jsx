@@ -11,9 +11,15 @@ import {
 } from "@/components/ui/pagination";
 import TableSkeleton from "@/features/skeleton/TableSkeleton";
 import TableManager from "@/features/tickets/components/table/TableManager";
+import {
+  useTicketFilters,
+  useTicketPagination,
+} from "@/features/tickets/context/TicketListContext";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
-export default function Table({ filters, offset = 0, onOffsetChange, onApprove, onReject }) {
+export default function Table() {
+  const { filters } = useTicketFilters();
+  const { offset, setOffset } = useTicketPagination();
   const {
     tickets,
     total = 0,
@@ -69,7 +75,7 @@ export default function Table({ filters, offset = 0, onOffsetChange, onApprove, 
       return;
     }
 
-    onOffsetChange?.((page - 1) * limit);
+    setOffset((page - 1) * limit);
   };
 
   return (
@@ -103,7 +109,7 @@ export default function Table({ filters, offset = 0, onOffsetChange, onApprove, 
         </div>
       )}
       {!loading && tickets.length > 0 && (
-        <TableManager tickets={tickets} resume={false} onApprove={onApprove} onReject={onReject} />
+        <TableManager tickets={tickets} resume={false} />
       )}
 
       {!error && (

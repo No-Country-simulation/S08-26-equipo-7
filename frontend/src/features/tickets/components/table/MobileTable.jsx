@@ -9,7 +9,7 @@ import Remaining from "@/features/tickets/components/sla/Remaining";
 import ActionCell from "@/features/tickets/components/table/ActionCell";
 import { CATEGORY_CODE_CONFIG } from "@/i18n/es/categoryConfig";
 
-export default function MobileTable({ tickets, resume, onApprove, onReject }) {
+export default function MobileTable({ tickets, resume }) {
   const location = useLocation();
   return (
     <Table>
@@ -89,8 +89,6 @@ export default function MobileTable({ tickets, resume, onApprove, onReject }) {
               <TableCell className="wrap-break-words text-primary border-border w-3/4 border-b-4 whitespace-normal">
                 <ActionCell
                   ticket={ticket}
-                  onApprove={onApprove}
-                  onReject={onReject}
                   mobileView={true}
                 />
               </TableCell>

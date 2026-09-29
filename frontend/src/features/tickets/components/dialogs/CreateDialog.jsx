@@ -1,7 +1,17 @@
 import { ArrowLeftIcon, FilePlus, Plus } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import SuccessCard from "@/components/SuccessCard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,16 +27,56 @@ import CreateForm from "../forms/CreateForm";
 export default function CreateDialog({ trigger }) {
   const [open, setOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formInstance, setFormInstance] = useState(0);
 
-  function handleOpenChange(nextOpen) {
-    setOpen(nextOpen);
-    if (!nextOpen) {
-      if (showSuccess) {
-        window.dispatchEvent(new Event("ticket-created"));
-      }
-      setShowSuccess(false);
+  const closeDialog = useCallback(() => {
+    if (showSuccess) {
+      window.dispatchEvent(new Event("ticket-created"));
     }
-  }
+    setOpen(false);
+    setShowSuccess(false);
+    setShowDiscardConfirmation(false);
+    setIsDirty(false);
+    setFormInstance((current) => current + 1);
+  }, [showSuccess]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen) => {
+      if (nextOpen) {
+        setOpen(true);
+        return;
+      }
+
+      if (isSubmitting) return;
+      if (isDirty && !showSuccess) {
+        setShowDiscardConfirmation(true);
+        return;
+      }
+
+      closeDialog();
+    },
+    [closeDialog, isDirty, isSubmitting, showSuccess],
+  );
+
+  const handleSuccess = useCallback(() => {
+    setIsDirty(false);
+    setShowSuccess(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open || !isDirty || showSuccess) return undefined;
+
+    function warnBeforeUnload(event) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [isDirty, open, showSuccess]);
 
   return (
     <div>
@@ -46,7 +96,15 @@ export default function CreateDialog({ trigger }) {
             </Button>
           )}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-lg md:max-w-xl">
+        <DialogContent
+          className="sm:max-w-lg md:max-w-xl"
+          onEscapeKeyDown={(event) => {
+            if (isSubmitting) event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (isSubmitting) event.preventDefault();
+          }}
+        >
           {showSuccess ? (
             <SuccessCard
               title="¡Solicitud enviada!"
@@ -75,11 +133,43 @@ export default function CreateDialog({ trigger }) {
                   Completa los datos para registrar una nueva solicitud interna.
                 </DialogDescription>
               </DialogHeader>
-              <CreateForm onSuccess={() => setShowSuccess(true)} />
+              <CreateForm
+                key={formInstance}
+                onSuccess={handleSuccess}
+                onDraftChange={setIsDirty}
+                onPendingChange={setIsSubmitting}
+                onCancel={() => handleOpenChange(false)}
+              />
             </>
           )}
         </DialogContent>
       </Dialog>
+      <AlertDialog
+        open={showDiscardConfirmation}
+        onOpenChange={setShowDiscardConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Descartar esta solicitud?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se perderán el área, el título y la descripción que escribiste.
+              Puedes seguir editando o descartar el borrador.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-11 rounded-md">
+              Seguir editando
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              className="h-11 rounded-md"
+              onClick={closeDialog}
+            >
+              Descartar solicitud
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

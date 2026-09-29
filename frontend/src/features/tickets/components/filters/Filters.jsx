@@ -2,7 +2,11 @@ import CategoryFilter from "@/features/tickets/components/filters/CategoryFilter
 import PriorityFilter from "@/features/tickets/components/filters/PriorityFilter";
 import SearchFilter from "@/features/tickets/components/filters/SearchFilter";
 import StatusFilter from "@/features/tickets/components/filters/StatusFilter";
-export default function Filters({ filters, onFilterChange }) {
+import { useTicketFilters } from "@/features/tickets/context/TicketListContext";
+
+export default function Filters() {
+  const { filters, onFilterChange } = useTicketFilters();
+
   return (
     <div className="bg-card border-border my-4 flex flex-wrap gap-2 rounded-lg border p-4 shadow-md">
       <div className="min-w-34 flex-1 sm:min-w-64">

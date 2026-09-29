@@ -3,24 +3,30 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { useOptionalTicketApprovalActions } from "@/features/tickets/context/TicketApprovalActionsContext";
 
-export default function ActionCell({ ticket, onApprove, onReject, mobileView = false }) { 
+export default function ActionCell({ ticket, mobileView = false }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [resolvedStatus, setResolvedStatus] = useState(null);
   const location = useLocation();
+  const approvalActions = useOptionalTicketApprovalActions();
 
-  const executeAction = async (actionFn, statusMarker) => {
+  const executeAction = async (action, statusMarker) => {
     setIsProcessing(true);
     try {
-      await actionFn(ticket.id);
-      setResolvedStatus(statusMarker);
+      const succeeded = await action(ticket.id);
+      if (succeeded) {
+        setResolvedStatus(statusMarker);
+      } else {
+        setIsProcessing(false);
+      }
     } catch (error) {
       console.error(error);
       setIsProcessing(false); 
     }
   };
 
-  if (!onApprove || !onReject) {
+  if (!approvalActions) {
     return (
       <Link
         to={`/tickets/${ticket.id}`}
@@ -53,7 +59,7 @@ export default function ActionCell({ ticket, onApprove, onReject, mobileView = f
       <Button
         size="sm"
         className="h-8 w-8 p-0 text-success bg-card border border-success/20 hover:bg-success hover:text-white transition-all duration-300"
-        onClick={() => executeAction(onApprove, 'APPROVED')}
+        onClick={() => executeAction(approvalActions.approve, "APPROVED")}
         disabled={isProcessing}
         title="Aprobar"
       >
@@ -64,7 +70,7 @@ export default function ActionCell({ ticket, onApprove, onReject, mobileView = f
         size="sm"
         variant="outline"
         className="h-8 w-8 p-0 text-destructive! bg-card! border! border-destructive/20! hover:bg-destructive! hover:text-white! transition-all! duration-300!"
-        onClick={() => executeAction(onReject, 'REJECTED')}
+        onClick={() => executeAction(approvalActions.reject, "REJECTED")}
         disabled={isProcessing}
         title="Rechazar"
       >
