@@ -15,7 +15,8 @@ export const useAuth = () => {
   const isAdmin = user?.rol === "ADMIN";
   const isSupervisor = user?.rol === "SUPERVISOR";
   const isAgent = user?.rol === "AGENT";
-  const isUser = user?.rol === "USER" || user?.rol === "varios";
+  const isRequester = user?.rol === "REQUESTER";
+  const isOperationalUser = isSupervisor || isAgent || isRequester;
 
   return {
     user,
@@ -26,6 +27,7 @@ export const useAuth = () => {
     isAdmin,
     isSupervisor,
     isAgent,
-    isUser,
+    isRequester,
+    isOperationalUser,
   };
 };

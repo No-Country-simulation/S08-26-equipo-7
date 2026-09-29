@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "@/app/routes/ProtectedRoute";
 import PublicRoute from "@/app/routes/PublicRoute";
+import RoleRoute from "@/app/routes/RoleRoute";
 import AppLayout from "@/layout/AppLayout";
 import ApprovalsPage from "@/pages/ApprovalsPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -37,15 +38,19 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/tickets" element={<TicketsPage />} />
-          <Route path="/approvals" element={<ApprovalsPage />} />
-          <Route path="/departments" element={<DepartmentsPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/knowledge" element={<KnowledgePage />} />
-          <Route path="/knowledge/new" element={<KnowledgeDetailPage />} />
-          <Route path="/knowledge/:id" element={<KnowledgeDetailPage />} />
-          <Route path="/tickets/:id" element={<TicketDetailPage />} />
+          <Route element={<RoleRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/tickets" element={<TicketsPage />} />
+            <Route path="/tickets/:id" element={<TicketDetailPage />} />
+            <Route path="/knowledge" element={<KnowledgePage />} />
+            <Route path="/knowledge/new" element={<KnowledgeDetailPage />} />
+            <Route path="/knowledge/:id" element={<KnowledgeDetailPage />} />
+          </Route>
+          <Route element={<RoleRoute adminOnly />}>
+            <Route path="/approvals" element={<ApprovalsPage />} />
+            <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/users" element={<UsersPage />} />
+          </Route>
         </Route>
       </Route>
 
