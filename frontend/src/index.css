@@ -187,7 +187,7 @@
 
 /* Estilos de botones principales con degradado (Login y Recuperar contraseña) */
 .btn-gradient-primary {
-  @apply inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-cyan-600 hover:shadow-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none disabled:opacity-70 dark:hover:from-blue-500 dark:hover:to-cyan-400 dark:focus:ring-cyan-500 dark:focus:ring-offset-slate-800;
+  @apply inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-cyan-600 hover:shadow-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none disabled:opacity-70 dark:hover:from-blue-500 dark:hover:to-cyan-400 dark:focus:ring-cyan-500 dark:focus:ring-offset-slate-800;
 }
 
 .color-brand-gradient {
