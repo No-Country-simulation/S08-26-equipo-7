@@ -1,4 +1,9 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Navigate,
+  Route,
+} from "react-router-dom";
 
 import ProtectedRoute from "@/app/routes/ProtectedRoute";
 import PublicRoute from "@/app/routes/PublicRoute";
@@ -16,9 +21,9 @@ import TicketDetailPage from "@/pages/TicketDetailPage";
 import TicketsPage from "@/pages/TicketsPage";
 import UsersPage from "@/pages/UsersPage";
 
-export default function AppRoutes() {
-  return (
-    <Routes>
+const appRouter = createBrowserRouter(
+  createRoutesFromElements(
+    <>
       <Route
         path="/login"
         element={
@@ -56,6 +61,8 @@ export default function AppRoutes() {
 
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-  );
-}
+    </>,
+  ),
+);
+
+export default appRouter;
