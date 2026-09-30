@@ -22,7 +22,7 @@ export default function CardKnowl({ info }) {
   };
 
   return (
-    <div className="bg-card border-border hover:border-primary/40 relative flex w-full flex-col justify-between rounded-lg border p-4 shadow-md duration-300">
+    <div className="bg-card border-border hover:border-primary/40 relative flex h-full min-h-60 w-full flex-col justify-between rounded-lg border p-4 shadow-md duration-300">
       <div>
         <div className="flex items-center justify-between space-x-1">
           <div className="bg-primary/10 text-primary rounded-md px-2 py-1 text-center text-xs font-semibold">
@@ -41,9 +41,9 @@ export default function CardKnowl({ info }) {
           </div>
         </div>
 
-        <h1 className="py-2 text-xl font-bold">{info.titulo}</h1>
+        <h1 className="line-clamp-2 py-2 text-xl font-bold">{info.titulo}</h1>
 
-        <p className="text-muted-foreground bg-muted-foreground/5 mb-2 rounded-sm p-2 text-sm">
+        <p className="text-muted-foreground bg-muted-foreground/5 mb-2 line-clamp-3 rounded-sm p-2 text-sm">
           {info.descripcion}
         </p>
       </div>

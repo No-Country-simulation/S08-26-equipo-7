@@ -34,7 +34,9 @@ export default function KnowledgeDetail() {
     knowledgeData.setEditForm,
   );
 
-  if (knowledgeData.loading) return <KnowledgeDetailSkeleton />;
+  if (knowledgeData.loading) {
+    return <KnowledgeDetailSkeleton />;
+  }
   if (knowledgeData.notFound) return <KnowledgeNotFound />;
 
   const columns = knowledgeData.editForm.layoutConfig?.columns || {
@@ -54,7 +56,7 @@ export default function KnowledgeDetail() {
 
   return (
     <KnowledgeProvider value={contextValue}>
-      <div className="mx-auto max-w-7xl space-y-4 p-4 font-sans">
+      <div className="mx-auto min-h-[70vh] max-w-7xl space-y-4 p-4 font-sans">
         <AdminPanelBar />
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-4">

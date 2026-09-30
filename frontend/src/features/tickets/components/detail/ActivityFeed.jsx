@@ -10,7 +10,7 @@ export default function ActivityFeed({
   isSubmitting,
 }) {
   return (
-    <div className="bg-card border-border order-4 rounded-lg border shadow-md">
+    <div className="bg-card border-border order-4 min-h-[24rem] rounded-lg border shadow-md">
       <div className="bg-muted-foreground/5 w-full rounded-t-lg px-2">
         <div className="border-primary w-fit border-b-2 py-4">
           <span className="text-primary text-xs font-semibold sm:text-sm">

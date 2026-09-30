@@ -27,7 +27,7 @@ export default function StatCard({
   };
 
   if (loading) {
-    return <StatCardSkeleton label={label} />;
+    return <StatCardSkeleton label={label} text={text} iconText={iconText} />;
   }
 
   return (

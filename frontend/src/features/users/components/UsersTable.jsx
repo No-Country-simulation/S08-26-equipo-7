@@ -8,7 +8,9 @@ import { useUsers } from "@/features/users/context/UsersContext";
 export default function UsersTable() {
   const { filteredUsers, isLoading, loadError, refresh, search, roleFilter, areaFilter } = useUsers();
 
-  if (isLoading) return <UsersSkeleton />;
+  if (isLoading) {
+    return <UsersSkeleton />;
+  }
 
   if (loadError) {
     return (

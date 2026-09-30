@@ -80,7 +80,7 @@ export default function Table() {
 
   return (
     <div className="bg-card border-border my-4 rounded-lg border pb-4 shadow-md">
-      {loading && <TableSkeleton />}
+      {loading && tickets.length === 0 && <TableSkeleton />}
       {error && tickets.length === 0 && (
         <div
           className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
@@ -108,7 +108,7 @@ export default function Table() {
           </p>
         </div>
       )}
-      {!loading && tickets.length > 0 && (
+      {tickets.length > 0 && (
         <TableManager tickets={tickets} resume={false} />
       )}
 
