@@ -12,6 +12,8 @@ Todos los endpoints requieren **solo ADMIN**.
 | `supervisor@serviceflow.com` | `supervisor123` | SUPERVISOR |
 | `ana.agent@demo.com` (y demás `@demo.com`) | `demo123` | varios |
 
+La migración `V22` crea dos agentes por cada categoría activa, con email `agente.<area>.<01|02>@serviceflow.com`. Comparten la contraseña de `agente@serviceflow.com` y tienen el `area` igual al código de su categoría; el detalle está en [categorías](02-categorias.md#agentes-demo-por-área).
+
 ## POST /users
 
 Crea un usuario.
