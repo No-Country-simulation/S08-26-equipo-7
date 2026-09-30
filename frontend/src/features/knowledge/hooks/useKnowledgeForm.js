@@ -1,10 +1,18 @@
-import { useRef, useState } from "react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useCallback, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { createKnowledge, updateKnowledge } from "@/features/knowledge/service/knowledgeApi";
 
-export function useKnowledgeForm(id, editForm, setEditForm) {
+const cloneForm = (form) => JSON.parse(JSON.stringify(form ?? {}));
+
+export function useKnowledgeForm(
+  id,
+  editForm,
+  setEditForm,
+  savedForm,
+  setSavedForm,
+) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -15,22 +23,32 @@ export function useKnowledgeForm(id, editForm, setEditForm) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [activeWizardColumn, setActiveWizardColumn] = useState(null);
 
-  const originalFormRef = useRef(null);
+  const skipNextNavigationBlockRef = useRef(false);
+  const isDirty =
+    isEditing &&
+    JSON.stringify(editForm) !== JSON.stringify(savedForm);
+
+  const shouldBlockNavigation = useCallback(() => {
+    if (skipNextNavigationBlockRef.current) {
+      skipNextNavigationBlockRef.current = false;
+      return false;
+    }
+
+    return isDirty;
+  }, [isDirty]);
 
   const handleStartEdit = () => {
-    originalFormRef.current = JSON.parse(JSON.stringify(editForm));
     setIsEditing(true);
   };
 
   const handleConfirmCancel = () => {
     if (isCreating) {
+      skipNextNavigationBlockRef.current = true;
       navigate("/knowledge");
       return;
     }
 
-    if (originalFormRef.current) {
-      setEditForm(originalFormRef.current);
-    }
+    setEditForm(cloneForm(savedForm));
     setIsEditing(false);
     setActiveWizardColumn(null);
     setShowCancelDialog(false);
@@ -70,6 +88,8 @@ export function useKnowledgeForm(id, editForm, setEditForm) {
 
       if (isCreating) {
         await createKnowledge(payload);
+        setSavedForm(cloneForm(editForm));
+        skipNextNavigationBlockRef.current = true;
         toast.success("¡Artículo creado con éxito!", {
           description: "El artículo se ha publicado correctamente.",
           className: "bg-foreground! dark:bg-background! text-white!",
@@ -77,12 +97,12 @@ export function useKnowledgeForm(id, editForm, setEditForm) {
         navigate("/knowledge", { replace: true });
       } else {
         await updateKnowledge(id, payload);
+        setSavedForm(cloneForm(editForm));
         toast.success("¡Cambios guardados!", {
           description: "El artículo se ha actualizado correctamente en el servidor.",
           className: "bg-foreground! dark:bg-background! text-white!",
         });
         setIsEditing(false);
-        originalFormRef.current = null;
       }
       return true;
     } catch (error) {
@@ -99,6 +119,7 @@ export function useKnowledgeForm(id, editForm, setEditForm) {
 
   return {
     isEditing,
+    isDirty,
     isSaving,
     showCancelDialog,
     setShowCancelDialog,
@@ -107,6 +128,7 @@ export function useKnowledgeForm(id, editForm, setEditForm) {
     handleStartEdit,
     handleConfirmCancel,
     handleSaveChanges,
+    shouldBlockNavigation,
     isCreating,
   };
 }

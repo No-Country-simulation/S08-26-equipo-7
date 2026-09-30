@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useBlocker, useParams } from "react-router-dom";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import AdminPanelBar from "@/features/knowledge/components/Builder/AdminPanelBar";
@@ -27,12 +28,29 @@ export default function KnowledgeDetail() {
     id,
     knowledgeData.editForm,
     knowledgeData.setEditForm,
+    knowledgeData.savedForm,
+    knowledgeData.setSavedForm,
   );
+  const blocker = useBlocker(formActions.shouldBlockNavigation);
   const actionHandlers = useKnowledgeActions(
     id,
     knowledgeData.editForm,
     knowledgeData.setEditForm,
   );
+
+  useEffect(() => {
+    if (!formActions.isDirty || !formActions.isEditing) {
+      return undefined;
+    }
+
+    const warnBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [formActions.isDirty, formActions.isEditing]);
 
   if (knowledgeData.loading) {
     return <KnowledgeDetailSkeleton />;
@@ -73,6 +91,19 @@ export default function KnowledgeDetail() {
           description="Tienes modificaciones sin guardar en este artículo. Si cancelas, se perderán todos los cambios realizados en esta sesión de edición."
           confirmText="Sí, descartar cambios"
           cancelText="Continuar editando"
+          variant="warning"
+        />
+
+        <ConfirmActionDialog
+          open={blocker.state === "blocked"}
+          onOpenChange={(open) => {
+            if (!open && blocker.state === "blocked") blocker.reset();
+          }}
+          onConfirm={() => blocker.proceed()}
+          title="¿Salir sin guardar?"
+          description="Tienes cambios sin guardar en este artículo. Si sales ahora, perderás todo el progreso realizado."
+          confirmText="Descartar y salir"
+          cancelText="Seguir editando"
           variant="warning"
         />
 

@@ -23,6 +23,7 @@ export function useKnowledgeData(id) {
     tiempoLecturaMin: "",
     layoutConfig: { columns: { left: [], center: [], right: [] } },
   });
+  const [savedForm, setSavedForm] = useState(() => JSON.parse(JSON.stringify(editForm)));
 
   useEffect(() => {
     async function loadData() {
@@ -73,7 +74,9 @@ export function useKnowledgeData(id) {
             }
           }
         }
-        setEditForm({ ...articleData, layoutConfig: parsedLayout });
+        const loadedForm = { ...articleData, layoutConfig: parsedLayout };
+        setEditForm(loadedForm);
+        setSavedForm(JSON.parse(JSON.stringify(loadedForm)));
         setCategories(categoriesData);
         const parsedUserVote = voteData?.miVoto ?? voteData?.mivoto ?? voteData?.megusta ?? null;
         setUserVote(parsedUserVote);
@@ -96,6 +99,8 @@ export function useKnowledgeData(id) {
     notFound, 
     editForm, 
     setEditForm, 
+    savedForm,
+    setSavedForm,
     isCreating, 
     userVote
   };
