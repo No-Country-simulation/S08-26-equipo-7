@@ -1,4 +1,4 @@
-import { KeyRound, Loader2 } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -24,6 +24,8 @@ export default function ProfileDialog({ open, onOpenChange, user }) {
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   function handleOpenChange(nextOpen, force = false) {
     if (!nextOpen && isSaving && !force) return;
@@ -31,6 +33,8 @@ export default function ProfileDialog({ open, onOpenChange, user }) {
       setCurrentPassword("");
       setNewPassword("");
       setError("");
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
     }
     onOpenChange(nextOpen);
   }
@@ -45,6 +49,10 @@ export default function ProfileDialog({ open, onOpenChange, user }) {
     }
     if (newPassword.length < 8) {
       setError("La nueva contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setError("La nueva contraseña debe ser diferente a la actual.");
       return;
     }
 
@@ -96,30 +104,60 @@ export default function ProfileDialog({ open, onOpenChange, user }) {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="profile-current-password">Contraseña actual</Label>
-                <Input
-                  id="profile-current-password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  disabled={isSaving}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="profile-current-password"
+                    type={showCurrentPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    disabled={isSaving}
+                    className="pr-11"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-1 -translate-y-1/2 hover:scale-100"
+                    onClick={() => setShowCurrentPassword((visible) => !visible)}
+                    aria-label={showCurrentPassword ? "Ocultar contraseña actual" : "Mostrar contraseña actual"}
+                    aria-pressed={showCurrentPassword}
+                    disabled={isSaving}
+                  >
+                    {showCurrentPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="profile-new-password">
                   Nueva contraseña (mínimo 8 caracteres)
                 </Label>
-                <Input
-                  id="profile-new-password"
-                  type="password"
-                  autoComplete="new-password"
-                  minLength={8}
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  disabled={isSaving}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="profile-new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    minLength={8}
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    disabled={isSaving}
+                    className="pr-11"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-1 -translate-y-1/2 hover:scale-100"
+                    onClick={() => setShowNewPassword((visible) => !visible)}
+                    aria-label={showNewPassword ? "Ocultar nueva contraseña" : "Mostrar nueva contraseña"}
+                    aria-pressed={showNewPassword}
+                    disabled={isSaving}
+                  >
+                    {showNewPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
