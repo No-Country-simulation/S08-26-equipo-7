@@ -43,8 +43,8 @@ export default function ControlPanel({
   const canResolve =
     (isAdmin || isSupervisor || (isAgent && isAssignedToCurrentAgent)) &&
     !isResolved &&
-    ["IN_PROGRESS", "ESCALATED"].includes(ticket.status) &&
-    (!ticket.requiresApproval || ["IN_PROGRESS", "ESCALATED"].includes(ticket.status));
+    ["ASSIGNED", "IN_PROGRESS", "ESCALATED"].includes(ticket.status) &&
+    (!ticket.requiresApproval || ["ASSIGNED", "IN_PROGRESS", "ESCALATED"].includes(ticket.status));
 
   const progress = useProgress(
     ticket.createdAt,
