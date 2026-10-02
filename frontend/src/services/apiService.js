@@ -21,8 +21,16 @@ function getCookie(name) {
     : null;
 }
 
-function requiresCsrf(method) {
-  return ["POST", "PUT", "PATCH", "DELETE"].includes(method);
+function requiresCsrf(method, endpoint) {
+  const path = endpoint.replace(/^\/+/, "");
+  const csrfExemptEndpoints = [
+    "auth/login",
+    "auth/recover-password",
+    "auth/logout",
+  ];
+
+  return ["POST", "PUT", "PATCH", "DELETE"].includes(method)
+    && !csrfExemptEndpoints.includes(path);
 }
 
 async function ensureCsrfToken() {
@@ -68,7 +76,7 @@ export function initializeCsrfToken() {
 export async function apiRequest(endpoint, options = {}, isRetry = false) {
   const { body, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
-  const needsCsrf = requiresCsrf(method);
+  const needsCsrf = requiresCsrf(method, endpoint);
   let response;
 
   try {
