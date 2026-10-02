@@ -1,6 +1,12 @@
 <h1 align="center"><strong>ServiceFlow — Gestión de Solicitudes Internas</strong></h1>
 
-<p align="center"><img src="./photos/serviceflow-logo-light.svg" alt="ServiceFlow" width="400"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./photos/serviceflow-logo.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./photos/serviceflow-logo-light.svg">
+    <img src="./photos/serviceflow-logo-light.svg" alt="ServiceFlow" width="400">
+  </picture>
+</p>
 
 <div align="center">
 <p>Sistema centralizado para registrar, atender y medir solicitudes internas.</p>

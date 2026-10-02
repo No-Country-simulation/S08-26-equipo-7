@@ -1,4 +1,10 @@
-<p align="center"><img src="../photos/serviceflow-logo-light.svg" alt="ServiceFlow" width="300"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../photos/serviceflow-logo.svg">
+    <source media="(prefers-color-scheme: light)" srcset="../photos/serviceflow-logo-light.svg">
+    <img src="../photos/serviceflow-logo-light.svg" alt="ServiceFlow" width="300">
+  </picture>
+</p>
 
 <h1 align="center"><strong>Arquitectura de Datos — ServiceFlow</strong></h1>
 
