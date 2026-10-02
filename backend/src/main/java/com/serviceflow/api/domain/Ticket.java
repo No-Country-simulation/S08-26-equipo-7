@@ -1,0 +1,93 @@
+package com.serviceflow.api.domain;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+public class Ticket {
+
+    private UUID id;
+    private String codigo;
+    private UUID userId;
+    private String email;
+    private String title;
+    private String category;
+    private String description;
+    private PrioridadTicket priority;
+    private EstadoTicket status;
+    private boolean requiresApproval;
+    private UUID assignedTo;
+    private LocalDateTime slaDueAt;
+    private LocalDateTime resolvedAt;
+    private LocalDateTime closedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public Ticket(UUID id, UUID userId, String email, String title, String category, String description,
+                  PrioridadTicket priority, EstadoTicket status, boolean requiresApproval,
+                  UUID assignedTo, LocalDateTime slaDueAt, LocalDateTime resolvedAt,
+                  LocalDateTime closedAt, LocalDateTime createdAt) {
+        this.id = id;
+        this.userId = userId;
+        this.email = email;
+        this.title = title;
+        this.category = category;
+        this.description = description;
+        this.priority = priority;
+        this.status = status;
+        this.requiresApproval = requiresApproval;
+        this.assignedTo = assignedTo;
+        this.slaDueAt = slaDueAt;
+        this.resolvedAt = resolvedAt;
+        this.closedAt = closedAt;
+        this.createdAt = createdAt;
+        this.updatedAt = createdAt;
+    }
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
+
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public PrioridadTicket getPriority() { return priority; }
+    public void setPriority(PrioridadTicket priority) { this.priority = priority; }
+
+    public EstadoTicket getStatus() { return status; }
+    public void setStatus(EstadoTicket status) { this.status = status; }
+
+    public boolean isRequiresApproval() { return requiresApproval; }
+    public void setRequiresApproval(boolean requiresApproval) { this.requiresApproval = requiresApproval; }
+
+    public UUID getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(UUID assignedTo) { this.assignedTo = assignedTo; }
+
+    public LocalDateTime getSlaDueAt() { return slaDueAt; }
+    public void setSlaDueAt(LocalDateTime slaDueAt) { this.slaDueAt = slaDueAt; }
+
+    public LocalDateTime getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
+
+    public LocalDateTime getClosedAt() { return closedAt; }
+    public void setClosedAt(LocalDateTime closedAt) { this.closedAt = closedAt; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+}

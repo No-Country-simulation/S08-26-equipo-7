@@ -1,0 +1,125 @@
+# Base de Conocimiento (Auto-Servicio)
+
+Artículos para la sección "Base de Conocimiento & Auto-Servicio": tarjetas con categoría, contador de lecturas, título y descripción.
+
+## Campos del artículo (respuesta)
+
+| Campo | Descripción |
+|---|---|
+| `id` | UUID del artículo |
+| `titulo` | Título del artículo |
+| `descripcion` | Descripción corta (para la tarjeta) |
+| `contenido` | Texto completo del artículo |
+| `categoria` | Code de la categoría (ej. `IT`, `ACCESS`, `FINANCE`, `FACILITIES`) |
+| `visualizaciones` | Contador de lecturas/vistas |
+| `megusta` | Votos positivos (útil) |
+| `nomegusta` | Votos negativos (no útil) |
+| `satisfaccion` | Porcentaje de satisfacción (`megusta / (megusta + nomegusta) * 100`) |
+| `tiempoLecturaMin` | Tiempo estimado de lectura en minutos (basado en ~200 palabras/min) |
+| `activo` | Si está publicado (`true`) o desactivado (`false`) |
+| `actualizadoEn` | Fecha de última actualización (UTC) |
+
+## GET /knowledge
+
+Lista los artículos **activos** (los desactivados quedan ocultos) ordenados por más reciente. **Público** (sin login).
+
+```
+GET /knowledge?active=false   // solo desactivados, SOLO ADMIN (403 para otros roles)
+```
+
+```json
+[
+  {
+    "id": "11111111-...",
+    "titulo": "Cómo conectar y configurar la VPN corporativa GlobalProtect",
+    "descripcion": "Guía paso a paso para autenticación multifactor...",
+    "categoria": "IT",
+    "layoutConfig": { "blocks": [...] },
+    "visualizaciones": 1402,
+    "megusta": 42,
+    "nomegusta": 3,
+    "satisfaccion": 93.33,
+    "tiempoLecturaMin": 5,
+    "activo": true
+  }
+]
+```
+
+## GET /knowledge/{id}
+
+Trae un artículo por ID (con su `contenido` y `layoutConfig`). **Público**. `404` si no existe.
+
+## POST /knowledge/{id}/view
+
+Incrementa en 1 las `visualizaciones` del artículo con UPDATE atómico (no toca ningún otro campo ni `actualizadoEn`). **Público** y sin CSRF (es un contador de clics).
+
+```json
+// respuesta 200
+{ "id": "11111111-...", "visualizaciones": 1403 }
+```
+
+## POST /knowledge/{id}/votar
+
+Registra un voto de satisfacción (útil / no útil) en el artículo. Requiere login (cualquier rol) y CSRF. Body: `{ "megusta": true|false }` (`true` = útil, `false` = no útil). Devuelve el resumen actualizado (incluye `satisfaccion`, `tiempoLecturaMin` y `miVoto`):
+
+```json
+// respuesta 200
+{
+  "id": "11111111-...",
+  "megusta": 42,
+  "nomegusta": 3,
+  "satisfaccion": 93.33,
+  "tiempoLecturaMin": 5,
+  "miVoto": true
+}
+```
+
+- `404` si el artículo no existe.
+
+## GET /knowledge/{id}/mi-voto
+
+Devuelve el voto del usuario autenticado + resumen (`satisfaccion`, `tiempoLecturaMin`).
+
+```json
+// respuesta 200
+{
+  "articuloId": "11111111-...",
+  "megusta": true,
+  "satisfaccion": 93.33,
+  "tiempoLecturaMin": 5
+}
+```
+
+- `megusta` es `null` si el usuario no votó. `401` si no está autenticado.
+
+## DELETE /knowledge/{id}/votar
+
+Quita el voto del usuario. Requiere login (cualquier rol) y CSRF. Devuelve el resumen actualizado (`satisfaccion`, `tiempoLecturaMin`, `miVoto: null`). `401` si no está autenticado.
+
+## POST /knowledge
+
+Crea un artículo. **Solo ADMIN** (403 para otros roles). Requiere CSRF.
+
+```json
+// body (layoutConfig opcional: layout del editor de bloques, se guarda tal cual;
+// tiempoLecturaMin opcional: si se manda se guarda, si no se calcula del contenido)
+{ "titulo": "Nuevo artículo", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "tiempoLecturaMin": 5 }
+```
+
+`201` con el artículo creado (incluye `layoutConfig`, `{}` si no se mandó).
+
+## PUT /knowledge/{id}
+
+Edita un artículo (títulos, descripción, contenido, categoría, `layoutConfig` o `activo`). **Solo ADMIN**. Requiere CSRF.
+
+```json
+// body (todos opcionales, parcialmente; layoutConfig reemplaza si se manda, `{}` lo limpia;
+// tiempoLecturaMin reemplaza si se manda con valor > 0)
+{ "titulo": "Nuevo título", "descripcion": "...", "contenido": "...", "categoria": "IT", "layoutConfig": { "blocks": [...] }, "tiempoLecturaMin": 3, "activo": false }
+```
+
+`200` con el artículo actualizado. `404` si no existe.
+
+## DELETE /knowledge/{id}
+
+Elimina un artículo (y sus votos en cascada). **Solo ADMIN**. Requiere CSRF. `404` si no existe.

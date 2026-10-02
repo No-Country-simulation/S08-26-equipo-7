@@ -1,10 +1,10 @@
+import ForgotPassForm from "@/features/auth/components/ForgotPassForm";
 import AuthLayout from "@/layout/AuthLayout";
-import ForgotPass from "@/features/auth/ForgotPass";
 
 export default function ForgotPassPage() {
   return (
-    <AuthLayout>
-      <ForgotPass />
+    <AuthLayout subtitle="Recuperación de acceso seguro.">
+      <ForgotPassForm />
     </AuthLayout>
   );
 }

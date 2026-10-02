@@ -1,0 +1,6 @@
+.env
+.git
+target/
+.qodo/
+.vscode/
+.github/

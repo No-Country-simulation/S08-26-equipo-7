@@ -1,17 +1,23 @@
-import { LayoutDashboard } from "lucide-react";
+import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
-export default function AuthLayout({ children }) {
+export default function AuthLayout({ subtitle, children }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
-      <div className="flex flex-col items-center mb-8 space-y-2">
-        <div className="h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-zinc-900/20">
-          <LayoutDashboard className="w-6 h-6 text-white" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-700 mt-4">
-            ServiceFlow
-        </h1>
+    <div className="body-app relative flex min-h-screen w-full flex-col items-center justify-center overflow-y-auto px-4 py-6 md:px-0">
+      <div className="absolute top-0 right-0 mt-4 mr-8">
+        <ThemeToggle />
       </div>
-      { children }
+      <Logo />
+      <div className="mb-4 flex flex-col items-center justify-center">
+        <p className="text-chart-2 mt-2 text-center text-sm font-semibold">
+          {subtitle}
+        </p>
+      </div>
+      {children}
+      <p className="text-muted-foreground mt-8 text-center text-xs">
+        Powered by NoCountry S08-26-equipo 7<br />
+        Uso interno exclusivo
+      </p>
     </div>
   );
 }

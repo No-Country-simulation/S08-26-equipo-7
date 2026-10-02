@@ -1,0 +1,106 @@
+import { ArrowLeftIcon, Loader2 } from "lucide-react";
+import { useActionState } from "react";
+import { Link } from "react-router-dom";
+
+import SuccessCard from "@/components/SuccessCard";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { forgotPassword } from "@/features/auth/services/authService.js";
+
+async function forgotPassAction(prevState, formData) {
+  const email = formData.get("email");
+
+  try {
+    const result = await forgotPassword(email);
+    return { success: true, message: result.message };
+  } catch (error) {
+    return { error: error.message };
+  }
+}
+
+export default function ForgotPassForm() {
+  const [state, formAction, isPending] = useActionState(forgotPassAction, null);
+
+  return (
+    <div className="w-full max-w-md space-y-1 px-3 py-2">
+      <Card
+        className="w-full space-y-1.5 rounded-4xl p-8 shadow-md"
+        aria-live="polite"
+      >
+        {state?.success ? (
+          <SuccessCard
+            title="¡Solicitud enviada!"
+            message="Si el correo existe, se creará un ticket automático para que puedas recuperar tu contraseña. Para más información, comunícate con el administrador."
+            action={
+              <Link
+                to="/login"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base"
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+                Volver al inicio de sesión
+              </Link>
+            }
+          />
+        ) : (
+          <form action={formAction} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-bold sm:text-sm">
+                Correo asociado a tu cuenta
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Ingresa tu correo corporativo; si está en la base de datos,
+                crearemos un ticket.
+              </p>
+              <Input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="nombre@tuempresa.com"
+                required
+                disabled={isPending}
+                autoComplete="email"
+                className="border-border font-semibold"
+              />
+            </div>
+            {state?.error && (
+              <p role="alert" className="text-destructive text-sm font-medium">
+                {state.error}
+              </p>
+            )}
+            <Button
+              type="submit"
+              className="btn-gradient-primary w-full cursor-pointer"
+              disabled={isPending}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <span className="min-[360px]:hidden">Enviar solicitud</span>
+                  <span className="hidden min-[360px]:inline">
+                    Enviar solicitud de recuperación
+                  </span>
+                </>
+              )}
+            </Button>
+            <Link
+              to="/login"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2 text-base"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              <span className="min-[360px]:hidden">Volver al inicio</span>
+              <span className="hidden min-[360px]:inline">
+                Volver al inicio de sesión
+              </span>
+            </Link>
+          </form>
+        )}
+      </Card>
+    </div>
+  );
+}

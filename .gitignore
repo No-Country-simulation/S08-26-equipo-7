@@ -1,0 +1,8 @@
+# Variables de entorno locales (secretos) de docker compose
+.env
+.vscode
+.github/hooks/
+.github/context-mode/
+.github/agents/
+.claude
+opencode.json
