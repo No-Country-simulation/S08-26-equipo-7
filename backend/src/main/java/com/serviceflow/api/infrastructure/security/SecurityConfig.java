@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -30,17 +31,23 @@ public class SecurityConfig {
     private final String allowedOrigin;
     private final int maxRequests;
     private final long windowMs;
+    private final boolean cookieSecure;
+    private final String cookieSameSite;
 
     public SecurityConfig(JwtService jwtService,
                           InMemoryRateLimiter rateLimiter,
                           @Value("${app.cors.allowed-origin:http://localhost:5173}") String allowedOrigin,
                           @Value("${app.rate-limit.max-requests:3}") int maxRequests,
-                          @Value("${app.rate-limit.window-ms:900000}") long windowMs) {
+                          @Value("${app.rate-limit.window-ms:900000}") long windowMs,
+                          @Value("${app.cookie.secure:false}") boolean cookieSecure,
+                          @Value("${app.cookie.samesite:Strict}") String cookieSameSite) {
         this.jwtService = jwtService;
         this.rateLimiter = rateLimiter;
         this.allowedOrigin = allowedOrigin;
         this.maxRequests = maxRequests;
         this.windowMs = windowMs;
+        this.cookieSecure = cookieSecure;
+        this.cookieSameSite = cookieSameSite;
     }
 
     @Bean
@@ -49,10 +56,18 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CookieCsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        boolean secure = cookieSecure || "None".equalsIgnoreCase(cookieSameSite);
+        repo.setCookieCustomizer(c -> c.secure(secure).sameSite(cookieSameSite));
+        return repo;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRepository(csrfTokenRepository())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                         .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/recover-password", "/api/v1/auth/logout",
                                 "/api/v1/knowledge/*/view")
@@ -99,7 +114,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigin));
+        List<String> origins = Arrays.stream(allowedOrigin.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(s -> s.endsWith("/") ? s.substring(0, s.length() - 1) : s)
+                .toList();
+        config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

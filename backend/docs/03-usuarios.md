@@ -49,6 +49,15 @@ Lista todos los usuarios. La respuesta **nunca incluye** `passwordHash`.
 [ { "id": "uuid", "name": "Mariana López", "email": "mariana.lopez@empresa.com", "role": "AGENT", "area": "HARDWARE", "createdAt": "2026-09-14T09:21:17" } ]
 ```
 
+## PUT /users/{id}
+
+Edita un usuario (todo opcional: `name`, `email`, `role`, `area`). **Solo ADMIN**. Valida formato de email (único), rol válido. `404` si no existe, `409` si el email ya está en uso.
+
+```json
+// body (todo opcional)
+{ "name": "Nuevo nombre", "area": "IT" }
+```
+
 ## GET /users/agents?search=&area=
 
 Buscador de agentes para reasignar (autocompletar). **Solo ADMIN y SUPERVISOR**. Parámetros opcionales: `search` (filtra por nombre o email) y `area` (filtra por área, ej. `HARDWARE`). Devuelve la lista de agentes (con `area`).
