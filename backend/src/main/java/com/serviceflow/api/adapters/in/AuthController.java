@@ -30,12 +30,22 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
     private final boolean cookieSecure;
+    private final String cookieSameSite;
 
     public AuthController(AuthService authService, JwtService jwtService,
-                          @Value("${app.cookie.secure:false}") boolean cookieSecure) {
+                          @Value("${app.cookie.secure:false}") boolean cookieSecure,
+                          @Value("${app.cookie.samesite:Strict}") String cookieSameSite) {
         this.authService = authService;
         this.jwtService = jwtService;
         this.cookieSecure = cookieSecure;
+        this.cookieSameSite = cookieSameSite;
+    }
+
+    private void aplicarSameSite(Cookie cookie) {
+        cookie.setAttribute("SameSite", cookieSameSite);
+        if ("None".equalsIgnoreCase(cookieSameSite)) {
+            cookie.setSecure(true);
+        }
     }
 
     @PostMapping("/login")
@@ -46,7 +56,7 @@ public class AuthController {
             Cookie cookie = new Cookie(JwtAuthFilter.COOKIE_NAME, result.token());
             cookie.setHttpOnly(true);
             cookie.setSecure(cookieSecure);
-            cookie.setAttribute("SameSite", "Strict");
+            aplicarSameSite(cookie);
             cookie.setPath("/");
             cookie.setMaxAge(Math.toIntExact(jwtService.expirationInSeconds()));
             response.addCookie(cookie);
@@ -86,7 +96,7 @@ public class AuthController {
         Cookie cookie = new Cookie(JwtAuthFilter.COOKIE_NAME, "");
         cookie.setHttpOnly(true);
         cookie.setSecure(cookieSecure);
-        cookie.setAttribute("SameSite", "Strict");
+        aplicarSameSite(cookie);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
