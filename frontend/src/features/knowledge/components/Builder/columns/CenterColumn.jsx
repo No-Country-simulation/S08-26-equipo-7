@@ -29,7 +29,7 @@ export default function CenterColumn() {
         : "lg:col-span-4";
 
   return (
-    <div className={`${spanClass} space-y-4`}>
+    <div className={`${spanClass} min-w-0 space-y-4`}>
       <KnowledgeHeader />
 
       <div className="space-y-4">

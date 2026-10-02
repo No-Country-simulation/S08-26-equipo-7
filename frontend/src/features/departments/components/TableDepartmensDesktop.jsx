@@ -17,22 +17,22 @@ export default function TableDepartmensDesktop() {
   const { departments } = useDepartmens();
 
   return (
-    <Table>
+    <Table className="table-fixed">
       <TableHeader className="bg-muted-foreground/5">
         <TableRow>
-          <TableHead className="text-muted-foreground text-center text-xs font-bold">
+          <TableHead className="text-muted-foreground w-[14%] text-center text-xs font-bold whitespace-normal">
             CÓDIGO
           </TableHead>
-          <TableHead className="text-muted-foreground text-xs font-bold">
+          <TableHead className="text-muted-foreground w-[34%] text-xs font-bold whitespace-normal">
             NOMBRE Y DESCRIPCIÓN
           </TableHead>
-          <TableHead className="text-muted-foreground text-center text-xs font-bold">
+          <TableHead className="text-muted-foreground w-[22%] text-center text-xs font-bold whitespace-normal">
             REQUIERE APROBACIÓN
           </TableHead>
-          <TableHead className="text-muted-foreground text-center text-xs font-bold">
+          <TableHead className="text-muted-foreground w-[14%] text-center text-xs font-bold whitespace-normal">
             ESTADO
           </TableHead>
-          <TableHead className="text-muted-foreground text-center text-xs font-bold">
+          <TableHead className="text-muted-foreground w-[16%] text-center text-xs font-bold whitespace-normal">
             ACCIONES
           </TableHead>
         </TableRow>
@@ -43,10 +43,10 @@ export default function TableDepartmensDesktop() {
             key={department.id}
             className="hover:bg-muted-foreground/10"
           >
-            <TableCell className="pl-4 font-semibold tracking-wide">
+            <TableCell className="w-[14%] whitespace-normal [overflow-wrap:anywhere] pl-4 font-semibold tracking-wide">
               {department.code}
             </TableCell>
-            <TableCell>
+            <TableCell className="w-[34%] min-w-0 whitespace-normal [overflow-wrap:anywhere]">
               <span className="font-semibold">{department.name}</span>
               {department.description ? (
                 <p className="text-muted-foreground mt-0.5 text-xs">
@@ -54,13 +54,13 @@ export default function TableDepartmensDesktop() {
                 </p>
               ) : null}
             </TableCell>
-            <TableCell className="text-center">
+            <TableCell className="w-[22%] whitespace-normal text-center">
               <ApprovalBadge requiresApproval={department.requiresApproval} />
             </TableCell>
-            <TableCell className="text-center">
+            <TableCell className="w-[14%] whitespace-normal text-center">
               <StatusBadge active={department.active} />
             </TableCell>
-            <TableCell>
+            <TableCell className="w-[16%] whitespace-normal">
               <div className="flex justify-center">
                 <ActionCellDepartmens department={department} />
               </div>

@@ -46,7 +46,7 @@ export default function ActivityFeed({
                     className="bg-primary ring-ring relative z-10 mt-1.5 h-2 w-2 shrink-0 rounded-full ring-4"
                     aria-hidden="true"
                   />
-                  <div className="flex-1 text-sm">
+                  <div className="min-w-0 flex-1 text-sm">
                     <div>
                       <span className="text-muted-foreground/70 text-xs">
                         {formatTicketDate(item.fecha)}&nbsp;&mdash;&nbsp;
@@ -59,7 +59,7 @@ export default function ActivityFeed({
                         })()}
                       </span>
                     </div>
-                    <p className="text-muted-foreground/90 mt-0.5 text-xs sm:text-sm">
+                    <p className="text-muted-foreground/90 mt-0.5 break-words text-xs sm:text-sm">
                       {item.descripcion}
                     </p>
                   </div>
@@ -78,7 +78,7 @@ export default function ActivityFeed({
                 key={index}
                 className="bg-ring w-full space-y-1 rounded-lg p-4 text-xs sm:text-sm"
               >
-                <div className="text-muted-foreground/90 flex items-center justify-between space-x-2">
+                <div className="text-muted-foreground/90 flex min-w-0 flex-wrap items-center justify-between gap-2">
                   <div className="text-muted-foreground/70 text-xs font-semibold">
                     {(() => {
                       const isMe = message.autorEmail === currentUserEmail;
@@ -90,7 +90,7 @@ export default function ActivityFeed({
                     {message.creadoEn && formatTicketDate(message.creadoEn)}
                   </div>
                 </div>
-                <div>{message.mensaje}</div>
+                <div className="break-words">{message.mensaje}</div>
               </div>
             ))}
           </div>

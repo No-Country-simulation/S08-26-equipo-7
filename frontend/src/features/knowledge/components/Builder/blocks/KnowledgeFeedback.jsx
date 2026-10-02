@@ -72,15 +72,15 @@ export default function KnowledgeFeedback() {
   };
 
   return (
-    <div className="bg-card border-border flex flex-col items-center justify-between space-y-2 rounded-lg border px-6 py-5 shadow-md sm:flex-row">
-      <div className="flex flex-col">
+    <div className="bg-card border-border flex min-w-0 flex-col items-center justify-between gap-2 rounded-lg border px-4 py-5 shadow-md sm:px-6 lg:flex-row">
+      <div className="min-w-0 flex-1 text-center lg:text-left">
         <p className="text-sm font-semibold">¿Resolvió su requerimiento?</p>
         <p className="text-muted-foreground/70 text-xs">
           {satisfaccion}% efectividad ({totalVotes} votos confirmados)
         </p>
       </div>
 
-      <div className="flex space-x-2">
+      <div className="flex shrink-0 flex-wrap justify-center gap-2">
         <Button
           variant="outline"
           size="sm"

@@ -23,7 +23,7 @@ function LabelCell({ children, last = false }) {
 function ValueCell({ children, last = false }) {
   return (
     <TableCell
-      className={`wrap-break-words w-2/3 whitespace-normal ${
+      className={`w-2/3 min-w-0 whitespace-normal [overflow-wrap:anywhere] ${
         last ? "border-border border-b-4" : ""
       }`}
     >
@@ -36,7 +36,7 @@ export default function TableDepartmensMobile() {
   const { departments } = useDepartmens();
 
   return (
-    <Table>
+    <Table className="table-fixed">
       <TableBody className="border-border border">
         {departments.map((department) => (
           <Fragment key={department.id}>

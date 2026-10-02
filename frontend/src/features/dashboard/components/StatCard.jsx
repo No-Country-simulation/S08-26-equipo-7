@@ -31,7 +31,7 @@ export default function StatCard({
   }
 
   return (
-    <div className="bg-card border-border my-2 flex w-full max-w-62.5 min-w-42 flex-col rounded-lg border p-4 shadow-md">
+    <div className="bg-card border-border my-2 flex w-full min-w-0 flex-col rounded-lg border p-4 shadow-md">
       <div className="mb-4 flex items-center justify-between">
         <div className="text-muted-foreground text-sm font-semibold">
           {label}
