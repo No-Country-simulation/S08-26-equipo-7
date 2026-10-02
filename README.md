@@ -47,7 +47,7 @@ ServiceFlow centraliza cada solicitud en un ticket con responsable, prioridad, h
 
 ## 🎬 Demostración y Despliegue
 
-- **App web:** Pendiente de despliegue en Vercel.
+- **App web:** [ServiFlow](https://s08-26-equipo-7.vercel.app/)
 - **API Backend:** Pendiente de despliegue; en local: `http://localhost:8080/api/v1`.
 - **📹 Video Demo:** [https://youtu.be/EO09dTAKwcM](https://youtu.be/EO09dTAKwcM)
 
