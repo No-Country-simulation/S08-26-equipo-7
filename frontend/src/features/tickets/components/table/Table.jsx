@@ -11,9 +11,15 @@ import {
 } from "@/components/ui/pagination";
 import TableSkeleton from "@/features/skeleton/TableSkeleton";
 import TableManager from "@/features/tickets/components/table/TableManager";
+import {
+  useTicketFilters,
+  useTicketPagination,
+} from "@/features/tickets/context/TicketListContext";
 import { useTickets } from "@/features/tickets/hooks/useTickets";
 
-export default function Table({ filters, offset = 0, onOffsetChange }) {
+export default function Table() {
+  const { filters } = useTicketFilters();
+  const { offset, setOffset } = useTicketPagination();
   const {
     tickets,
     total = 0,
@@ -69,12 +75,12 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
       return;
     }
 
-    onOffsetChange?.((page - 1) * limit);
+    setOffset((page - 1) * limit);
   };
 
   return (
-    <div className="bg-card border-border my-4 rounded-lg border py-4 shadow-md">
-      {loading && <TableSkeleton />}
+    <div className="bg-card border-border my-4 rounded-lg border pb-4 shadow-md">
+      {loading && tickets.length === 0 && <TableSkeleton />}
       {error && tickets.length === 0 && (
         <div
           className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"
@@ -102,7 +108,7 @@ export default function Table({ filters, offset = 0, onOffsetChange }) {
           </p>
         </div>
       )}
-      {!loading && tickets.length > 0 && (
+      {tickets.length > 0 && (
         <TableManager tickets={tickets} resume={false} />
       )}
 

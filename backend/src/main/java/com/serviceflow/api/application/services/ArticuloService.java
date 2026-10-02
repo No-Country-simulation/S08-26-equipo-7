@@ -28,22 +28,31 @@ public class ArticuloService {
         return articuloRepository.findAllActive();
     }
 
+    public List<Articulo> listInactive() {
+        return articuloRepository.findAllInactive();
+    }
+
     public Articulo findById(UUID id) {
         return articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
     }
 
     public Articulo create(String titulo, String descripcion, String contenido, String categoria) {
-        return create(titulo, descripcion, contenido, categoria, null);
+        return create(titulo, descripcion, contenido, categoria, null, null);
     }
 
     public Articulo create(String titulo, String descripcion, String contenido, String categoria,
                            java.util.Map<String, Object> layoutConfig) {
+        return create(titulo, descripcion, contenido, categoria, layoutConfig, null);
+    }
+
+    public Articulo create(String titulo, String descripcion, String contenido, String categoria,
+                           java.util.Map<String, Object> layoutConfig, Integer tiempoLecturaMin) {
         if (titulo == null || titulo.isBlank() || categoria == null || categoria.isBlank()) {
             throw new IllegalArgumentException("titulo and categoria are required");
         }
         return articuloRepository.save(new Articulo(
-                null, titulo, descripcion, contenido, categoria, layoutConfig,
+                null, titulo, descripcion, contenido, categoria, layoutConfig, tiempoLecturaMin,
                 0L, 0L, 0L,
                 true, null, null
         ));
@@ -51,12 +60,18 @@ public class ArticuloService {
 
     public Articulo update(UUID id, String titulo, String descripcion, String contenido,
                            String categoria, Boolean activo) {
-        return update(id, titulo, descripcion, contenido, categoria, activo, null);
+        return update(id, titulo, descripcion, contenido, categoria, activo, null, null);
     }
 
     public Articulo update(UUID id, String titulo, String descripcion, String contenido,
                            String categoria, Boolean activo,
                            java.util.Map<String, Object> layoutConfig) {
+        return update(id, titulo, descripcion, contenido, categoria, activo, layoutConfig, null);
+    }
+
+    public Articulo update(UUID id, String titulo, String descripcion, String contenido,
+                           String categoria, Boolean activo,
+                           java.util.Map<String, Object> layoutConfig, Integer tiempoLecturaMin) {
         Articulo existing = articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
         return articuloRepository.save(new Articulo(
@@ -66,6 +81,7 @@ public class ArticuloService {
                 contenido != null ? contenido : existing.getContenido(),
                 categoria != null && !categoria.isBlank() ? categoria : existing.getCategoria(),
                 layoutConfig != null ? layoutConfig : existing.getLayoutConfig(),
+                tiempoLecturaMin != null ? tiempoLecturaMin : existing.getTiempoLecturaMinGuardado(),
                 existing.getVisualizaciones(),
                 existing.getMegusta(),
                 existing.getNomegusta(),
@@ -75,44 +91,20 @@ public class ArticuloService {
         ));
     }
 
-    public long registerView(UUID id) {
-        Articulo existing = articuloRepository.findById(id)
+    public void delete(UUID id) {
+        articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
-        Articulo updated = articuloRepository.save(new Articulo(
-                existing.getId(),
-                existing.getTitulo(),
-                existing.getDescripcion(),
-                existing.getContenido(),
-                existing.getCategoria(),
-                existing.getVisualizaciones() + 1,
-                existing.getMegusta(),
-                existing.getNomegusta(),
-                existing.isActivo(),
-                existing.getCreatedAt(),
-                LocalDateTime.now()
-        ));
-        return updated.getVisualizaciones();
+        articuloRepository.deleteById(id);
     }
 
-    public Articulo registrarVoto(UUID id, boolean megusta) {
-        Articulo existing = articuloRepository.findById(id)
+    @Transactional
+    public long registerView(UUID id) {
+        articuloRepository.findById(id)
                 .orElseThrow(() -> new ArticuloNotFoundException("Article not found"));
-        long nuevoMegusta = existing.getMegusta() + (megusta ? 1 : 0);
-        long nuevoNomegusta = existing.getNomegusta() + (megusta ? 0 : 1);
-        Articulo updated = articuloRepository.save(new Articulo(
-                existing.getId(),
-                existing.getTitulo(),
-                existing.getDescripcion(),
-                existing.getContenido(),
-                existing.getCategoria(),
-                existing.getVisualizaciones(),
-                nuevoMegusta,
-                nuevoNomegusta,
-                existing.isActivo(),
-                existing.getCreatedAt(),
-                LocalDateTime.now()
-        ));
-        return updated;
+        articuloRepository.incrementarVisualizaciones(id);
+        return articuloRepository.findById(id)
+                .orElseThrow(() -> new ArticuloNotFoundException("Article not found"))
+                .getVisualizaciones();
     }
 
     public double calcularSatisfaccion(Articulo articulo) {
@@ -134,15 +126,19 @@ public class ArticuloService {
             throw new IllegalArgumentException("megusta es requerido (true/false)");
         }
         Optional<ArticuloVoto> existente = articuloVotoRepository.findByArticuloIdAndUsuarioId(articuloId, usuarioId);
+        ArticuloVoto guardado;
         if (existente.isPresent()) {
             ArticuloVoto v = existente.get();
-            return articuloVotoRepository.save(new ArticuloVoto(
+            guardado = articuloVotoRepository.save(new ArticuloVoto(
                     v.getId(), articuloId, usuarioId, megusta, v.getCreadoEn(), LocalDateTime.now()));
+        } else {
+            ArticuloVoto nuevo = new ArticuloVoto(
+                    null, articuloId, usuarioId, megusta, null, null
+            );
+            guardado = articuloVotoRepository.save(nuevo);
         }
-        ArticuloVoto nuevo = new ArticuloVoto(
-                null, articuloId, usuarioId, megusta, null, null
-        );
-        return articuloVotoRepository.save(nuevo);
+        sincronizarContadores(articuloId);
+        return guardado;
     }
 
     public Optional<ArticuloVoto> obtenerVotoUsuario(UUID articuloId, UUID usuarioId) {
@@ -160,5 +156,21 @@ public class ArticuloService {
     @Transactional
     public void quitarVoto(UUID articuloId, UUID usuarioId) {
         articuloVotoRepository.deleteByArticuloIdAndUsuarioId(articuloId, usuarioId);
+        sincronizarContadores(articuloId);
+    }
+
+    private void sincronizarContadores(UUID articuloId) {
+        Articulo a = articuloRepository.findById(articuloId).orElse(null);
+        if (a == null) {
+            return;
+        }
+        articuloRepository.save(new Articulo(
+                a.getId(), a.getTitulo(), a.getDescripcion(), a.getContenido(), a.getCategoria(),
+                a.getLayoutConfig(), a.getTiempoLecturaMinGuardado(),
+                a.getVisualizaciones(),
+                articuloVotoRepository.countMegusta(articuloId),
+                articuloVotoRepository.countNoMegusta(articuloId),
+                a.isActivo(), a.getCreatedAt(), LocalDateTime.now()
+        ));
     }
 }

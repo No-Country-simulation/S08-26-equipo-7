@@ -26,8 +26,7 @@ public record ArticuloResponse(
         long nomegusta = articulo.getNomegusta();
         long total = megusta + nomegusta;
         double satisfaccion = total > 0 ? (megusta * 100.0) / total : 0.0;
-        int palabras = articulo.getContenido() != null ? articulo.getContenido().trim().split("\\s+").length : 0;
-        int tiempoLecturaMin = Math.max(1, (int) Math.ceil(palabras / 200.0));
+        int tiempoLecturaMin = articulo.tiempoLecturaMin();
         return new ArticuloResponse(
                 articulo.getId(),
                 articulo.getTitulo(),

@@ -16,9 +16,13 @@ import {
 } from "@/features/tickets/services/ticketApi";
 import { formatTicketDate } from "@/lib/utils";
 
-export default function ControlPanel({ ticket, onRefresh }) {
+export default function ControlPanel({
+  ticket,
+  isAssignedToCurrentAgent = false,
+  onRefresh,
+}) {
   const [loadingAction, setLoadingAction] = useState(null);
-  const { isAdmin, isSupervisor } = useAuth();
+  const { isAdmin, isSupervisor, isAgent } = useAuth();
 
   const {
     isEditingAssignee,
@@ -36,6 +40,11 @@ export default function ControlPanel({ ticket, onRefresh }) {
     ticket.resolvedAt !== null &&
     ticket.resolvedAt !== undefined &&
     String(ticket.resolvedAt).trim() !== "";
+  const canResolve =
+    (isAdmin || isSupervisor || (isAgent && isAssignedToCurrentAgent)) &&
+    !isResolved &&
+    ["ASSIGNED", "IN_PROGRESS", "ESCALATED"].includes(ticket.status) &&
+    (!ticket.requiresApproval || ["ASSIGNED", "IN_PROGRESS", "ESCALATED"].includes(ticket.status));
 
   const progress = useProgress(
     ticket.createdAt,
@@ -72,7 +81,7 @@ export default function ControlPanel({ ticket, onRefresh }) {
   };
 
   const handleResolve = async () => {
-    if (loadingAction) return;
+    if (!canResolve || loadingAction) return;
     try {
       setLoadingAction("RESOLVE");
       await resolveTicket(ticket.id);
@@ -265,46 +274,44 @@ export default function ControlPanel({ ticket, onRefresh }) {
       </div>
 
       {/* Botones de acción inferior con estados de carga (Spinners dinámicos) */}
-      {ticket.status !== "PENDING_APPROVAL" &&
-        (ticket.status !== "CLOSED" ? (
-          <Button
-            disabled={Boolean(loadingAction)}
-            className="bg-success hover:bg-success/80 w-full cursor-pointer py-4 disabled:opacity-50"
-            onClick={handleResolve}
-          >
-            {loadingAction === "RESOLVE" ? (
-              <>
-                <Loader2 size="14" className="mr-2 animate-spin" />
-                Resolviendo...
-              </>
-            ) : (
-              <>
-                <Check size="14" className="mr-2" />
-                Marcar como Resuelta
-              </>
-            )}
-          </Button>
-        ) : (
-          (isAdmin || isSupervisor) && (
-            <Button
-              disabled={Boolean(loadingAction)}
-              className="bg-destructive hover:bg-destructive/80 w-full cursor-pointer py-4 disabled:opacity-50"
-              onClick={handleReopen}
-            >
-              {loadingAction === "REOPEN" ? (
-                <>
-                  <Loader2 size="14" className="mr-2 animate-spin" />
-                  Reabriendo...
-                </>
-              ) : (
-                <>
-                  <RefreshCcw size="14" className="mr-2" />
-                  Volver a Abrir
-                </>
-              )}
-            </Button>
-          )
-        ))}
+      {canResolve && (
+        <Button
+          disabled={Boolean(loadingAction)}
+          className="bg-success hover:bg-success/80 w-full cursor-pointer py-4 disabled:opacity-50"
+          onClick={handleResolve}
+        >
+          {loadingAction === "RESOLVE" ? (
+            <>
+              <Loader2 size="14" className="mr-2 animate-spin" />
+              Resolviendo...
+            </>
+          ) : (
+            <>
+              <Check size="14" className="mr-2" />
+              Marcar como Resuelta
+            </>
+          )}
+        </Button>
+      )}
+      {ticket.status === "CLOSED" && (isAdmin || isSupervisor) && (
+        <Button
+          disabled={Boolean(loadingAction)}
+          className="bg-destructive hover:bg-destructive/80 w-full cursor-pointer py-4 disabled:opacity-50"
+          onClick={handleReopen}
+        >
+          {loadingAction === "REOPEN" ? (
+            <>
+              <Loader2 size="14" className="mr-2 animate-spin" />
+              Reabriendo...
+            </>
+          ) : (
+            <>
+              <RefreshCcw size="14" className="mr-2" />
+              Volver a Abrir
+            </>
+          )}
+        </Button>
+      )}
     </div>
   );
 }

@@ -28,7 +28,7 @@ export default function Knowledge() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 p-4 font-sans">
+    <div className="mx-auto space-y-4 font-sans">
       <InfoBanner
         title="Base de Conocimiento & Auto-Servicio"
         paragraph="Consulte guías oficiales y resuelva requerimientos frecuentes sin necesidad de abrir un ticket."

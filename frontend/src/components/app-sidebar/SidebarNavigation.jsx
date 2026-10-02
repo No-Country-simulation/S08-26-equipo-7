@@ -1,4 +1,11 @@
-import { BookOpen, House , LogOut, Ticket } from "lucide-react";
+import {
+  BookOpen,
+  FolderKanban,
+  House,
+  SquareCheckBig,
+  Ticket,
+  Users,
+} from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 import {
@@ -22,20 +29,41 @@ const navigationItems = [
     icon: Ticket,
   },
   {
-    label: "Base deConocimiento",
+    label: "Aprobaciones",
+    href: "/approvals",
+    icon: SquareCheckBig,
+    adminOnly: true,
+  },
+  {
+    label: "Base de Conocimiento",
     href: "/knowledge",
     icon: BookOpen,
+  },
+  {
+    label: "Usuarios",
+    href: "/users",
+    icon: Users,
+    adminOnly: true,
+  },
+  {
+    label: "Departamentos",
+    href: "/departments",
+    icon: FolderKanban,
+    adminOnly: true,
   },
 ];
 
 export default function SidebarNavigation() {
-  const { logoutContext } = useAuth();
+  const { isAdmin, isOperationalUser } = useAuth();
   const location = useLocation();
+  const visibleItems = navigationItems.filter((item) =>
+    item.adminOnly ? isAdmin : isAdmin || isOperationalUser,
+  );
 
   return (
     <SidebarContent>
       <SidebarMenu>
-        {navigationItems.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
 
           return (
@@ -49,13 +77,6 @@ export default function SidebarNavigation() {
             </SidebarMenuItem>
           );
         })}
-        <SidebarMenuItem>
-          <SidebarMenuItemLink
-            icon={LogOut}
-            label="Cerrar sesión"
-            onClick={logoutContext}
-          />
-        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarContent>
   );

@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,7 +68,12 @@ async function createTicketAction(_, formData) {
   }
 }
 
-export default function CreateForm({ onSuccess }) {
+export default function CreateForm({
+  onSuccess,
+  onDraftChange,
+  onPendingChange,
+  onCancel,
+}) {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [title, setTitle] = useState("");
@@ -77,6 +82,17 @@ export default function CreateForm({ onSuccess }) {
     createTicketAction,
     null,
   );
+  const hasDraft = Boolean(
+    selectedCategory || title.trim() || description.trim(),
+  );
+
+  useEffect(() => {
+    onDraftChange?.(hasDraft);
+  }, [hasDraft, onDraftChange]);
+
+  useEffect(() => {
+    onPendingChange?.(isPending);
+  }, [isPending, onPendingChange]);
 
   useEffect(() => {
     fetchCategories().then(setCategories);
@@ -165,15 +181,15 @@ export default function CreateForm({ onSuccess }) {
       </div>
 
       <DialogFooter>
-        <DialogClose asChild>
-          <Button
-            variant="outline"
-            className="h-11 cursor-pointer rounded-xl px-6 py-2"
-            disabled={isPending}
-          >
-            Cancelar
-          </Button>
-        </DialogClose>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 cursor-pointer rounded-xl px-6 py-2"
+          disabled={isPending}
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
         <Button
           type="submit"
           className="btn-gradient-primary cursor-pointer"

@@ -1,6 +1,6 @@
-import { BrowserRouter } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 
-import AppRoutes from "@/app/routes/AppRoutes";
+import appRouter from "@/app/routes/AppRoutes";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -11,10 +11,8 @@ export default function App() {
     <TooltipProvider>
       <ThemeProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-            <Toaster />
-          </BrowserRouter>
+          <RouterProvider router={appRouter} />
+          <Toaster />
         </AuthProvider>
       </ThemeProvider>
     </TooltipProvider>

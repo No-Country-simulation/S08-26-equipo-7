@@ -15,12 +15,12 @@ export default function CategoryFilter({ value = "", onChange }) {
   return (
     <div>
       <SelectFilter
-        placeholder="Categorias"
-        label="Categorías"
+        placeholder="Departamentos"
+        label="Departamentos"
         value={value}
         onChange={onChange}
         options={[
-          { value: "", label: "Todas las Categorías" },
+          { value: "", label: "Todas los Departamentos" },
           ...categories.map((category) => ({
             value: category.code,
             label: category.name,

@@ -24,6 +24,7 @@ async function loginAction(prevState, formData) {
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
   const { loginContext } = useAuth();
   const [state, formAction, isPending] = useActionState(loginAction, null);
   const navigate = useNavigate();
@@ -67,6 +68,8 @@ export default function LoginForm() {
                 name="email"
                 id="email"
                 placeholder="nombre@tuempresa.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 required
                 disabled={isPending}
                 autoComplete="email"

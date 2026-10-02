@@ -18,7 +18,7 @@ export default function RecentTicketsTable() {
           </div>
         </Link>
       </div>
-      {loading && tickets.length === 0 && <TableSkeleton mobile />}
+      {loading && tickets.length === 0 && <TableSkeleton compact />}
       {error && tickets.length === 0 && (
         <div
           className="text-muted-foreground flex flex-col items-center justify-center py-4 text-center"

@@ -31,6 +31,20 @@ Lista **todas** las categorías (incluyendo inactivas). **Solo ADMIN**.
 [ { "id": "uuid", "code": "SECURITY", "name": "Ciberseguridad", "description": "...", "active": false, "requiresApproval": true } ]
 ```
 
+## Agentes demo por área
+
+La migración `V22` crea dos usuarios con rol `AGENT` para cada categoría activa. El valor de `area` de cada usuario es el mismo `code` de la categoría y sus credenciales de prueba son las mismas que las de `agente@serviceflow.com` (ver [usuarios demo](03-usuarios.md)).
+
+| Categoría / área | Agente 1 | Agente 2 |
+|---|---|---|
+| `IT` | `agente.it.01@serviceflow.com` | `agente.it.02@serviceflow.com` |
+| `ACCESS` | `agente.access.01@serviceflow.com` | `agente.access.02@serviceflow.com` |
+| `HARDWARE` | `agente.hardware.01@serviceflow.com` | `agente.hardware.02@serviceflow.com` |
+| `FACILITIES` | `agente.facilities.01@serviceflow.com` | `agente.facilities.02@serviceflow.com` |
+| `FINANCE` | `agente.finance.01@serviceflow.com` | `agente.finance.02@serviceflow.com` |
+
+Solo se crean agentes para categorías activas al ejecutar la migración. Las categorías inactivas no aceptan tickets nuevos y no reciben agentes demo.
+
 ## POST /categories
 
 Crea una categoría. **Solo ADMIN**.

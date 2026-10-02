@@ -53,3 +53,9 @@ export async function removeKnowledgeVote(id) {
     method: "DELETE",
   });
 }
+
+export async function viewKnowledge(id) {
+  return apiRequest(`/knowledge/${id}/view`, {
+    method: "POST",
+  });
+}

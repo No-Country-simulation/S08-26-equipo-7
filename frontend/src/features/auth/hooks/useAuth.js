@@ -10,21 +10,24 @@ export const useAuth = () => {
   }
 
   // Extraemos tanto el estado como las acciones del Provider
-  const { user, loading, loginContext, logoutContext } = context;
+  const { user, loading, logoutLoading, loginContext, logoutContext } = context;
 
   const isAdmin = user?.rol === "ADMIN";
   const isSupervisor = user?.rol === "SUPERVISOR";
   const isAgent = user?.rol === "AGENT";
-  const isUser = user?.rol === "USER" || user?.rol === "varios";
+  const isRequester = user?.rol === "REQUESTER";
+  const isOperationalUser = isSupervisor || isAgent || isRequester;
 
   return {
     user,
     loading,
+    logoutLoading,
     loginContext,
     logoutContext,
     isAdmin,
     isSupervisor,
     isAgent,
-    isUser,
+    isRequester,
+    isOperationalUser,
   };
 };
