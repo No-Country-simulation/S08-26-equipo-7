@@ -10,7 +10,10 @@
     "format": "eslint . --fix",
     "format:tailwind": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "record:walkthrough": "node scripts/record-serviceflow-walkthrough.mjs",
+    "record:rejection": "node scripts/record-rejection-decision.mjs",
+    "record:mobile-theme": "node scripts/record-mobile-theme.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
