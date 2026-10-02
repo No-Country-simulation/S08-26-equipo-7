@@ -13,7 +13,7 @@ export default function LeftColumn() {
   if (!isEditing && leftBlocks.length === 0) return null;
 
   return (
-    <div className="space-y-4 lg:col-span-1">
+    <div className="min-w-0 space-y-4 lg:col-span-1">
       {leftBlocks.map((block) => renderBlockComponent(block, "left"))}
 
       {isEditing &&

@@ -90,14 +90,14 @@ export default function NotificationPopover() {
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="mr-10 w-80">
+      <PopoverContent className="w-[min(20rem,calc(100vw-2rem))]">
         {error && notifications.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             No se pudieron cargar las notificaciones.
           </p>
         ) : notifications.length > 0 ? (
           <div className="max-h-126">
-            <div className="border-border flex justify-between items-center border-b py-2">
+            <div className="border-border flex flex-wrap items-center justify-between gap-2 border-b py-2">
               <div>{unreadCount} Notificaciones sin leer</div>
               <Button
                 className="text-primary cursor-pointer text-xs"
@@ -107,7 +107,7 @@ export default function NotificationPopover() {
                 Marcar como leidas
               </Button>
             </div>
-            <ScrollArea className="h-120 w-80 pr-5 pb-5">
+            <ScrollArea className="h-120 w-full min-w-0 pr-5 pb-5">
               {notifications.map((notification) => (
                 <Link
                   key={notification.id}

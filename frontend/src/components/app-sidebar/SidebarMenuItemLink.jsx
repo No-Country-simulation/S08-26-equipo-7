@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 export default function SidebarMenuItemLink({
   icon: Icon,
@@ -9,16 +9,9 @@ export default function SidebarMenuItemLink({
   onClick,
   isActive = false,
 }) {
-  const { state, setOpen, toggleSidebar } = useSidebar();
   const Component = to ? NavLink : "button";
 
   function handleClick(event) {
-    if (to && isActive) {
-      toggleSidebar();
-    } else if (to && state === "collapsed") {
-      setOpen(true);
-    }
-
     onClick?.(event);
   }
 

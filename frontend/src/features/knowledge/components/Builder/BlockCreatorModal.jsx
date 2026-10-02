@@ -43,7 +43,7 @@ export default function BlockCreatorModal({ columnKey }) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 shadow-xl space-y-4 relative">
+    <div className="bg-card border border-border relative w-full min-w-0 space-y-4 rounded-lg p-4 shadow-xl sm:p-6">
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h4 className="font-bold text-sm text-primary flex items-center gap-2">
           <Sparkles size={16} className="text-primary" />
@@ -104,19 +104,19 @@ export default function BlockCreatorModal({ columnKey }) {
           />
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2 flex-wrap">
+        <div className="flex flex-col items-stretch justify-end gap-2 pt-2">
           <Button
             type="button"
             size="sm"
             onClick={() => setActiveWizardColumn(null)}
-            className="rounded-lg text-xs font-semibold bg-destructive text-white py-4 hover:bg-destructive/90"
+            className="w-full whitespace-normal rounded-lg bg-destructive py-4 text-xs font-semibold text-white hover:bg-destructive/90"
           >
             Cancelar
           </Button>
           <Button
             type="submit"
             size="sm"
-            className="rounded-lg text-xs font-semibold bg-success text-white py-4 hover:bg-success/90"
+            className="w-full whitespace-normal rounded-lg bg-success py-4 text-xs font-semibold text-white hover:bg-success/90"
           >
             Crear y Añadir Bloque
           </Button>

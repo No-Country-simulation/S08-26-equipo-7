@@ -9,7 +9,7 @@ export default function Filters() {
 
   return (
     <div className="bg-card border-border my-4 flex flex-wrap gap-2 rounded-lg border p-4 shadow-md">
-      <div className="min-w-34 flex-1 sm:min-w-64">
+      <div className="min-w-0 flex-1 sm:min-w-64">
         <SearchFilter
           value={filters.search}
           onChange={(val) => onFilterChange("search", val)}

@@ -490,6 +490,7 @@ function SidebarMenuButton({
         side="right"
         align="center"
         hidden={state !== "collapsed" || isMobile}
+        className="[@media(hover:none)]:hidden"
         {...tooltip}
       />
     </Tooltip>

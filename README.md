@@ -47,8 +47,8 @@ ServiceFlow centraliza cada solicitud en un ticket con responsable, prioridad, h
 
 ## 🎬 Demostración y Despliegue
 
-- **App web:** [ServiFlow](https://s08-26-equipo-7.vercel.app/)
-- **API Backend:** Pendiente de despliegue; en local: `http://localhost:8080/api/v1`.
+- **Frontend — ServiceFlow:** [https://s08-26-equipo-7.vercel.app](https://s08-26-equipo-7.vercel.app)
+- **API Backend:** [https://s08-26-equipo-7-production.up.railway.app/api/v1](https://s08-26-equipo-7-production.up.railway.app/api/v1) (URL de producción compartida; puede no estar disponible si el servicio de Railway está pausado).
 - **📹 Video Demo:** [https://youtu.be/EO09dTAKwcM](https://youtu.be/EO09dTAKwcM)
 
 ---

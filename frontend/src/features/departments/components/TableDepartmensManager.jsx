@@ -23,7 +23,7 @@ export default function TableDepartmensManager() {
   }, []);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="w-full min-w-0">
       {isMobile ? <TableDepartmensMobile /> : <TableDepartmensDesktop />}
     </div>
   );
