@@ -9,6 +9,7 @@ Todas las respuestas son JSON. Los errores siguen el formato `{"error": "mensaje
 - Login JWT en **cookie HttpOnly** (`access_token`).
 - Los POST que modifican datos requieren header **`X-XSRF-TOKEN`** con el valor de la cookie `XSRF-TOKEN`.
 - **Antes de escribir**, pedir el token al servidor: `GET /auth/csrf` → guarda la cookie `XSRF-TOKEN` y devuelve el token en el body. Usar ese mismo valor en el header.
+- CORS con credenciales (`Access-Control-Allow-Credentials`): origins permitidos por env `APP_CORS_ALLOWED_ORIGIN`, coma-separados (ej. `http://localhost:5173,https://s08-26-equipo-7.vercel.app`). El front debe mandar `credentials: "include"` y el token CSRF fresco por request.
 
 ## Errores
 
