@@ -32,7 +32,7 @@ Uso: el mismo valor del body va como header `X-XSRF-TOKEN` en los POST siguiente
 
 ## POST /auth/recover-password
 
-Genera un ticket de recuperación — **siempre devuelve 200** (no revela si el email existe). Inserta el ticket solo cuando el email existe en la BD. Rate limit: **máx. 3 peticiones / 15 min por IP** (la 4ta responde `429`). Ruta **pública** (no requiere token).
+Genera un ticket de recuperación — **siempre devuelve 200** (no revela si el email existe). Si el email existe, crea un ticket `PASSWORD_RECOVERY` (prioridad `URGENT`) **asignado al admin con menos carga**, con `requiresApproval=true` (queda en `PENDING_APPROVAL`), eventos `CREATED`/`ASSIGNED`/`APPROVAL_REQUIRED` y notificaciones. Rate limit: **máx. 3 peticiones / 15 min por IP** (la 4ta responde `429`). Ruta **pública** (no requiere token).
 
 ```json
 // body

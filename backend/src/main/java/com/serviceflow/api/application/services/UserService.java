@@ -52,6 +52,31 @@ public class UserService {
         return usuarioRepository.save(usuario);
     }
 
+    public Usuario update(UUID id, String name, String email, String role, String area) {
+        Usuario existing = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("User not found"));
+        String newName = name != null && !name.isBlank() ? name.trim() : existing.getName();
+        String newEmail = email != null && !email.isBlank() ? email.toLowerCase() : existing.getEmail();
+        String newRole = role != null && !role.isBlank() ? role : existing.getRole().name();
+        validateName(newName);
+        validateEmail(newEmail);
+        validateRole(newRole);
+        if (!newEmail.equalsIgnoreCase(existing.getEmail())
+                && usuarioRepository.existsByEmail(newEmail)) {
+            throw new DuplicateEmailException("Email already registered: " + newEmail);
+        }
+        Usuario actualizado = new Usuario(
+                existing.getId(),
+                newName,
+                newEmail,
+                existing.getPasswordHash(),
+                RolUsuario.valueOf(newRole),
+                area != null ? (area.isBlank() ? null : area.trim().toUpperCase()) : existing.getArea(),
+                existing.getCreatedAt()
+        );
+        return usuarioRepository.save(actualizado);
+    }
+
     public Usuario adminChangePassword(UUID userId, String newPassword) {
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ValidationException("User not found"));
